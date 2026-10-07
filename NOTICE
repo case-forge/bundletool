@@ -1,0 +1,377 @@
+NOTICE
+======
+
+BundleTool
+Copyright (c) 2026 CaseForge
+
+This product is a modified distribution of BunTool, and bundles or loads the
+third-party components listed below. Each entry states the licence that applies
+to that component, not to this product as a whole.
+
+Licence strings for the npm-distributed components were read from the registry
+metadata for the exact pinned versions (`npm view <pkg>@<version> license`) and,
+for the build-time tree, from the `license` field of each installed package's
+own package.json.
+
+Upstream project
+----------------
+
+BunTool: https://github.com/TrisSherliker/buntool-website-git
+Copyright (c) 2025-2026 Tris Sherliker <tris@sherliker.net>
+Licensed under the Mozilla Public License, Version 2.0.
+Full text: LICENSE (in this repository), or http://mozilla.org/MPL/2.0/
+
+This repository is a fork. Files carried over from BunTool remain under the
+MPL-2.0, and modifications to those files are published under the same licence
+as MPL-2.0 section 3 requires. MPL-2.0 is file-level copyleft: it attaches to
+the modified files themselves and does not extend to separate files combined
+with them.
+
+MPL-2.0 section 3.4 additionally requires that the licence and copyright
+notices carried by a covered file are not removed. Every source file under
+public/js is named bundletool* rather than buntool*, and most have been
+substantially rewritten; the per-file notices are carried through, and
+tests/policy.test.mjs fails the build if any of them goes missing.
+
+MPL-2.0 section 3.4 grants no rights in the licensor's trademarks, so
+self-referential product naming in this fork ("BundleTool") is deliberately
+distinct from the upstream name. The "Based on BunTool by Tris Sherliker"
+credit in the page footer is retained deliberately.
+
+Runtime dependencies bundled with the application
+-------------------------------------------------
+
+Self-hosted: every library below is served from this origin, so each IS
+redistributed by this product. scripts/build-vendor.mjs makes them from the
+pinned npm packages (scripts/vendor-packages.mjs lists how): most are bundled,
+with their own dependencies, into one ESM file under public/js/vendor/ or the
+site's shared static/vendor/; qrcode-generator and tesseract-wasm are copied as
+their packages ship them; pdf.js is kept as it is. Nothing is loaded from a
+third-party CDN at runtime, so the application works without any other host
+and no page load discloses request metadata to one. All are permissive (MIT,
+BSD-2-Clause, Apache-2.0 or Zlib, as stated against each entry below), which
+permits this redistribution.
+
+THIRD-PARTY-LICENSES/ holds the full licence text of every package and
+component shipped, inside the vendored files and outside them: each npm
+package's own licence file, verbatim; for the parts that are not npm packages
+(pdf.js, Tesseract and Leptonica inside the OCR engine, eng.traineddata,
+Tailwind CSS, Material Symbols) the project's own licence file, verbatim; and
+for the two packages that ship no licence file (qrcode-generator,
+@pdf-lib/fontkit) the MIT text with the copyright line the project gives.
+Together with this file it is the record each licence asks for.
+
+@cantoo/pdf-lib 2.6.5: https://github.com/cantoo-scribe/pdf-lib
+Copyright (c) 2019 Andrew Dillon; fork maintained by Cantoo
+MIT
+
+    The PDF engine. Every PDF operation in the application goes through it:
+    merging, page numbering, annotations, bookmarks and metadata. Imported in
+    exactly one place, public/js/bundletoolPdfLib.js.
+
+@pdf-lib/fontkit 1.1.1: https://github.com/Hopding/fontkit
+Copyright (c) 2014-2017 Devon Govett
+MIT
+
+    Font embedding for the page-number footer and the index pages.
+
+jsPDF 4.2.1: https://github.com/parallax/jsPDF
+Copyright (c) 2010-2021 James Hall and contributors
+MIT
+
+    Generates the index (table of contents) pages.
+
+pdfjs-dist 4.0.379: https://github.com/mozilla/pdf.js
+Copyright (c) Mozilla and individual contributors
+Apache License, Version 2.0
+
+    Renders the coversheet-maker preview onto a <canvas>. Unlike a
+    browser-native PDF <iframe>, it looks the same in every browser and can
+    be restyled for dark mode. Vendored at static/vendor/pdfjs.mjs and
+    pdfjs.worker.mjs (the site-wide shared copy). isEvalSupported: false is
+    passed at every call site, so CVE-2024-4367 (eval-based code execution
+    in pdf.js before 4.2.67) does not apply here even though this pinned
+    version predates that fix; the Content-Security-Policy also carries no
+    unsafe-eval.
+
+jspdf-autotable 5.0.7: https://github.com/simonbengtsson/jsPDF-AutoTable
+Copyright (c) Simon Bengtsson
+MIT
+
+    Lays out the index table, and reports back the row coordinates the index
+    hyperlinks are placed from.
+
+qrcode-generator 2.0.4: https://github.com/kazuhikoarase/qrcode-generator
+Copyright (c) 2009 Kazuhiko Arase
+MIT
+
+    Draws the QR code for sharing settings by code. The package's own dist file,
+    copied unmodified under a banner into static/vendor/matrix-render.js by
+    scripts/build-vendor.mjs (loaded with a <script> tag, not bundled), so the
+    committed file is always the pinned package's file; a test compares them.
+
+chrono-node 2.9.0: https://github.com/wanasit/chrono
+Copyright (c) Wanasit Tanakitrungruang
+MIT
+
+    Parses dates out of uploaded filenames when a document is added.
+
+utif2 4.1.0: https://github.com/photopea/UTIF.js
+Copyright (c) 2017 Photopea
+MIT
+
+    Reads TIFF photos and scans (Group 3 and Group 4 fax, LZW, PackBits, Deflate, JPEG,
+    16-bit), one PDF page per TIFF page. Bundled into public/js/vendor/utif2.js by
+    scripts/build-vendor.mjs and loaded only when a TIFF is added. It makes no network
+    requests when used this way (its optional image-replacement helper, which does, is
+    never called). Includes pako, below.
+
+pako 1.0.11: https://github.com/nodeca/pako
+Copyright (c) 2014-2017 Vitaly Puzrin, Andrei Tuputcyn
+(MIT AND Zlib)
+
+    Inflate, used by utif2 for Deflate-compressed TIFFs. Bundled inside utif2.js.
+
+mammoth 1.12.3: https://github.com/mwilliamson/mammoth.js
+Copyright (c) 2013 Michael Williamson
+BSD-2-Clause
+
+    Converts an uploaded .docx to HTML client-side, which is then rendered
+    to a PDF page via jsPDF and merged into the bundle through
+    @cantoo/pdf-lib like every other page. No file is uploaded anywhere.
+    Used when a Word document is added. The reverse direction (a finished
+    bundle exported as .docx) does not exist.
+
+tesseract-wasm 0.11.0: https://github.com/robertknight/tesseract-wasm
+Copyright (c) 2022, Robert Knight and tesseract-wasm contributors
+BSD-2-Clause
+
+    Makes a scanned page's text selectable and searchable: recognised words
+    and their positions are embedded as an invisible text layer over the
+    page's own existing content, which is never redrawn or altered. In the
+    browser this runs entirely on-device, in its own Web Worker; no image or
+    document ever leaves the browser. A WebAssembly build of the Tesseract
+    OCR engine (Apache License, Version 2.0,
+    https://github.com/tesseract-ocr/tesseract) and Leptonica (its own
+    permissive BSD-style licence), stripped of browser-irrelevant code
+    (image-format parsing the browser's own Canvas already does) and
+    compiled to WebAssembly, one SIMD build and one non-SIMD fallback the
+    library itself feature-detects between. Depends on comlink (below).
+    Self-hosted: lib.js, tesseract-worker.js and both .wasm files are copied
+    unmodified from the package's own dist/ by scripts/build-vendor.mjs into
+    static/vendor/tesseract-wasm/, the one directory the library resolves
+    everything relative to by default, so nothing here is fetched from a
+    CDN. The command line (scripts/cliOcrEngine.mjs) runs the same engine a
+    second way, using the package's own documented Node entry point
+    ("tesseract-wasm/node") in a node:worker_threads Worker instead of a Web
+    Worker. It is an optionalDependency (package.json), so the core CLI still
+    needs nothing beyond npm install; if it or @napi-rs/canvas below is not
+    installed or has no prebuilt binary for the machine, the command line
+    still builds, without a text layer for the pages that needed OCR
+    (warning ocr_unavailable).
+
+comlink 4.4.2: https://github.com/GoogleChromeLabs/comlink
+Copyright Google LLC
+Apache License, Version 2.0
+
+    Worker message-passing, used internally by tesseract-wasm. Bundled
+    inside lib.js for the browser, not imported separately there. The
+    command line's own OCR path (above) imports it directly, as
+    tesseract-wasm's own node-worker.js does, to pass work to its
+    node:worker_threads Worker.
+
+@napi-rs/canvas 1.0.10: https://github.com/Brooooooklyn/canvas
+Copyright (c) 2020 lynweklm@gmail.com
+MIT (the package's own JavaScript/TypeScript code and native-binding glue)
+
+    A Canvas 2D implementation for Node, built on Google's Skia graphics
+    library (BSD-3-Clause), used ONLY by the command line (never the
+    browser, which already has its own native Canvas/OffscreenCanvas): the
+    one thing Node has no equivalent of, needed to rasterise a page to a
+    bitmap for the OCR engine above to read. Each supported platform's
+    package (for example @napi-rs/canvas-linux-x64-gnu) ships a prebuilt,
+    statically-linked native binary, so no compiler or node-gyp is needed at
+    install time. Skia itself depends on further BSD- and MIT-licensed
+    libraries (for example FreeType, HarfBuzz, libpng, zlib) compiled into
+    that same binary; @napi-rs/canvas's own published package does not ship
+    a line-by-line bill of materials for the exact versions of those
+    pinned at build time, so this entry names what is known to be inside
+    (Skia and its usual graphics-library dependencies, all permissively
+    licensed) rather than overstating a precision this package does not
+    itself provide. An optionalDependency (package.json), lazy-loaded only
+    when a page actually needs OCR: see the tesseract-wasm entry above for
+    what happens when it is not installed or has no prebuilt binary for the
+    machine.
+
+eng.traineddata (the "fast" variant): https://github.com/tesseract-ocr/tessdata_fast
+The Tesseract OCR project contributors
+Apache License, Version 2.0
+
+    The trained recognition model for English, the language this product
+    ships (see tests/ocr.test.mjs and public/js/bundletoolOcr.js).
+    The "fast" variant, not "best": roughly a third the size for materially
+    the same day-to-day accuracy on a scanned court document, the right
+    trade-off for a file every visitor's browser downloads once. Fetched
+    once from the project's own tessdata_fast repository and committed at
+    public/ocr/eng.traineddata, not re-fetched at runtime. A firm wanting
+    another language would need that language's own file added the same
+    way; none is fetched automatically.
+
+Tailwind CSS: https://tailwindcss.com
+Copyright (c) Tailwind Labs, Inc.
+MIT
+
+    The compiled utility classes in assets/css/bundletool.css are a frozen
+    Tailwind capture with hand-written patches; this product does not run
+    Tailwind's own build tooling.
+
+Components bundled inside the vendored files
+--------------------------------------------
+
+Each vendored library above is bundled with the packages it depends on. These are the packages found inside the
+bundles (rebuilt with the pinned versions and read from esbuild's own list of inputs), with the licence each declares.
+All are permissive. Where a package offers a choice of licences, this product uses it under the permissive option
+named below and does not modify it.
+
+    @babel/runtime 7.29.7: MIT  (in jspdf.js)
+    @pdf-lib/standard-fonts 1.0.0: MIT  (in cantoo-pdf-lib.js)
+    @pdf-lib/upng 1.0.1: MIT  (in cantoo-pdf-lib.js)
+    @xmldom/xmldom 0.8.15: MIT  (in mammoth.js)
+    base64-js 1.5.1: MIT  (in mammoth.js)
+    bluebird 3.4.7: MIT  (in mammoth.js)
+    canvg 3.0.11: MIT  (in jspdf.js)
+    color 4.2.3: MIT  (in cantoo-pdf-lib.js)
+    color-convert 2.0.1: MIT  (in cantoo-pdf-lib.js)
+    color-name 1.1.4: MIT  (in cantoo-pdf-lib.js)
+    color-string 1.9.1: MIT  (in cantoo-pdf-lib.js)
+    core-js 3.50.0: MIT  (in jspdf.js)
+    crypto-js 4.2.0: MIT  (in cantoo-pdf-lib.js)
+    dingbat-to-unicode 1.0.2: BSD-2-Clause  (in mammoth.js)
+    dompurify 3.4.16: MPL-2.0 OR Apache-2.0  (in jspdf.js)
+    fast-png 6.4.0: MIT  (in jspdf.js)
+    fflate 0.8.3: MIT  (in jspdf.js)
+    html-entities 2.6.0: MIT  (in cantoo-pdf-lib.js)
+    html2canvas 1.4.1: MIT  (in jspdf.js)
+    iobuffer 5.4.0: MIT  (in jspdf.js)
+    is-arrayish 0.3.4: MIT  (in cantoo-pdf-lib.js)
+    jszip 3.10.2: MIT OR GPL-3.0-or-later  (in mammoth.js)
+    lop 0.4.2: BSD-2-Clause  (in mammoth.js)
+    node-html-better-parser 1.5.9: MIT  (in cantoo-pdf-lib.js)
+    option 0.2.4: BSD-2-Clause  (in mammoth.js)
+    pako 1.0.11: MIT AND Zlib  (in cantoo-pdf-lib.js, pdf-lib-fontkit.js, utif2.js)
+    pako 2.2.0: MIT AND Zlib  (in jspdf.js)
+    performance-now 2.1.0: MIT  (in jspdf.js)
+    raf 3.4.1: MIT  (in jspdf.js)
+    rgbcolor 1.0.1: MIT OR SEE LICENSE IN FEEL-FREE.md  (in jspdf.js)
+    simple-swizzle 0.2.4: MIT  (in cantoo-pdf-lib.js)
+    stackblur-canvas 2.7.0: MIT  (in jspdf.js)
+    svg-pathdata 6.0.3: MIT  (in jspdf.js)
+    tslib 2.8.1: 0BSD  (in cantoo-pdf-lib.js)
+    underscore 1.13.8: MIT  (in mammoth.js)
+    xmlbuilder 10.1.1: MIT  (in mammoth.js)
+
+Choices of licence taken:
+    dompurify: the Apache-2.0 option
+    jszip: the MIT option (the GPL option is not used)
+    rgbcolor: the MIT option
+
+
+
+Build-time dependencies
+-----------------------
+
+The development dependencies are pinned exactly in package.json (esbuild, which builds the vendored files, and the
+libraries above, from which they are built). None of them is distributed except through the vendored files listed
+above; the rest run only on the machine that builds or tests the product.
+
+The installed tree is 111 packages. Licence distribution, from the licence field of each package in
+package-lock.json:
+
+     93  MIT
+      5  BSD-2-Clause
+      4  Apache-2.0
+      2  (MIT AND Zlib)
+      1  (MPL-2.0 OR Apache-2.0)
+      1  BSD
+      1  ISC
+      1  (MIT OR GPL-3.0-or-later)
+      1  MIT OR SEE LICENSE IN FEEL-FREE.md
+      1  BSD-3-Clause
+      1  0BSD
+
+No GPL-only, AGPL or LGPL package is installed. The packages that offer a choice of licences or carry a non-standard
+licence field, named because they are not simply permissive:
+
+    dompurify 3.4.16 (MPL-2.0 OR Apache-2.0)
+    jszip 3.10.2 (MIT OR GPL-3.0-or-later)
+    rgbcolor 1.0.1 (MIT OR SEE LICENSE IN FEEL-FREE.md)
+
+
+Icons and artwork
+-----------------
+
+Material Symbols: https://github.com/google/material-design-icons
+Copyright (c) Google LLC
+Apache-2.0
+
+    The interface icons throughout the site, via the @material-symbols/svg-400
+    package, as the inline SVG paths in data/icons.json.
+
+Fonts
+-----
+
+Bundled under public/fonts and served from this origin, so like the libraries
+above these ARE redistributed by this product. There are no external
+font hosts: no Google Fonts, no gstatic, no CDN, and no external stylesheets.
+tests/fonts.test.mjs fails if a font host appears anywhere under public/.
+
+Each entry below is verified by reading the licence file that ships with the
+family AND the name table inside the binaries, rather than inferring either
+from the directory name. Family and version are quoted from the binary.
+
+Every licence file is fingerprinted in tests/fonts.test.mjs, together with the
+family name and version of each family's binaries. A font cannot be updated
+without failing the build, which is the point: licences are not retroactive, so
+the risk is not that a licence changes under us but that a NEWER RELEASE arrives
+under different terms and nobody looks.
+
+Charis SIL 4.104: SIL Open Font License **1.0**, not 1.1
+    Copyright (c) 1997-2008 SIL International.
+    public/fonts/timesalt/, offered in the interface as "Times style".
+    Reserved Font Names: "Charis SIL", "SIL".
+
+Noto Serif 2.015: SIL Open Font License 1.1
+    Copyright 2022 The Noto Project Authors.
+    public/fonts/serif/.
+    "Noto" is a Google trademark; the OFL grants no rights in it.
+    The OFL.txt is the Noto Project's own copy.
+
+Plus Jakarta Sans 2.071: SIL Open Font License 1.1
+    Copyright 2020 The Plus Jakarta Sans Project Authors.
+    public/fonts/sans/. No reserved font name is declared.
+
+EB Garamond 1.001: SIL Open Font License 1.1
+    Copyright 2017 The EB Garamond Project Authors.
+    public/fonts/trad/, offered as "Traditional". No reserved font name.
+
+Ubuntu Mono 0.80: Ubuntu Font Licence 1.0
+    Copyright 2011 Canonical Ltd. public/fonts/mono/.
+    "Ubuntu" and "Canonical" are registered trademarks of Canonical Ltd. The UFL
+    permits redistribution and embedding; a modified version must be renamed.
+
+Liberation Sans 2.1.5: SIL Open Font License 1.1
+    Digitized data copyright (c) 2010 Google Corporation, with Reserved Font
+    Names Arimo, Tinos and Cousine; copyright (c) 2012 Red Hat, Inc., with
+    Reserved Font Name Liberation.
+    public/fonts/arialalt/liberation-sans/, offered as "Arial style
+    (Liberation Sans)" and the default font for the page-number footer.
+
+Embedding: fonts are embedded in produced bundles IN FULL, not subset. Verified
+rather than assumed: the font stream in an output PDF decompresses to exactly
+the byte length of the source .ttf, and pdffonts reports "sub: no". pdf-lib's
+embedFont() does not subset unless asked and is never asked here; the jsPDF path
+that builds the index has no subsetting to enable. This matters because
+subsetting is arguably a modification, which would engage the Reserved Font Name
+clauses above; as things stand no font is modified, so no renaming obligation
+arises. The cost is size: the default footer font adds about 211 KB (compressed)
+to each produced bundle, once, not per page.

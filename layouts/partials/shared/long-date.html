@@ -1,0 +1,4 @@
+{{- /* "Friday, 25th September 2026" from a YYYY-MM-DD string (a date with no time, so the weekday
+     cannot shift with a timezone). humanize turns 1, 2, 3, 11, 21 ... into 1st, 2nd, 3rd, 11th, 21st. */ -}}
+{{- $t := time . -}}
+{{- $t.Format "Monday" }}, {{ humanize $t.Day }} {{ $t.Format "January 2006" -}}

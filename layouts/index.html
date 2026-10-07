@@ -1,0 +1,20 @@
+{{/* Mounted as layouts/bundletool/section.html (see hugo.toml): this section's
+     _index.md sits under content/bundletool/, so it renders as a Hugo "section"
+     page, not "home" (only the site's root _index.md is "home"). */}}
+{{ define "main" }}
+{{ partial "bundletool/header.html" . }}
+
+<main id="main-content" class="min-h-screen">
+	<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+		<section class="bt-hero pt-4 pb-4">
+			<h1 class="bt-wordmark text-gray-900 dark:text-slate-100">Bundle<span class="wordmark-accent">Tool</span></h1>
+			<p class="bt-hero-sub mt-2 text-[15px] text-gray-600 dark:text-slate-400 max-w-xl">
+				Create court-ready PDF bundles on your own device. Nothing is uploaded.
+			</p>
+		</section>
+		{{ partial "bundletool/bundletool.html" . }}
+	</div>
+</main>
+
+{{ partial "bundletool/footer.html" . }}
+{{ end }}

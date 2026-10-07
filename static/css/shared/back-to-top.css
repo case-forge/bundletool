@@ -1,0 +1,44 @@
+/* Shared #cf-ascend return-to-top button: the Material FAB every product
+ * uses, driven entirely by shared/tokens.css custom properties (--card,
+ * --shadow, --shadow-sm, --text-dim, --orange). No border: a Material FAB
+ * carries no stroke, only elevation (box-shadow), so hover raises the shadow
+ * rather than changing a border colour.
+ */
+#cf-ascend {
+  display: none;
+  position: fixed;
+  bottom: calc(24px + var(--ascend-lift, 0px));
+  /* Sits just outside the page's content column: half the column's width
+     comes from --ascend-half, 360px (the 720px column most pages use) unless the
+     page sets its own, as Envelope Guide's 1040px layout does in tool.css. */
+  right: max(24px, calc(50% - var(--ascend-half, 360px) - 56px));
+  /* Below every modal overlay (Settings 40, BundleTool 40/50) so the blurred
+     backdrop covers it instead of the button floating over the blur. */
+  z-index: 30;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+  transition: opacity 0.14s, box-shadow 0.14s, transform 0.12s;
+}
+#cf-ascend:hover { opacity: 1; box-shadow: var(--shadow); transform: scale(1.08); }
+#cf-ascend:active { transform: scale(0.94); }
+#cf-ascend i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border: solid var(--text-dim);
+  border-width: 0 2px 2px 0;
+  transform: rotate(-135deg);
+  margin-top: 4px;
+}
+#cf-ascend:hover i { border-color: var(--orange); }
+@media (prefers-reduced-motion: reduce) {
+  #cf-ascend { transition: none; }
+}

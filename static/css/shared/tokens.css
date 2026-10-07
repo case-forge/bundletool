@@ -1,0 +1,76 @@
+/* Single source of truth for every product's colour, shadow and radius tokens.
+ * The home page, Chambers Finder, BundleTool, Envelope Guide, Contact and
+ * Privacy all draw from this file, so a token added or changed here changes
+ * everywhere at once.
+ */
+
+:root {
+  color-scheme: dark;
+  --bg: #0e1014;
+  --surface: #13161c;
+  --card: #1c1f27;
+  --orange: #e8610c;
+  /* Background of a filled button or badge carrying white text. #e8610c is 3.42:1 with white,
+     under the 4.5 floor; #c04f08 (the shade of BundleTool's Add Documents button and the radius chips) is 4.81:1. */
+  --orange-fill: #c04f08;
+  --orange-soft: rgba(232, 97, 12, 0.15);
+  --accent-bg: rgba(232, 97, 12, 0.07);
+  --accent-bg-mid: rgba(232, 97, 12, 0.20);
+  --accent-strong: rgba(232, 97, 12, 0.18);
+  --accent-border: rgba(232, 97, 12, 0.26);
+  --accent-focus: rgba(232, 97, 12, 0.18);
+  --text: #f0ebe3;
+  --text-dim: rgba(240, 235, 227, 0.66);
+  /* It carries the status-block captions and the radius label, so it must
+     clear the 4.5 floor: #8f939d is 5.36:1 on --card and still reads as the
+     quiet ink of the pair. */
+  --muted: #8f939d;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-mid: rgba(255, 255, 255, 0.12);
+  --green: #2ba870;
+  --red: #c03535;
+  --amber: #d4920a;
+  --shadow: 0 20px 44px rgba(0, 0, 0, 0.45);
+  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f0ebe1;
+  --surface: #faf6ee;
+  --card: #ffffff;
+  --orange: #1a4f8c;
+  --orange-fill: var(--orange);
+  --orange-soft: rgba(26, 79, 140, 0.09);
+  --accent-bg: rgba(26, 79, 140, 0.07);
+  --accent-bg-mid: rgba(26, 79, 140, 0.13);
+  --accent-strong: rgba(26, 79, 140, 0.18);
+  --accent-border: rgba(26, 79, 140, 0.26);
+  --accent-focus: rgba(26, 79, 140, 0.18);
+  --text: #1f2933;
+  --text-dim: rgba(31, 41, 51, 0.72);   /* 0.65 would be 4.41:1 on --bg, under the 4.5 floor */
+  --muted: #5b6773;
+  --border: rgba(58, 68, 76, 0.13);
+  --border-mid: rgba(58, 68, 76, 0.24);
+  --green: #1f6a52;
+  --red: #8b2e2e;
+  --amber: #9a6700;
+  --shadow: 0 18px 38px rgba(26, 79, 140, 0.11);
+  --shadow-sm: 0 4px 16px rgba(26, 79, 140, 0.07);
+}
+
+/* One type scale for every page. A size is picked by what the text is, so the same kind of
+   text is the same size on every page. */
+:root {
+  --fs-tool-title: 46px;   /* the tool name on its own page (Chambers Finder, BundleTool) */
+  --fs-page-title: 35.2px; /* Contact, Privacy, Success, 404, Guide, Envelope Guide */
+  --fs-page-title-fluid: clamp(28px, 7vw, var(--fs-page-title)); /* a page title on a phone: the same on every page */
+  --fs-large: 21.6px;      /* the wordmark, a court's name, an empty-state message */
+  --fs-heading: 19px;      /* section and step headings, orb names */
+  --fs-body: 16px;         /* body text, inputs, selects, textareas, buttons, menu rows */
+  --fs-label: 14.4px;      /* form labels, secondary text, intro lines, compact controls */
+  --fs-caption: var(--fs-label); /* hints, helper text, toasts, footer: the same size as a label, told apart by weight and colour */
+  --fs-micro: 12.5px;      /* only uppercase table and group headings, badges, and the menu's tool tiles */
+}

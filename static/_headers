@@ -1,0 +1,54 @@
+# Response headers for Cloudflare Pages (a host that reads _headers). Any other host needs the same headers set in
+# its own configuration; docs/deploying.md lists what each one is for. The Content-Security-Policy on /bundletool/*,
+# the root page's own policy and the security headers are checked by tests/standalone.test.mjs.
+
+# Security headers for every page. HSTS is max-age only: this repository does not know which host it is
+# served from, so it must not claim every subdomain (includeSubDomains) or ask for the preload list.
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+
+# The root page only sends people to the tool; nothing else loads there.
+/
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests
+
+# Scripts, styles and libraries shared by every page are referenced by a fixed name, not a
+# content hash, so a long cache would keep serving an old copy after a deploy (the stale
+# script beside a new page that caused the coversheet symptoms). no-cache still lets the
+# browser reuse a copy after a quick 304 check.
+/js/*
+  Cache-Control: no-cache
+
+/css/*
+  Cache-Control: no-cache
+
+/vendor/*
+  Cache-Control: no-cache
+
+# The shared stylesheets, scripts and mark the page loads are built by Hugo Pipes into /built/ with a content hash in
+# the file name (layouts/partials/shared/asset-url.html), so a changed file is a new URL and the old one can be kept
+# for a year. Nothing else lives under /built/.
+/built/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# BundleTool: no-cache everywhere. Its JS carries no content hash in the filename (only its CSS is
+# fingerprinted via Hugo Pipes), so a long TTL would pin a stale script past a redeploy. One rule
+# covers the whole path (a narrower rule for /js/ or /fonts/ would send the header twice).
+#
+# Its Content-Security-Policy is what stops a hostile file's markup from running code: a bundle PDF
+# someone sends, a manifest or a saved snapshot can carry text that ends up in the page. script-src
+# 'self' means only this site's own script files run (the page has no inline script). It needs:
+#   worker-src 'self' blob:   the build, footer and merge workers, and pdf.js's worker
+#   img-src 'self' data: blob:  page previews and pictures made from the user's own photos
+#   frame-src 'self' blob:    the PDF preview and Save previews are blob: documents
+#   connect-src 'self' blob: data:  the app's own files and the user's documents read back as blobs
+#   font-src 'self' data:     the bundled typefaces, and fonts embedded in a generated PDF preview
+#   style-src 'unsafe-inline' the page and its tutorial and modals use style attributes (styles cannot
+#                             run code; script-src is the protection that matters here)
+/bundletool/*
+  Cache-Control: no-cache
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; manifest-src 'self'; connect-src 'self' blob: data:; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; upgrade-insecure-requests

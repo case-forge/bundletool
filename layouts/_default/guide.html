@@ -1,0 +1,314 @@
+{{ define "main" }}
+{{ partial "bundletool/header.html" . }}
+
+	<main id="main-content" class="min-h-screen">
+		<div class="bt-guide max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-gray-800 dark:text-slate-200">
+			<h1 class="text-2xl font-bold mb-1 text-gray-900 dark:text-slate-100">How to create a bundle</h1>
+			<p class="text-xs text-gray-500 dark:text-slate-400 mb-3">Last updated: {{ partial "shared/updated-date.html" . }}</p>
+			<p class="mb-6 text-sm text-gray-600 dark:text-slate-400">
+				BundleTool turns your files into a court-ready bundle with an optional coversheet, an automatic
+				index, consistent page numbering, bookmarks and internal links. Everything happens on your own
+				device: no file is uploaded anywhere, and once the page has loaded it keeps working offline.
+				For a guided walk around the page itself, choose Help in the menu (the grid of dots in the header).
+			</p>
+
+			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Prepare your documents</h2>
+			<p class="mb-3 text-sm leading-6">
+				Have your documents ready as PDFs, Word documents or photos of exhibits (see Accepted files below), ideally in one folder.
+				Naming files with their dates saves time later: BundleTool reads dates like
+				<span class="font-mono text-xs">Claim Form 2 June 2026.pdf</span> or
+				<span class="font-mono text-xs">Witness Statement 2026-03-12.pdf</span> straight from the filename.
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				Keep a single bundle under roughly 1,000 pages or 75 MB; BundleTool warns you beyond that. Larger
+				cases are usually split into volumes ("Bundle A", "Bundle B").
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				Family Procedure Rules Practice Direction 27A limits an e-bundle to 350 pages by default; the court's
+				permission is needed to go over that. This is a separate, lower limit from the 1,000-page one above: the
+				Review Table shows the running page count once documents are added, and a note once it passes 350.
+				BundleTool never refuses to build a larger bundle; it only says so.
+			</p>
+
+			<h2 id="accepted-files" class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Accepted files</h2>
+			<p class="mb-3 text-sm leading-6">
+				BundleTool takes PDFs, Word documents and photos, both as documents and as your own
+				coversheet. Everything is converted on your device and nothing is uploaded.
+			</p>
+			<ul class="list-disc list-inside space-y-0.5 mb-3 text-sm leading-6">
+				<li><strong>PDF</strong>: <span class="font-mono text-xs">.pdf</span>. A password-protected PDF asks for its password.</li>
+				<li><strong>Word document</strong>: <span class="font-mono text-xs">.docx</span>. Older <span class="font-mono text-xs">.doc</span> files are not supported: open the file in Word and save it as .docx or PDF first.</li>
+				<li><strong>JPEG</strong>: <span class="font-mono text-xs">.jpg</span>, <span class="font-mono text-xs">.jpeg</span>. A photo taken sideways is turned upright.</li>
+				<li><strong>PNG</strong>: <span class="font-mono text-xs">.png</span></li>
+				<li><strong>WebP, AVIF, GIF and BMP</strong>: <span class="font-mono text-xs">.webp</span>, <span class="font-mono text-xs">.avif</span>, <span class="font-mono text-xs">.gif</span> (the first frame only), <span class="font-mono text-xs">.bmp</span></li>
+				<li><strong>TIFF</strong>: <span class="font-mono text-xs">.tif</span>, <span class="font-mono text-xs">.tiff</span>. Each page of a multi-page TIFF becomes a page, so scans from an office scanner or fax work.</li>
+				<li><strong>HEIC</strong>: <span class="font-mono text-xs">.heic</span>, <span class="font-mono text-xs">.heif</span>. These open only in Safari, on an iPhone or a Mac, and only when dropped onto the page. Anywhere else, share the photo from the phone as a JPG, or choose "Most Compatible" in the iPhone camera settings.</li>
+			</ul>
+			<p class="mb-3 text-sm leading-6">
+				Each photo goes on its own page, scaled down to fit and never enlarged. Very large photos are
+				reduced to a size that still prints sharply, so a bundle of phone photos stays a sensible size.
+				With <strong>Smaller Photos</strong> (Advanced Settings, Page Setup, on by default), every photo
+				or picture BundleTool converted goes into the finished bundle at most 2,000 pixels across: a page
+				of phone photos is a fraction of its size and looks the same. The Review Table keeps the full
+				photo, so turning the setting off works for photos already added. A PDF you add is never changed.
+			</p>
+
+			<h2 id="whats-inside-a-pdf" class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">What happens to notes, forms and links in your PDFs</h2>
+			<p class="mb-3 text-sm leading-6">
+				Highlights, comments, stamps and drawn notes stay visible in the bundle. A form that has been
+				filled in is flattened, so what was typed stays on the page and cannot be edited, and two documents
+				with a field of the same name do not interfere. Links to a web address or email address keep working,
+				and a link from one page of a document to another follows that page to its new place in the bundle.
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				Anything a PDF can do beyond showing pages is left out, whichever way the file tried to carry it:
+				scripts (including ones chained behind a link or set on a form field or a page), links or buttons
+				that open a program, another file, or a web address that is not http, https, email or phone, actions
+				that send a form or import data, sound, video and 3D content, and files attached inside the PDF.
+				A form field's or a stamp's own click action is removed and its appearance kept. The bundle is built
+				as a new document, so nothing from a source document's own settings, open actions or attachments
+				list comes with it. Bookmarks that came with a document are not carried over, because the bundle
+				builds its own.
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				<strong>Redaction markers.</strong> Some PDF editors mark text for redaction without removing it
+				until the redaction is applied. If a document you add still carries such markers, BundleTool tells
+				you before it goes in, names the pages, and marks the document in the Review Table, because the
+				text underneath can still be read. Apply the redactions in your PDF editor and add the file again,
+				or leave it in if you understand the risk.
+			</p>
+
+			<h2 id="if-a-file-will-not-add" class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">If a file will not add</h2>
+			<p class="mb-3 text-sm leading-6">
+				BundleTool looks at what is inside a file, not at its name. A photo saved as <span class="font-mono text-xs">scan.pdf</span>
+				is added as a photo, and a PDF saved as <span class="font-mono text-xs">scan.jpg</span> is added as a PDF, with a note
+				saying so. A file that cannot be added is listed with the reason, and nothing about it is kept.
+			</p>
+			<ul class="list-disc list-inside space-y-0.5 mb-3 text-sm leading-6">
+				<li><strong>"That file is empty"</strong>: it has no content, usually because copying it did not finish. Copy it again from the original.</li>
+				<li><strong>"That file could not be read"</strong>: the browser could not open it. A folder cannot be dropped: open it and drop the files inside. A file on a network drive or a phone should be copied to this computer first.</li>
+				<li><strong>"That file cannot be added"</strong>: it is a program, a web page, an SVG drawing, a text file, a spreadsheet, a presentation, a zip file or an older Word file. None of them is ever opened. Save or print it as a PDF (or, for Word, as .docx) and add that. An older <span class="font-mono text-xs">.doc</span> file, or a Word file protected by a password, has to be saved again in Word as .docx or PDF without the password.</li>
+				<li><strong>"That Word document is too long", "too complex" or "holds a very large picture"</strong>: Word documents are converted by drawing them, so very long ones, ones made of thousands of parts, and ones with a picture of tens of millions of pixels are refused. In Word choose Save As, pick PDF, and add the PDF, which also keeps the layout exactly.</li>
+				<li><strong>"Not a valid PDF file"</strong>: the file is not a PDF, or is too badly damaged to read. If the damage can be worked around, BundleTool shows what was recovered and asks whether to add it. Otherwise open the original in a PDF reader and print it to a new PDF.</li>
+				<li><strong>"That PDF has no pages", "too many pages" or "enormous pages"</strong>: the file is empty, longer than the limit below, or has pages larger than 70 inches (1.8 metres) across. Split it, or print it to A4 or A3 from a PDF reader, then add that.</li>
+				<li><strong>"Too many files at once", "Too many documents", "Total file size too large" or "That would make the bundle too long"</strong>: the limits below. Split the documents into separate volumes, such as Bundle A and Bundle B.</li>
+				<li><strong>A note after adding</strong>: a PDF that has files attached inside it, or is a portfolio, does not bring those files into the bundle, because they are not pages; save them out and add them separately. A dynamic (XFA) form can appear blank in other readers; print it to a new PDF if the page looks empty. Scripts and programs a PDF may carry are never copied into a bundle.</li>
+			</ul>
+			<p class="mb-1 text-sm leading-6 font-semibold">Limits</p>
+			<ul class="list-disc list-inside space-y-0.5 mb-3 text-sm leading-6">
+				<li>One file: 200 MB.</li>
+				<li>Files added at once: 300 (a section-layout file dropped together with its PDFs counts the PDFs it uses). Documents in one bundle: 1,000.</li>
+				<li>Sections in one bundle: 100. A section layout, or a bundle reopened, with more is not opened. A section's label (the "A" or "B" box): 10 characters; a longer one in a layout or a reopened bundle is shortened to 10.</li>
+				<li>All documents together: 450 MB and 10,000 pages.</li>
+				<li>Pages in one PDF: 5,000. Size of a page: up to 70 inches (1.8 metres) on the longest side.</li>
+				<li>A photo: 100 million pixels.</li>
+			</ul>
+			<p class="mb-3 text-sm leading-6">
+				Above 1,000 pages or 75 MB BundleTool warns that a bundle is unusually large, but still builds it.
+			</p>
+
+			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Step 1: Basic Information</h2>
+			<p class="mb-3 text-sm leading-6">
+				Enter the court reference, bundle title (for example "Trial Bundle"), the parties and who prepared
+				it. A <strong>watermark</strong> and a <strong>bundle password</strong> (if the finished PDF
+				should require one to open) live in Advanced Settings, under Confidentiality &amp; Security.
+			</p>
+
+			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Step 2: Select Documents</h2>
+			<p class="mb-3 text-sm leading-6">
+				Click <strong>Add Documents</strong>, or drop files anywhere on the page. Photos of exhibits
+				become PDF pages automatically, and Word documents are converted to
+				PDF on your device. A password-protected PDF asks for its
+				password and is unlocked on your device. Files you have already added are recognised and not
+				added twice. Use <strong>Add Section</strong> to group documents into named parts, such as
+				"A: Applications" or "B: Witness Statements".
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				<strong>Where a dropped file goes.</strong> Files dropped onto a section join that section, and
+				files dropped on a row go in at that row: before it when you drop on its upper half, after it on
+				its lower half. A thin line shows the place while you drag. Dropped on a section's heading they go
+				to the start of the section, and on a gap in a section or its empty line they go to the end. Several
+				files keep the order you dropped them in. When the bundle has sections and you drop somewhere
+				outside all of them, or use <strong>Add Documents</strong>, BundleTool asks which section to use.
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				<strong>Add Coversheet</strong> opens the coversheet maker: fill in the court, the parties and
+				any extra lines, watch the live preview, and use it as the bundle's front page. The court
+				reference, the title and Prepared By start as the ones in Basic Information and follow them; change
+				one in the coversheet and it changes on the coversheet only, never in Basic Information. Every
+				field is optional, the party labels can be changed in Advanced Settings (Claimant and Defendant, Petitioner and
+				Respondent, or your own words, rather than Applicant and Respondent), and the court, case subheading and party labels are remembered for your next bundle. If you already have a front page, such as a firm letterhead,
+				add your own instead as a PDF, Word document or photo; only its first page is used, and a
+				bundle never carries two covers. A coversheet made here can be edited again, even after you
+				reopen the finished bundle.
+			</p>
+
+			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Step 3: Review Table</h2>
+			<p class="mb-3 text-sm leading-6">
+				Check the titles and dates BundleTool suggested, and click any of them to edit. Drag rows or
+				sections to reorder them, or use the up/down arrows beside each one, so dragging is never
+				the only way. The column headings sort
+				within sections; hold Shift and click to sort everything at once.
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				Each document's row has four buttons: remove it, move it up, move it down, and the eye, which
+				opens the document. Page through it with the arrows beside the page number, with the Left and
+				Right arrow keys, or by typing a page number. A sideways scan or photo is turned with
+				<strong>Turn left</strong> or <strong>Turn right</strong>: the page shows the turn, and
+				<strong>Turn document</strong> writes it into the document.
+				Choose <strong>This page</strong> to turn only the page shown, page by page if several are
+				sideways, or <strong>Whole document</strong> to turn every page the same way.
+				Cancel leaves the document as it was.
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				A scanned page with no text of its own is read when it is added, so its text can be searched
+				and selected. If that check gets a page wrong, <strong>Force OCR</strong> in the same window
+				reads every page again; a turn not yet written is written first. When the page shown looks
+				blank, a note under it says so; so does a page that reading found on its side or upside down,
+				while it is shown that way and Turn sideways scanned pages upright is off. That is all a note
+				does: nothing is ever removed or turned because of it.
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				Documents are read one at a time, in the order they were added. While one is read its row says
+				<strong>Reading text…</strong>, and documents still to come say <strong>Waiting to read</strong>;
+				once read, the row shows <strong>OCR</strong> instead. Above the table, beside the number of documents
+				and pages, a line such as "Reading text: 2 of 5 documents, about 40 s left" counts down. The time
+				comes from how long pages have actually taken on your device so far, so it appears once the first
+				page is read. <strong>Skip</strong> on a row stops reading that document alone and moves on to the
+				next: the document stays as it is, without searchable text, and Force OCR in its window can still
+				read it later.
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				A page the OCR settings changed says so too: "Turned upright by the setting" (turn it back with
+				Turn left or Turn right if you prefer it as it was), or "Straightened by 2.4 degrees" with
+				<strong>Put back as scanned</strong>, which returns that page alone to exactly how it was scanned,
+				its searchable text with it. A page put back stays as scanned when the document is read again.
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				<strong>Remove this page</strong> takes the page shown out of the document once you confirm it;
+				until then, Cancel, Escape or the close cross leave the document as it was. A document always
+				keeps at least one page, and the page count and the bundle's total follow straight away.
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				<strong>Download</strong>, at the top of the table beside the button that clears it, gives back
+				the documents as BundleTool holds them, after conversion, turning and OCR. Choose a section, the
+				documents in no section, only the documents BundleTool changed, or all of them. One document
+				comes as its own PDF; more come as one zip, named in bundle order ("01 - Witness
+				statement.pdf"), with a folder for each section.
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				A section's header row also has a button for <strong>adding a witness statement cover
+				page</strong>: type the statement's title and it draws a one-page cover in the same style as
+				the bundle's own coversheet, with that title in place of the bundle title and everything
+				else exactly as currently set. It becomes an ordinary row in that section, so drag it in
+				front of the statement it introduces the same way you would reorder any other row.
+			</p>
+
+			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Step 4: Create Bundle</h2>
+			<p class="mb-3 text-sm leading-6">
+				<strong>Create Bundle</strong> builds the finished PDF: coversheet, hyperlinked index,
+				page numbers, bookmarks and printable right-hand page starts. If sections, a coversheet or case
+				details are missing you are asked once, and can continue. If text is still being read, you are
+				asked about the document being read now, with the time it has left: <strong>Wait</strong> shows
+				its progress and carries on once it is read, asking again about the next document if there is
+				one, and <strong>Skip this document</strong> builds without that document's searchable text and
+				asks about the next. When nothing is left to read, the bundle is built; Cancel stops at any point.
+				<strong>Preview Index</strong>
+				generates just the index so you can check it first. On a phone, or any browser that cannot show a
+				PDF itself, a preview shows the pages as pictures, one at a time. Finished bundles are kept in this
+				browser under <strong>Bundles</strong> in the menu, so you can re-download one without rebuilding it.
+			</p>
+
+			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Emailing a bundle</h2>
+			<p class="mb-3 text-sm leading-6">
+				Email services cap the whole message at about 25,000,000 bytes, and attachments grow by
+				roughly 37% in transit, so about 18 MB of PDF is the most that reliably fits. When a bundle is
+				bigger than that, <strong>Split for email</strong> (on the bundle-ready screen, or next to any
+				finished bundle under <strong>Bundles</strong> in the menu) divides it into parts that each fit.
+				Documents are never split across parts unless a single document is itself over the limit, and
+				each part can open with a "Bundle 1 of 3" page saying what it carries, or be left seamless so
+				the parts print and stitch back together. The third choice, <strong>an index and page numbers
+				of their own</strong>, makes each part a small bundle: it opens with the bundle's cover, then an
+				index of only that part's documents headed "Part 2 of 3", and its pages are numbered from 1 in the
+				same style as the whole bundle. The index has a "Bundle page" column giving each document's page
+				in the whole bundle, so a citation to the full bundle can still be found. A document cut across two
+				parts is listed in each with "(continued)". Index rows, footers and bookmarks work inside each
+				part, and each part can be reopened in BundleTool. This needs a bundle made by BundleTool, and the
+				index of the whole bundle is not repeated in the parts. Numbering by section (C1, C2 and so on)
+				does not depend on the split, so it is left exactly as it is.
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				You can also split <strong>by section</strong>: one PDF for the cover and index, then one
+				for each section, in order, each named after the bundle and the section (for example
+				"Hearing bundle - A Applications.pdf"). Page numbers stay exactly as they are in the whole
+				bundle, including numbers restarted in each section (C1, C2 and so on). Links to pages inside
+				the same part keep working; a link to a page in another part cannot work between separate
+				files, so it is left as plain text. A section that is bigger than the size you set is cut
+				further at document boundaries and labelled "Part 1 of 2". The parts are listed with their
+				sizes and pages before anything is saved, and you can download them one by one or all
+				together in a single zip. Splitting by section needs a bundle made by BundleTool, because it
+				reads the sections from the bundle itself. If you nearly always split one way, set it under Advanced
+				Settings, Split for Email, and the dialog will open that way; you can still switch it there.
+			</p>
+
+			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Autosave and rewind</h2>
+			<p class="mb-3 text-sm leading-6">
+				Your work saves to this browser automatically once you have added documents, and what you have
+				typed survives a refresh of the tab. <strong>Rewind</strong> in the menu goes back to an earlier
+				save, with its documents. To reopen a finished bundle for editing later,
+				just add its PDF like any other file: BundleTool recognises its own bundles and offers to
+				open them, or to split their documents into the current table.
+			</p>
+
+			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Exporting and reusing a bundle's structure</h2>
+			<p class="mb-3 text-sm leading-6">
+				Next to <strong>Add Section</strong>, <strong>export</strong> saves everything except the
+				documents themselves (section names, document titles and dates, and all your settings) as a
+				small <span class="font-mono text-xs">.json</span> manifest. It never carries the PDFs, so a
+				manifest on its own is not a bundle: to bring one back, use <strong>import</strong> in the
+				same place, or drop the <span class="font-mono text-xs">.json</span> file together with the
+				original PDFs in a single drag, with their filenames unchanged. This is the fastest way to
+				rebuild the same bundle shape for a similar case, or to keep a template (a set of sections
+				and a house style) ready to reuse. A manifest carries structure only, never a password.
+			</p>
+
+			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Advanced Settings</h2>
+			<p class="mb-3 text-sm leading-6">
+				Advanced Settings, below Create Bundle, is arranged in panels. Index Options holds the index font and
+				text size, date format, outline style, heading, section word and table borders. Coversheet holds the
+				party labels and the cover layout: stacked or two columns, whether the case number sits on the court's line or its own, whether each party's label goes under the name or beside it, where the case number sits when it has its own line, where the court and subheading sit, where the names sit on a stacked cover, and whether the rules above and below the title are single or double. The default cover is the compact one: the case number on the court's line and each label on its name's line. The Case Reference field takes up to 60 characters, enough for two joined case numbers. What is printed before the number is its own setting too, "CASE NO:" by default, freely changed to "CLAIM NO:", "ORDER NO:", any other wording, or cleared for no prefix at all, the same way the party labels are. What is printed before who prepared the bundle works the same way: "Prepared by:" by default, freely changed to "Compiled by:", "On behalf of:", any other wording, or cleared for no label at all. The word joining the two parties on a stacked cover is a setting too: "-and-" by default, freely changed to "-v-", any other wording, or cleared for just the gap between the two names. Confidentiality &amp; Security holds the bundle password and the
+				watermark. Page Setup holds the page size, double-sided printing and Smaller Photos. Split for Email holds whether that dialog opens split by size or by section. Page Numbering holds the numbering style
+				(including numbering that restarts in each section, such as C1, C2 … D1, D2, and roman numerals for the cover
+				and index), the prefix, alignment, footer font, size, height and colours, and where the page number's link jumps to.
+				Settings that do nothing at the moment, such as the footer settings while numbering is off, are dimmed rather than removed.
+				Appearance switches between the Modern and Classic looks. Everything saves
+				automatically as you change it.
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				OCR (Searchable Text) holds the automatic check that makes a scanned page's text selectable and searchable
+				once it is added (on by default; <strong>Force OCR</strong> in a document's window reads it again at any time),
+				and two settings that change scanned pages as they are read, both off by default.
+				<strong>Turn sideways scanned pages upright</strong> turns a page that was read on its side or upside down
+				so that it shows the right way up. <strong>Straighten tilted scanned pages</strong> turns a page scanned up
+				to 10 degrees crooked level. The page keeps its size, so the corners of the scan that turn past its edges
+				are trimmed: on a scan that is its outer margin and the scanner's background, not the print. Neither setting
+				ever changes a page that has text of its own, and a crooked page with links or form fields is left as it is,
+				because they would no longer line up with it. Both apply to pages read after they are switched on; for a
+				document already added, use Force OCR in its window. With turning off, a page found on its side keeps a
+				note in the window instead.
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				The Share button in the panel's header turns your settings into a link you can send to a colleague, or a
+				QR code for them to scan; opening the link applies them in one step. The link and the
+				code carry settings only, never documents.
+			</p>
+
+			<a href="{{ "bundletool/" | relURL }}" class="bt-guide-back inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-lg text-white text-sm font-semibold no-underline transition">
+				Back to BundleTool
+			</a>
+		</div>
+	</main>
+
+
+{{ partial "bundletool/footer.html" . }}
+{{ end }}

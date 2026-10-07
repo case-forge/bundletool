@@ -1,0 +1,37 @@
+{
+  "id": "/bundletool/",
+  "name": "BundleTool",
+  "short_name": "BundleTool",
+  "description": "Create court-ready PDF bundles on your own device. Nothing is uploaded.",
+  "lang": "en-GB",
+  "dir": "ltr",
+  "start_url": "/bundletool/",
+  "scope": "/bundletool/",
+  "display": "standalone",
+  "background_color": "#f0ebe1",
+  "theme_color": "#f0ebe1",
+  "categories": [
+    "productivity",
+    "business"
+  ],
+  "icons": [
+    {
+      "src": "/bundletool/images/pwa-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/bundletool/images/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/bundletool/images/pwa-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

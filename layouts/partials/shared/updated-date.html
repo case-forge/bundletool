@@ -1,0 +1,8 @@
+{{- /* The page's "last updated" date, long form. Takes the page. The date comes from
+     data/lastupdated.json, the date this repository was last refreshed; Hugo's own git date is the fallback. */ -}}
+{{- $stamp := index site.Data.lastupdated .RelPermalink -}}
+{{- if $stamp -}}
+{{- partial "shared/long-date.html" $stamp -}}
+{{- else -}}
+{{- partial "shared/long-date.html" (.Lastmod.Format "2006-01-02") -}}
+{{- end -}}

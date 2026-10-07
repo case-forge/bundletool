@@ -1,0 +1,14 @@
+{{- /* URL of one of the root site's own static files: pass (dict "src" "js/contact.js" "min" true).
+     In a production build it is the minified (when "min"), fingerprinted copy under /built/, which static/_headers
+     keeps for a year. Under `hugo server` it is the plain file: Hugo treats an edit to a file that is both a static
+     file and a mounted asset as a static change and does not rebuild the templates, so a fingerprinted copy would
+     go stale while you work. Pass "name" to choose the file name under /built/ (default: the file's own). */ -}}
+{{- if hugo.IsServer -}}
+{{- .src | relURL -}}
+{{- else -}}
+{{- $r := resources.Get (printf "site/%s" .src) -}}
+{{- $name := .name | default (path.Base .src) -}}
+{{- $r = $r | resources.Copy (printf "built/%s" $name) -}}
+{{- if .min }}{{ $r = $r | minify }}{{ end -}}
+{{- ($r | fingerprint).RelPermalink -}}
+{{- end -}}

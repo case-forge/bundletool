@@ -1,0 +1,191 @@
+/* Shared header actions and app menu (the waffle drawer): one copy for every
+ * page that uses layouts/partials/shared/header.html: Home, Contact, Privacy,
+ * Envelope Guide, Chambers Finder and BundleTool. Everything reads the shared
+ * tokens, so the menu follows the theme with no rules of its own per mode.
+ *
+ * The apps list only draws its divider when something sits above it
+ * (.drawer-apps:not(:first-child)), so a page with no Settings row (Chambers
+ * Finder, Envelope Guide, Contact, Privacy) gets a plain list.
+ */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.drawer-wrap { position: relative; }
+
+.drawer-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  padding: 0;
+}
+/* Hover and expanded change only the background, with no ring, as in
+   BundleTool's Modern theme. The border stays (transparent) so the button
+   does not resize by 2px when the state changes. */
+.drawer-btn:hover,
+.drawer-btn[aria-expanded="true"] {
+  background: var(--card);
+}
+/* In dark mode --surface sits only one step above --bg (#13161c against
+   #0e1014), barely a highlight, so the hover is a stronger grey. Grey, not an
+   accent tint, and no colour change on the icon itself, light or dark: only
+   the background lights up. */
+[data-theme="dark"] .drawer-btn:hover,
+[data-theme="dark"] .drawer-btn[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.drawer-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 300;
+  /* Sized to its content, so the panel is never visibly half empty, with a
+     floor so a short single-item drawer (a 404 page's, for example) does not
+     shrink to an awkward sliver. */
+  width: max-content;
+  min-width: 160px;
+  padding: 8px;
+  background: var(--card);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  /* However many tools and apps a page passes, the panel stays inside the
+     window and scrolls, rather than running off the bottom or the side. */
+  max-height: calc(100vh - 96px);
+  max-width: calc(100vw - 24px);
+  overflow-y: auto;
+}
+/* Light mode only: var(--card) is plain #ffffff in light mode, which reads
+   as an unrelated white box next to the beige page and the beige .lh-paper
+   preview (tool.css). Dark mode's --card (#1c1f27) is a real elevated tone
+   distinct from --bg (#0e1014), so it stays. */
+[data-theme="light"] .drawer-panel { background: var(--bg); }
+.drawer-panel[hidden] { display: none; }
+
+.drawer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+/* A panel carrying tools is at least wide enough for near-square tiles (about 72px
+   across for up to three, 64px for four) however narrow its longest app label is;
+   without this a three-tool panel would be 193px wide and the tiles 56px by 69px. */
+.drawer-panel--cols-1 { min-width: 128px; }
+.drawer-panel--cols-2 { min-width: 170px; }
+.drawer-panel--cols-3 { min-width: 242px; }
+.drawer-panel--cols-4 { min-width: 290px; }
+.drawer-grid--cols-1 { grid-template-columns: 1fr; }
+.drawer-grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
+.drawer-grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+.drawer-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: var(--fs-label);   /* the tile labels are what a phone user reads to pick an action */
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: background 0.12s, color 0.12s;
+}
+.drawer-item:hover,
+.drawer-item:focus-visible {
+  background: var(--accent-bg-mid);
+  color: var(--orange);
+  text-decoration: none;
+  outline: none;
+}
+
+/* The apps below the rule LEAVE this page; the tools above ACT on it.
+   Running the two kinds together in one grid is what makes a drawer feel
+   arbitrary, and the rule is what lets the app list grow without the tool
+   list growing with it. */
+.drawer-apps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* The rule, and the margin and padding around it, only make sense when
+   something precedes the app list. A drawer with no tools section above it
+   (Envelope Guide's has no Settings) would otherwise show a rule floating
+   at the very top of the panel and about 24px of empty space above the
+   first link (panel padding, this margin and this padding). */
+.drawer-apps:not(:first-child) {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.drawer-app {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: var(--fs-body);
+  text-decoration: none;
+  transition: background 0.12s, color 0.12s;
+  /* Settings is a <button>, not an <a>: reset the browser chrome a
+     button carries by default so it reads identically to its <a> siblings. */
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+.drawer-app:hover,
+.drawer-app:focus-visible {
+  background: var(--accent-bg-mid);
+  color: var(--orange);
+  text-decoration: none;
+  outline: none;
+}
+.drawer-app[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.5;
+}
+.drawer-app[aria-disabled="true"]:hover,
+.drawer-app[aria-disabled="true"]:focus-visible {
+  background: none;
+  color: var(--text-dim);
+}
+
+/* Reflow. At 320px (the WCAG 1.4.10 floor, and a real device width) the
+   logo, the three theme buttons and the drawer button come to 329px, which
+   would push the drawer button off the right edge and take the whole page
+   into horizontal scroll (.header-actions, .drawer-wrap and #drawer-btn all
+   end at 329). The wordmark is the part with slack in it, so it goes first; the controls
+   keep their full hit areas, which is the half that matters on a phone.
+   The shared header uses .home-mark-text on every page that has it. */
+@media (max-width: 360px) {
+  .home-mark-text { display: none; }
+  .header-actions { gap: 4px; }
+}
+
+/* A keyboard user needs more than the faint hover tint to see where they are in the menu. */
+.drawer-item:focus-visible,
+.drawer-app:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--orange);
+}

@@ -1,0 +1,54 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm ci --no-audit --no-fund
+      # No poppler is installed on purpose: the tests that read PDF text or pixels skip themselves when pdftotext
+      # and pdftoppm are absent.
+      - run: npm test
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.165.0"
+          extended: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: hugo --gc
+        env:
+          HUGO_BUILD_SHA: ${{ github.sha }}
+          HUGO_BUILD_RUN: ${{ github.run_number }}
+      # Writes the offline service worker from the built files; strict mode fails when a page or script names a file
+      # that is not in the build.
+      - run: OFFLINE_TOOLS=bundletool OFFLINE_STRICT=1 node scripts/build-offline.mjs dist
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download -R gitleaks/gitleaks --pattern 'gitleaks_*_linux_x64.tar.gz' -O gitleaks.tar.gz
+          tar xzf gitleaks.tar.gz gitleaks
+          sudo mv gitleaks /usr/local/bin/
+      - run: gitleaks detect --source . --no-git --redact --no-banner

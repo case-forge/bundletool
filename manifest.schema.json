@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://caseforge.uk/schemas/bundletool-manifest-1.json",
+  "title": "BundleTool manifest, schemaVersion 1",
+  "description": "What the BundleTool command line reads. The same shape is exported and imported by the browser tool. Keys not listed at the top level, in a section or in a file entry are rejected (error code unknown_key). Unknown keys inside config are ignored with a warning (unknown_config_key), because the settings grow and shrink between versions.",
+  "type": "object",
+  "required": ["sections"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1, "description": "Optional. When present it must be 1." },
+    "_comment": { "type": "string", "maxLength": 2000 },
+    "config": {
+      "type": "object",
+      "description": "Settings as flat \"group.field\" keys, for example \"heading.bundleTitle\". Groups: heading, index, pageNumbering, page, pageOptions, cover, ocr. Set pageOptions.generateCover to true to draw the cover maker's page from the cover.* fields. ocr.autoDetect has no effect here: it is the browser's own setting. The command line's OCR switch is ocr.mode (auto or off); a file's own \"forceOcr\" overrides it per document. index.dateInputOrder (UK or US) likewise has no effect here: it is the browser's own setting for reading an ambiguous date out of a file name; a document's date here is taken as given. ocr.turnUpright and ocr.straighten (true or false, both false by default) turn a sideways scanned page upright and straighten a tilted one as OCR reads it; they change only scanned pages OCR reads. pageOptions.smallerPhotos (true or false, true by default) puts each JPEG or PNG made into a page into the bundle at most 2000 pixels on its long edge; a PDF is never changed. The command line lists every key with its default when run with --config-keys.",
+      "maxProperties": 200,
+      "additionalProperties": { "type": ["string", "number", "boolean", "null"], "maxLength": 500 }
+    },
+    "coversheet": {
+      "type": "string",
+      "description": "Optional. The name of a PDF inside the documents directory whose first page is the cover. It wins over a generated cover.",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "sectionID": { "type": "string", "pattern": "^[0-9]{4}$", "description": "Optional. Four digits, unique per section. Left out, sections are numbered by position: 0000, 0001, and so on." },
+          "sectionLabel": { "type": "string", "maxLength": 500 },
+          "sectionName": { "type": "string", "maxLength": 500 },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["filename"],
+              "additionalProperties": false,
+              "properties": {
+                "filename": { "type": "string", "minLength": 1, "maxLength": 500, "description": "A plain file name inside the documents directory, no folder in front of it. A PDF, or a JPEG or PNG photo (read from the file's own bytes, not its extension), which becomes one page of the bundle's page size." },
+                "title": { "type": ["string", "null"], "maxLength": 500, "description": "Optional. Left out, null or blank, the title is filled in from the filename, the same as when a title field is cleared on the page." },
+                "date": { "type": ["string", "null"], "maxLength": 40 },
+                "pageCount": { "type": "integer", "description": "Ignored: the real page count is read from the file." },
+                "rotate": { "enum": [90, 180, 270], "description": "Optional. Turn every page of this document clockwise by this many degrees, added to any rotation the file already carries." },
+                "forceOcr": { "type": "boolean", "description": "Optional, default false. true runs OCR on every page of this document regardless of its own text layer, overriding ocr.mode for this file only." }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

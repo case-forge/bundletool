@@ -1,0 +1,43 @@
+{
+  "name": "bundletool",
+  "version": "1.0.0",
+  "description": "Court bundle builder: a browser tool and a command line build of the same bundle",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --import ./tests/register-hooks.mjs --test tests/*.test.mjs",
+    "build:vendor": "node scripts/build-vendor.mjs",
+    "build:cli": "node scripts/build-cli.mjs",
+    "build": "hugo --gc && OFFLINE_TOOLS=bundletool node scripts/build-offline.mjs dist",
+    "start": "hugo server"
+  },
+  "devDependencies": {
+    "@cantoo/pdf-lib": "2.6.5",
+    "@pdf-lib/fontkit": "1.1.1",
+    "chrono-node": "2.9.0",
+    "esbuild": "0.28.2",
+    "fake-indexeddb": "6.2.5",
+    "jspdf": "4.2.1",
+    "jspdf-autotable": "5.0.7",
+    "mammoth": "1.12.3",
+    "playwright": "1.63.0",
+    "qrcode-generator": "2.0.4",
+    "utif2": "4.1.0"
+  },
+  "optionalDependencies": {
+    "@napi-rs/canvas": "1.0.10",
+    "tesseract-wasm": "0.11.0"
+  },
+  "bin": {
+    "bundletool": "scripts/build-cli.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/case-forge/bundletool.git"
+  },
+  "homepage": "https://caseforge.uk/bundletool/"
+}

@@ -1,0 +1,110 @@
+<!-- Shared header and navigation: every product includes this partial
+     rather than a copy of its own. Params:
+       markSize     logo size in px (default 44)
+       hideApps     home page only: the menu lists no apps, only its tools
+                    (Settings). The three orbs on the home page are its app
+                    switcher, so its menu button, the same as on every other
+                    page, holds only Settings and repeats no app links
+       hideSettings drop the Settings item from the drawer (plain content
+                    pages such as Contact, Privacy, Success, Chambers Finder,
+                    BundleTool and Envelope Guide have nothing for a
+                    theme or favicon lock to act on beyond the theme buttons
+                    already in the header)
+       current      this page's own product id ("chambers-finder",
+                    "bundletool", "envelope-guide", or unset for
+                    home, Contact, Privacy and Success). The drawer's app
+                    list is site.Params.apps sorted by name, with this one
+                    entry skipped, so adding a fourth product needs one new
+                    [[params.apps]] entry in hugo.toml and nothing edited here.
+       tools        optional list of page-specific actions shown above the app
+                    list (BundleTool's Rewind / Bundles / Help are the
+                    model). Each is {id, label, icon} plus an optional
+                    title (icon is a key of data/icons.json); the page's own script binds the id. Settings is
+                    just the first tool and is added unless hideSettings.
+                    Build the list with slice/dict, for example
+                      "tools" (slice (dict "id" "help-btn" "label" "Help"
+                                      "icon" "help"))
+                    One, two or three tools take that many columns, four take
+                    four (one row), five or six take three, more than six take
+                    four, and the panel scrolls
+                    if the tools plus apps are taller than the window.
+                    Picking a tool closes the menu.
+       backLink     optional {url, label}: a same-product "back to X"
+                    link shown above the cross-product app list, for a
+                    subpage that is not its own product's home (Chambers
+                    Finder's 404 page uses it). -->
+{{ $size := .markSize | default 44 }}
+{{ $current := .current }}
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<header class="home-header">
+  <a class="home-mark" href="{{ "/" | relURL }}" aria-label="CaseForge">
+    <img src="{{ partial "shared/logo-url.html" . }}" alt="" width="{{ $size }}" height="{{ $size }}">
+    <span class="home-mark-text">Case<span>Forge</span></span>
+  </a>
+  <div class="header-actions">
+    <div class="theme-toggle" id="theme-toggle" role="group" aria-label="Colour theme">
+      <button type="button" class="theme-btn" data-t="light" title="Light mode" aria-label="Light mode" aria-pressed="false">
+        {{ partial "shared/icon.html" (dict "name" "light_mode" "size" 16) }}
+      </button>
+      <button type="button" class="theme-btn" data-t="auto" title="Follow device" aria-label="Follow device" aria-pressed="false">
+        {{ partial "shared/icon.html" (dict "name" "desktop_windows" "size" 16) }}
+      </button>
+      <button type="button" class="theme-btn" data-t="dark" title="Dark mode" aria-label="Dark mode" aria-pressed="false">
+        {{ partial "shared/icon.html" (dict "name" "dark_mode" "size" 16) }}
+      </button>
+    </div>
+    <div class="drawer-wrap">
+      <button type="button" class="drawer-btn" id="drawer-btn" aria-label="Menu" aria-expanded="false" aria-controls="drawer-panel" aria-haspopup="true" title="Menu">
+        {{ partial "shared/icon.html" (dict "name" "apps" "size" 24) }}
+      </button>
+      {{- $tools := slice }}
+      {{- if not .hideSettings }}
+      {{- $tools = $tools | append (dict "id" "settings-open-btn" "label" "Settings" "icon" "settings") }}
+      {{- end }}
+      {{- with .tools }}{{ $tools = $tools | append . }}{{ end }}
+      {{- /* Column count of the tools grid: 1 to 3 tools take that many, exactly 4 sit in
+           one row, 5 or 6 take three, more than 6 take four. Published on the panel as a
+           drawer-panel--cols-N class (--drawer-cols in drawer.css) so the app rows below can line their icons up with the first tool. */ -}}
+      {{- $cols := 3 }}{{ if or (eq (len $tools) 4) (gt (len $tools) 6) }}{{ $cols = 4 }}{{ else if le (len $tools) 2 }}{{ $cols = len $tools }}{{ end }}
+      <div class="drawer-panel drawer-panel--cols-{{ $cols }}" id="drawer-panel" hidden>
+        {{- with $tools }}
+        <div class="drawer-grid drawer-grid--cols-{{ $cols }}">
+          {{- range . }}
+          <button type="button" class="drawer-item" id="{{ .id }}"{{ with .title }} title="{{ . }}"{{ end }}>
+            {{ partial "shared/icon.html" (dict "name" .icon "size" 22) }}
+            <span>{{ .label }}</span>
+          </button>
+          {{- end }}
+        </div>
+        {{- end }}
+        {{- if not .hideApps }}
+        <div class="drawer-apps">
+          {{- with .backLink }}
+          <a class="drawer-app" href="{{ .url }}">
+            {{ partial "shared/icon.html" (dict "name" "home" "size" 20) }}
+            <span>{{ .label }}</span>
+          </a>
+          {{- end }}
+          {{- range sort site.Params.apps "name" }}
+          {{- if ne .id $current }}
+          <a class="drawer-app" href="{{ .url }}">
+            {{- if eq .icon "chambers" }}
+            {{ partial "shared/icon.html" (dict "name" "location_on" "size" 20) }}
+            {{- else if eq .icon "bundletool" }}
+            {{ partial "shared/icon.html" (dict "name" "stacks" "size" 20) }}
+            {{- else if eq .icon "envelope" }}
+            {{ partial "shared/icon.html" (dict "name" "mail" "size" 20) }}
+            {{- end }}
+            <span>{{ .name }}</span>
+          </a>
+          {{- end }}
+          {{- end }}
+        </div>
+        {{- end }}
+      </div>
+    </div>
+  </div>
+</header>
+{{ partial "settings-modal.html" . }}
+{{- /* The menu button's behaviour is an external file: an inline script here is blocked by Chambers Finder's Content-Security-Policy. */ -}}
+{{ if not .bundled }}<script src="{{ "js/shared/drawer.js" | relURL }}" defer></script>{{ end }}

@@ -1,0 +1,78 @@
+{
+  "_comment": "Example manifest for this engine's real schema (bundletoolConfig flat keys + bundletoolIndexData sections). Sections/titles below are placeholders showing the shape, not a spec of what a bundle must contain. All names/numbers are fixtures already used in tests/build.test.mjs, plus ABC123456 for the case number (no real court case-number shape). Case type is named by the filename, not a data field. The cover.* fields feed the cover maker's page: set pageOptions.generateCover to true and scripts/build-cli.mjs draws it in front of the index, exactly as the browser does. To use your own cover page instead, add a top-level \"coversheet\": \"cover.pdf\" naming a PDF in the documents directory (its first page is used, and it wins over a generated one). A manifest that carries cover.hearingInfo, cover.hearingDate or cover.dateStyle has them ignored: they are not settings.",
+  "config": {
+    "heading.bundleTitle": "Trial Bundle",
+    "heading.projectName": "Re: X (A Child)",
+    "heading.author": "A. Solicitor",
+    "heading.claimNumber": "ABC123456",
+    "heading.fontSize": "medium",
+    "cover.courtName": "IN THE FAMILY COURT AT [TOWN]",
+    "cover.matterOf": "Re: X (A Child)",
+    "cover.applicantName": "APPLICANT SURNAME",
+    "cover.respondentName": "RESPONDENT SURNAME",
+    "cover.partyLabel1": "Applicant",
+    "cover.partyLabel2": "Respondent",
+    "cover.extraText": "",
+    "pageOptions.coversheet": false,
+    "pageOptions.generateCover": false,
+    "pageOptions.coverSource": "none",
+    "pageOptions.printableBundle": false,
+    "pageOptions.pageSize": "a4",
+    "index.fontFace": "serif",
+    "index.dateStyle": "DD Mon. YYYY",
+    "index.sectionPrefix": "",
+    "index.outlineItemStyle": "plain",
+    "index.headingText": "Index",
+    "index.indexBookmarkLabel": "Index",
+    "index.justTheIndex": false,
+    "index.showTableBorders": true,
+    "pageNumbering.numberingStyle": "PageX",
+    "pageNumbering.frontMatterNumbering": "roman",
+    "pageNumbering.footerFont": "helvetica",
+    "pageNumbering.footerFontSize": "small",
+    "pageNumbering.footerPrefix": "",
+    "pageNumbering.footerLink": "index",
+    "pageNumbering.alignment": "centre",
+    "pageNumbering.pageNumberPerSection": false,
+    "pageNumbering.pageNumberColour": "black",
+    "pageNumbering.plateColour": "#ffffff",
+    "pageNumbering.plateOpacity": 0,
+    "pageNumbering.footerOffset": 0
+  },
+  "sections": [
+    {
+      "sectionID": "0001",
+      "sectionLabel": "A",
+      "sectionName": "PRELIMINARY DOCUMENTS",
+      "files": [
+        { "filename": "case-summary.pdf", "title": "Case Summary", "date": "2026-01-01", "pageCount": 3 },
+        { "filename": "chronology.pdf", "title": "Chronology", "date": "2026-01-01", "pageCount": 2 }
+      ]
+    },
+    {
+      "sectionID": "0002",
+      "sectionLabel": "B",
+      "sectionName": "APPLICATIONS & COURT ORDERS",
+      "files": [
+        { "filename": "c100-application.pdf", "title": "C100 Application", "date": "2025-11-01", "pageCount": 12 },
+        { "filename": "fl401-application.pdf", "title": "FL401 Application", "date": "2025-11-10", "pageCount": 8 },
+        { "filename": "order-2025-12-01.pdf", "title": "Order of District Judge Example", "date": "2025-12-01", "pageCount": 4 }
+      ]
+    },
+    {
+      "sectionID": "0003",
+      "sectionLabel": "C",
+      "sectionName": "STATEMENTS",
+      "files": [
+        { "filename": "applicant-statement-1.pdf", "title": "Statement of Applicant (1st)", "date": "2025-12-15", "pageCount": 10 },
+        { "filename": "respondent-statement-1.pdf", "title": "Statement of Respondent (1st)", "date": "2025-12-20", "pageCount": 9 }
+      ]
+    },
+    {
+      "sectionID": "0004",
+      "sectionLabel": "D",
+      "sectionName": "OTHER DOCUMENTS",
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+/* Settings modal, reached from the Settings entry of the header menu on the home page.
+ * The menu itself lives in shared/drawer.css. */
+@import url("/css/shared/drawer.css");
+
+/* The Settings modal, reached from the drawer's Settings entry. A plain
+   centred-card overlay, not a variant of .drawer-panel: it holds real
+   controls (switches), not a list of links, and needs its own backdrop
+   because the drawer closes underneath it. */
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.45);
+}
+.settings-overlay[hidden] { display: none; }
+.settings-card {
+  width: 100%;
+  max-width: 360px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+/* The same light-mode beige background as .drawer-panel (shared/drawer.css),
+   for the same reason. */
+[data-theme="light"] .settings-card { background: var(--bg); }
+.settings-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.settings-card-head h2 { font-size: var(--fs-heading); font-weight: 700; color: var(--text); margin: 0; }
+.settings-close {
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: 6px;
+  color: var(--text-dim);
+  cursor: pointer;
+  line-height: 0;
+}
+.settings-close:hover { color: var(--orange); background: var(--accent-bg-mid); }
+.settings-section { padding-top: 14px; margin-top: 14px; border-top: 1px solid var(--border); }
+.settings-section:first-of-type { border-top: none; margin-top: 6px; }
+.settings-section h3 { font-size: var(--fs-label); font-weight: 700; color: var(--text); margin: 0 0 4px; }
+.settings-hint { font-size: var(--fs-caption); color: var(--text-dim); margin: 0 0 10px; line-height: 1.5; }
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--fs-label);
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* A checkbox styled as a track-and-thumb switch: the input itself stays in
+   the DOM (visually hidden, not display:none) so it keeps native keyboard
+   and screen-reader behaviour; only its paint is replaced. */
+.settings-switch { position: relative; display: inline-block; width: 34px; height: 20px; flex: 0 0 auto; }
+.settings-switch input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.settings-switch-track {
+  position: absolute;
+  inset: 0;
+  background: var(--border-mid);
+  border-radius: 999px;
+  transition: background 0.15s;
+  /* Purely decorative: without this it sits on top of the input (later
+     in DOM order, same inset:0 box) and silently swallows every click. */
+  pointer-events: none;
+}
+.settings-switch-track::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--card);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s;
+}
+.settings-switch input:checked + .settings-switch-track { background: var(--orange); }
+.settings-switch input:checked + .settings-switch-track::before { transform: translateX(14px); }
+.settings-switch input:focus-visible + .settings-switch-track { outline: 2px solid var(--orange); outline-offset: 2px; }
+
+/* The return-to-top button's rules are in shared/back-to-top.css, one copy
+   for every product. */

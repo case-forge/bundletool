@@ -1,0 +1,11 @@
+{{- /* BundleTool's header is the shared one (layouts/partials/shared/header.html),
+     the same bar every CaseForge page has: logo and wordmark, the light/auto/dark
+     switch, and the menu button. This file only says what is different here: the
+     three tools BundleTool adds to the menu (it has no Settings item). Their ids are the ones frontend.js and bundletoolTutorial.js bind. The
+     other apps (Chambers Finder, Envelope Guide) come from [[params.apps]] in
+     hugo.toml, so nothing about them is listed here. */ -}}
+{{- $tools := slice
+  (dict "id" "autosave-restore-btn" "label" "Rewind" "title" "Rewind to an earlier save" "icon" "history")
+  (dict "id" "finished-bundles-btn" "label" "Bundles" "title" "Bundles this browser has finished" "icon" "download")
+  (dict "id" "tutorial-open-btn" "label" "Help" "title" "Run the tutorial" "icon" "help") -}}
+{{ partial "shared/header.html" (dict "page" . "current" "bundletool" "markSize" 44 "hideSettings" true "hideApps" true "tools" $tools "bundled" (not hugo.IsServer)) }}

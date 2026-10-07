@@ -1,0 +1,15 @@
+{{- /* Registers a tool's offline service worker: {{ partial "offline/register.html" (dict "tool" "bundletool") }}
+     The worker itself is written into public/<tool>/sw.js by scripts/build-offline.mjs after `hugo` (it needs the
+     built files to list and hash them). Here Hugo publishes a harmless stand-in at the same path so a plain `hugo`
+     build, or `hugo server`, never leaves a missing or stale worker: the stand-in clears any worker and caches
+     an earlier deploy installed. Nothing registers under `hugo server`, so livereload is untouched, or when
+     [params.offline] enabled is false in hugo.toml (the kill switch: the next deploy then ships the stand-in
+     for real, and every browser that had the worker removes it on its next visit). */ -}}
+{{- $tool := .tool -}}
+{{- $on := true -}}
+{{- with site.Params.offline -}}{{- if isset . "enabled" -}}{{- $on = .enabled -}}{{- end -}}{{- end -}}
+{{- $stand := resources.FromString (printf "%s/sw.js" $tool) (partial "offline/standin.js" .) -}}
+{{- $stand.Publish -}}
+{{- if and $on (not hugo.IsServer) -}}
+<script src="{{ "js/shared/sw-register.js" | relURL }}" data-sw="{{ printf "%s/sw.js" $tool | relURL }}" data-scope="{{ printf "%s/" $tool | relURL }}" defer></script>
+{{- end -}}
