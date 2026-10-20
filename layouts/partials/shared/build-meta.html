@@ -1,0 +1,6 @@
+{{- /* Which build this page came from, for bug reports (the bug reporter and BundleTool's error box read it).
+     HUGO_BUILD_SHA is the commit: the deploy build sets it from the host's commit variable and CI from the run's.
+     HUGO_BUILD_RUN is the GitHub run number, which only a CI build has, so data-run is written only when it is set
+     (a deployed page has none, and an empty attribute would say nothing). A local `hugo server` has neither and
+     says "dev". Hugo only lets templates read HUGO_-prefixed variables. */ -}}
+<meta name="cf-build" content="{{ with getenv "HUGO_BUILD_SHA" }}{{ substr . 0 7 }}{{ else }}dev{{ end }}"{{ with getenv "HUGO_BUILD_RUN" }} data-run="{{ . }}"{{ end }}>

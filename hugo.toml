@@ -1,0 +1,102 @@
+# BundleTool as a standalone site. Set baseURL to the address it is served from (the site must be served from the
+# root of its own host: the scripts import shared files by root-absolute paths such as /vendor/ and /js/shared/).
+baseURL = "https://example.invalid/"
+locale = "en-GB"
+title = "BundleTool"
+publishDir = "dist"
+disableKinds = ["taxonomy", "term", "RSS", "sitemap"]
+
+[markup.goldmark.renderer]
+unsafe = true
+
+[params]
+  # The page footer links to the live CaseForge site's Contact and Privacy pages.
+  contactUrl = "https://caseforge.uk/contact/"
+  privacyUrl = "https://caseforge.uk/privacy/"
+
+# Offline mode (docs/offline-mode.md). Set enabled = false and deploy to switch it off: every browser that had the
+# service worker removes it and its caches on its next visit.
+[params.offline]
+  enabled = true
+
+# The mounts put the repository's folders where Hugo looks for them, the same places BundleTool's folders take when it
+# is built as part of the full CaseForge site. Declaring any [[module.mounts]] replaces Hugo's defaults for the whole
+# site, so static/, data/ and the shared partials are listed too.
+[[module.mounts]]
+source = "static"
+target = "static"
+
+[[module.mounts]]
+source = "data"
+target = "data"
+
+[[module.mounts]]
+source = "assets"
+target = "assets"
+
+# The shared stylesheets, scripts and mark are read as Hugo assets (bundled, minified and fingerprinted by
+# layouts/partials/shared/asset-url.html) from the same static/ folders that are also published unchanged.
+[[module.mounts]]
+source = "static/css"
+target = "assets/site/css"
+
+[[module.mounts]]
+source = "static/js"
+target = "assets/site/js"
+
+[[module.mounts]]
+source = "static/img"
+target = "assets/site/img"
+
+# The tool's page and Guide are content under /bundletool/.
+[[module.mounts]]
+source = "content"
+target = "content/bundletool"
+
+[[module.mounts]]
+source = "layouts/index.html"
+target = "layouts/bundletool/section.html"
+
+[[module.mounts]]
+source = "layouts/_default/baseof.html"
+target = "layouts/bundletool/baseof.html"
+
+[[module.mounts]]
+source = "layouts/_default/guide.html"
+target = "layouts/bundletool/guide.html"
+
+# The partials are reachable under their own names (shared/, offline/) and as bundletool/<name>, which is how the
+# templates include the tool's own three.
+[[module.mounts]]
+source = "layouts/partials"
+target = "layouts/partials"
+
+[[module.mounts]]
+source = "layouts/partials"
+target = "layouts/partials/bundletool"
+
+[[module.mounts]]
+source = "assets/css"
+target = "assets/bundletool/css"
+
+# The tool's own files (the bundle engine, fonts, images, manifest) live in public/ and are published under
+# /bundletool/. The READMEs in there are notes for people reading the repository, not part of the site.
+[[module.mounts]]
+source = "public"
+target = "static/bundletool"
+excludeFiles = ["**/README.md", "**/README.txt"]
+
+# The root page only sends people to /bundletool/, and the 404 page links back to it.
+[[module.mounts]]
+source = "home"
+target = "content"
+
+[[module.mounts]]
+source = "site-layouts"
+target = "layouts"
+
+# Only `hugo server` reads this: a browser never keeps a copy of any file, so an edit shows at once.
+[[server.headers]]
+  for = "/**"
+  [server.headers.values]
+    Cache-Control = "no-store"

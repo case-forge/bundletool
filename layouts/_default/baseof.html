@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en-GB">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" type="image/svg+xml" href="{{ "bundletool/favicon-light.svg" | relURL }}"
+			data-light="{{ "bundletool/favicon-light.svg" | relURL }}" data-dark="{{ "bundletool/favicon-dark.svg" | relURL }}" />
+		<link rel="apple-touch-icon" sizes="180x180" href="{{ "bundletool/images/caseforge-apple-touch.png" | relURL }}" />
+		<link rel="manifest" href="{{ "bundletool/manifest.json" | relURL }}" />
+		<meta name="theme-color" content="#f0ebe1" />
+		{{ hugo.Generator }}
+		{{ partial "shared/build-meta.html" . }}
+		{{- /* The error code the shared bug reporter gives an error no handler caught (public/js/frontend/errorCodes.js). */}}
+		<meta name="cf-error-page" content="BT-PAGE-01" />
+		<meta name="robots" content="index, follow" />
+		{{ $desc := .Params.description | default "Create professional court bundles with on-device PDF processing" }}
+		<meta name="description" content="{{ block "description" . }}{{ .Params.description | default "Create professional court bundles with on-device PDF processing" }}{{ end }}" />
+		<title>{{ block "title" . }}{{ .Title }}{{ end }}</title>
+		<link rel="canonical" href="{{ .Permalink }}">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="{{ .Permalink }}">
+		<meta property="og:title" content="{{ .Title }}">
+		<meta property="og:description" content="{{ $desc }}">
+		<meta property="og:image" content="{{ "bundletool/images/pwa-512.png" | absURL }}">
+		<meta name="twitter:card" content="summary">
+		<meta name="twitter:title" content="{{ .Title }}">
+		<meta name="twitter:description" content="{{ $desc }}">
+		<meta name="twitter:image" content="{{ "bundletool/images/pwa-512.png" | absURL }}">
+		{{- /* The shared header bar, menu, drawer and bug-report styles and scripts, bundled and
+		     fingerprinted the way the site's other pages bundle theirs, rather than loaded
+		     individually with no-cache. They come before BundleTool's own sheet so a rule there
+		     can adjust them. */ -}}
+		{{- if hugo.IsServer -}}
+		<link rel="stylesheet" href="{{ "css/shared/header.css" | relURL }}" />
+		<link rel="stylesheet" href="{{ "css/drawer.css" | relURL }}" />
+		<link rel="stylesheet" href="{{ "css/shared/back-to-top.css" | relURL }}" />
+		<link rel="stylesheet" href="{{ "css/shared/bug-report.css" | relURL }}" />
+		{{- else -}}
+		{{- /* drawer.css is not the menu's own rules, only a thin file that @imports shared/drawer.css
+		     plus the page's own Settings-modal styles. Concatenated as one of several files, its
+		     @import would land somewhere other than the very first rule of the bundle, and CSS
+		     silently drops an @import that is not first, taking the header-actions rules with it. So
+		     shared/drawer.css is pulled in directly and the @import is stripped from drawer.css's own
+		     copy. */ -}}
+		{{- $importRE := `(?m)^@import url\([^)]*\);[ \t]*\r?\n?` -}}
+		{{- $cssParts := slice -}}
+		{{- range slice "shared/header.css" "shared/drawer.css" -}}
+		  {{- $cssParts = $cssParts | append (resources.Get (printf "site/css/%s" .)) -}}
+		{{- end -}}
+		{{- $drawer := resources.Get "site/css/drawer.css" -}}
+		{{- $cssParts = $cssParts | append (resources.FromString "bundletool/built/drawer-body.css" (replaceRE $importRE "" $drawer.Content)) -}}
+		{{- range slice "shared/back-to-top.css" "shared/bug-report.css" -}}
+		  {{- $cssParts = $cssParts | append (resources.Get (printf "site/css/%s" .)) -}}
+		{{- end -}}
+		{{- $chrome := resources.Concat "bundletool/built/chrome.css" $cssParts | minify | fingerprint -}}
+		<link rel="stylesheet" href="{{ $chrome.RelPermalink }}" />
+		{{- end }}
+		{{ $css := resources.Get "bundletool/css/bundletool.css" | fingerprint }}
+		<link rel="stylesheet" href="{{ $css.RelPermalink }}" />
+		<script src="{{ "bundletool/js/bundletoolPrepaint.js" | relURL }}"></script>
+		<script type="module" src="{{ "bundletool/js/bundletoolTheme.js" | relURL }}"></script>
+		{{- if hugo.IsServer -}}
+		<script src="{{ "js/home-settings.js" | relURL }}" defer></script>
+		{{- else -}}
+		{{- $jsParts := slice -}}
+		{{- range slice "shared/drawer.js" "home-settings.js" "shared/dialog.js" "shared/clipboard.js" "shared/bug-report.js" "shared/back-to-top.js" -}}
+		  {{- $jsParts = $jsParts | append (resources.Get (printf "site/js/%s" .)) -}}
+		{{- end -}}
+		{{- $chromeJs := resources.Concat "bundletool/built/chrome.js" $jsParts | minify | fingerprint -}}
+		<script src="{{ $chromeJs.RelPermalink }}" defer></script>
+		{{- end }}
+		{{ partial "offline/register.html" (dict "tool" "bundletool") }}
+	</head>
+	<body class="bg-stone-100 dark:bg-slate-950 text-gray-900 dark:text-slate-100">
+		{{ block "main" . }}{{ end }}
+
+	</body>
+</html>

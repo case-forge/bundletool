@@ -1,0 +1,42 @@
+<!--
+	The footer. Two blocks, one shared and one BundleTool-specific:
+
+	  block 1  the CaseForge credit and the mark
+	  block 2  BundleTool's own: the credit to BunTool, the Guide, and links
+	           out to Contact and Privacy on caseforge.uk.
+
+	The "Based on BunTool" credit in block 2 stays. MPL-2.0 protects the
+	notices in the source files (section 3.4) and has no clause about credit
+	in the interface, so LICENSE, NOTICE and the per-file copyright headers
+	are what the licence requires; the footer credit is there by choice.
+
+	There is no build number here: the version goes into the PDF metadata and
+	the bug-report modal through public/js/bundletoolVersion.js, which is kept
+	in step with hugo.toml by hand.
+-->
+<!-- No border-top line above the footer. -->
+<footer class="bg-white dark:bg-slate-800 mt-auto">
+	<div class="header-footer-shell mx-auto px-4 sm:px-6 lg:px-8">
+		<p class="bt-footer-credit flex flex-wrap items-center justify-center gap-x-2 pt-4 pb-2 text-center text-gray-500 dark:text-slate-400">
+			<img src="{{ "bundletool/images/caseforge-mark.svg" | relURL }}" alt="" aria-hidden="true" width="16" height="16" class="footer-mark h-4 w-auto opacity-75" />
+			<span>Built by <a href="https://github.com/case-forge" target="_blank" rel="noopener noreferrer" class="caseforge-credit-link font-semibold text-accent-700 dark:text-accent-300 no-underline hover:underline transition">CaseForge</a></span>
+		</p>
+		<p class="bt-footer-links flex flex-wrap items-center justify-center gap-x-4 pb-4 text-center text-gray-600 dark:text-slate-400">
+			<span>Based on <a href="https://buntool.co.uk" target="_blank" rel="noopener noreferrer" class="text-inherit no-underline hover:underline transition">BunTool</a> by Tris Sherliker</span>
+			<a href="{{ "bundletool/guide/" | relURL }}" class="text-inherit no-underline hover:underline transition">Guide</a>
+			<a href="https://caseforge.uk/" target="_blank" rel="noopener noreferrer" class="text-inherit no-underline hover:underline transition">More tools at caseforge.uk</a>
+			<a href="{{ site.Params.contactUrl }}" target="_blank" rel="noopener noreferrer" class="text-inherit no-underline hover:underline transition">Contact</a>
+			<a href="{{ site.Params.privacyUrl }}" target="_blank" rel="noopener noreferrer" class="text-inherit no-underline hover:underline transition">Privacy</a>
+			<span>&copy; 2026 CaseForge</span>
+		</p>
+	</div>
+</footer>
+{{- /* The shared back-to-top button (same rules as every page) and the shared bug reporter.
+     This footer is BundleTool's own layout; only these shared pieces are added. */ -}}
+{{ partial "shared/back-to-top.html" . }}
+{{- if hugo.IsServer }}
+<script src="{{ "js/shared/back-to-top.js" | relURL }}" defer></script>
+<script src="{{ "js/shared/dialog.js" | relURL }}" defer></script>
+<script src="{{ "js/shared/clipboard.js" | relURL }}" defer></script>
+<script src="{{ "js/shared/bug-report.js" | relURL }}" defer></script>
+{{- end }}

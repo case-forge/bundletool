@@ -1,0 +1,6 @@
+{{- /* One Material Symbols icon as inline SVG: {{ partial "shared/icon.html" (dict "name" "delete" "class" "w-4 h-4") }}
+     Sized 1em by default, or "size" (px), or by whatever the class sets; coloured by the surrounding text.
+     Names are the keys of data/icons.json, generated from Material Symbols; an unknown name fails the build. */ -}}
+{{- $d := index site.Data.icons .name -}}
+{{- if not $d }}{{ errorf "unknown icon %q: add it to icons/icons.list and run icons/build-icons.mjs" .name }}{{ end -}}
+<svg{{ with .class }} class="{{ . }}"{{ end }} width="{{ with .size }}{{ . }}{{ else }}1em{{ end }}" height="{{ with .size }}{{ . }}{{ else }}1em{{ end }}" viewBox="60 -900 840 840" fill="currentColor" aria-hidden="true" focusable="false"><path d="{{ $d }}"/></svg>

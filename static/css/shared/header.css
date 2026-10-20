@@ -1,0 +1,95 @@
+/* The header bar every page shares (layouts/partials/shared/header.html): the logo
+ * and wordmark, the light/auto/dark switch and its buttons. One copy for Home,
+ * Chambers Finder, Envelope Guide, Contact, Privacy and BundleTool; a page sets
+ * only its own column width on .home-header. Colours are tokens, so the bar
+ * follows the theme. The menu button and panel are in shared/drawer.css.
+ */
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* A fixed row height rather than padding around auto-sized content: padding
+     alone does not give the same 63px on every page (the logo link's
+     line-height makes it taller). */
+  height: 63px;
+  padding: 0 18px;
+}
+
+/* The header reads its own copy of the shared surface and text colours, so it is the same colour
+   on every page, including Chambers Finder (whose --surface differs) and BundleTool's Modern dark
+   (which sets its own --text). BundleTool's Classic palette keeps its own, being Classic's alone. */
+[data-theme="light"]:not([data-palette="classic"]) .home-header { --surface: #faf6ee; --text: #1f2933; color: #1f2933; }
+[data-theme="dark"]:not([data-palette="classic"]) .home-header { --surface: #13161c; --text: #f0ebe3; color: #f0ebe3; }
+
+.home-mark { display: flex; align-items: center; gap: 10px; }
+.home-mark img { width: 50px; height: 50px; object-fit: contain; }
+[data-theme="dark"] .home-mark img { filter: invert(1); }
+.home-mark-text {
+  /* px, not rem: BundleTool's root font size is 18px, so 1.35rem would make its wordmark
+     24.3px against 21.6px everywhere else. */
+  font-size: var(--fs-large);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.6;   /* explicit: BundleTool's Tailwind base is 1.5, which would sit the wordmark 1px higher */
+  color: var(--text);
+}
+.home-mark-text span { color: var(--orange); }
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border-mid);
+  border-radius: 100px;
+  padding: 3px;
+  flex-shrink: 0;
+}
+.theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 100px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  padding: 0;
+}
+.theme-btn:hover { color: var(--text); }
+.theme-btn.active { background: var(--orange-fill); color: #fff; }
+
+/* Buttons and form controls use the page's own font, not the browser's default (Arial on
+   Home, Contact, Privacy and Envelope Guide). Family only: sizes stay each page's own. */
+button, input, select, textarea, optgroup { font-family: inherit; }
+
+/* The theme buttons hold icons only; give the button itself a scale size rather than the browser's 13.33px. */
+.theme-btn { font-size: var(--fs-micro); }
+.drawer-btn { font-size: var(--fs-body); }
+
+/* Touch screens: the header controls are smaller than a fingertip (theme buttons 30px, menu 36px).
+   An invisible extension makes each hit area about 40px without changing the header's layout. */
+@media (pointer: coarse) {
+  .theme-btn, .drawer-btn { position: relative; }
+  .theme-btn::after { content: ""; position: absolute; inset: -5px; }
+  .drawer-btn::after { content: ""; position: absolute; inset: -3px; }
+}
+
+/* A keyboard user's first Tab lands here and jumps past the header to the page's content. It is
+   parked above the window until it has focus. */
+.skip-link {
+  position: absolute; left: 12px; top: -80px; z-index: 100;
+  padding: 10px 16px; border-radius: 8px;
+  background: var(--card); color: var(--text); border: 1px solid var(--border-mid);
+  font-size: var(--fs-body); font-weight: 600; text-decoration: underline;
+}
+.skip-link:focus { top: 12px; }
+
+/* Text for screen readers only (a heading a page needs but the design does not show). */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}

