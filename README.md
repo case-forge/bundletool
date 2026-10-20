@@ -81,6 +81,20 @@ The site must be served from the root of its own host (it imports shared files b
 | `examples/`, `manifest.schema.json` | An example manifest and its JSON Schema. |
 | `docs/` | Offline mode and deployment. |
 
+## Changes since 1.0.0
+
+Version 1.1.0 collects everything changed since the first public snapshot.
+
+- **OCR.** A page's images are held to a total pixel budget, not only a per-image cap, so a page of many large images no longer runs a browser out of memory (issue #99). "Force OCR" is now "Redo OCR": it reads every page of one document again and replaces its hidden text layer, and its tooltip says so.
+- **Document window.** Page, turn and zoom sit on one row. Preview pictures zoom and pinch, and zooming no longer widens the window. There is an icon toolbar, Remove page, Turn page, and Turn all pages (formerly "Turn whole document").
+- **Cover.** The cover's selects offer presets only. The party joiner choices are `-&-` (the default) and `-V-`; a setting saved as `-and-` or `-v-` maps to them. The gap round the joiner is even.
+- **Settings.** Settings never grey out, and Reset also puts the cover's layout choices back.
+- **Recovery.** The restored-session notice has Delete all beside Dismiss; it asks for a second click before it deletes anything.
+- **Phones.** Step titles stay on one line, so Share and Reset no longer push Settings onto a second row. There is more room under the "documents and pages" line, and in light mode each document row is a box that stands out from the page.
+- **Tooltips.** Turn, Share, Reset and Download say what they do.
+- **Updates.** A new version applies itself when the page has only just opened or the tab is in the background; otherwise a Reload button is offered, and it works. The reload notice names the file that failed to load.
+- **Source.** `pageView.js` is now `documentPager.js`, a name that content blockers do not refuse.
+
 ## Command line
 
 `scripts/build-cli.mjs` builds the same bundle as the browser from a JSON manifest and a folder of PDFs: no browser, no server. It needs Node 22 or later (CI runs the suite on Node 24) and the repository's `npm install`. It registers the small Node shim it needs itself, so no flags are required.
