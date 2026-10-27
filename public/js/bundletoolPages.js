@@ -120,8 +120,8 @@ async function loadFooterFont(pdfDoc, fontKey) {
  * @returns {Promise<number>}
  */
 export async function countPdfPages(file) {
-  const { doc } = await loadPdf(await file.arrayBuffer());
-  return doc.getPageCount();
+  const { pageCount } = await loadPdf(await file.arrayBuffer());
+  return pageCount;
 }
 
 /**
@@ -270,8 +270,8 @@ export async function encryptPdf(pdfBytes, password) {
  * @returns {Promise<{pageCount: number, redactedPages: number[]}>}
  */
 export async function inspectPdf(file) {
-  const { doc } = await loadPdf(await file.arrayBuffer());
-  return { pageCount: doc.getPageCount(), redactedPages: findUnappliedRedactions(doc) };
+  const { doc, pageCount } = await loadPdf(await file.arrayBuffer());
+  return { pageCount, redactedPages: findUnappliedRedactions(doc) };
 }
 
 /**
@@ -501,7 +501,9 @@ export async function applyPageNumberingToDoc(doc, cv, pageLabels = [], indexPag
       cv['pageOptions.watermarkOpacity'],
     );
   }
-  const numbered = (cv['pageNumbering.numberingStyle'] || 'PageX') !== 'None';
+  // Page numbers left out (pageOptions.leaveOutPageNumbers) draws no footer at all, like None, while the
+  // numbering style itself is kept for when they are turned back on.
+  const numbered = (cv['pageNumbering.numberingStyle'] || 'PageX') !== 'None' && cv['pageOptions.leaveOutPageNumbers'] !== true;
   if (!numbered && paddingPages.length === 0) return;
 
   doc.registerFontkit(await getFontkit());
@@ -660,6 +662,7 @@ export function flattenFooterConfig(config) {
     'pageOptions.pageSize', 'pageOptions.watermark', 'pageOptions.watermarkText',
     'pageOptions.watermarkColour', 'pageOptions.watermarkOpacity',
     'pageNumbering.frontMatterNumbering', 'pageNumbering.footerOffset',
+    'pageOptions.leaveOutPageNumbers',
   ];
   const out = {};
   for (const key of keys) out[key] = config.getOption(key);

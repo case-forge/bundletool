@@ -111,7 +111,7 @@ window.addEventListener('DOMContentLoaded', () => {
           data-ts="${s.timestamp}">
           <span class="font-medium text-gray-800 dark:text-slate-200">${label}</span>${nameStr ? `<span class="text-gray-600 dark:text-slate-400 ml-2">${esc(nameStr)}</span>` : ''}
           <span class="text-gray-500 dark:text-slate-400 ml-2">${s.fileCount} doc${s.fileCount !== 1 ? 's' : ''} · ${size}</span>
-        </button><button type="button" class="autosave-delete text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition shrink-0 p-1" data-ts="${s.timestamp}" aria-label="Delete this saved copy" title="Delete this saved copy">${icon('close', 'w-3.5 h-3.5')}</button></div>`;
+        </button><button type="button" class="autosave-delete bt-btn-link--danger transition shrink-0 p-1" data-ts="${s.timestamp}" aria-label="Delete this saved copy" title="Delete this saved copy">${icon('close', 'w-3.5 h-3.5')}</button></div>`;
       }).join('');
       list.querySelectorAll('.autosave-delete').forEach(btn => {
         btn.addEventListener('click', async () => {
@@ -169,7 +169,7 @@ window.addEventListener('DOMContentLoaded', () => {
           <button type="button" class="finished-bundle-split text-gray-400 dark:text-slate-500 bt-hover-ink transition shrink-0 p-1" data-ts="${b.timestamp}" aria-label="Split for email" title="Split for email">
             ${icon('swap_horiz', 'w-3.5 h-3.5')}
           </button>
-          <button type="button" class="finished-bundle-delete text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition shrink-0 p-1" data-ts="${b.timestamp}" aria-label="Delete">
+          <button type="button" class="finished-bundle-delete bt-btn-link--danger transition shrink-0 p-1" data-ts="${b.timestamp}" aria-label="Delete">
             ${icon('close', 'w-3.5 h-3.5')}
           </button>
         </div>`;

@@ -45,6 +45,11 @@ export function collectFormConfig() {
     ocrTurnUpright:      document.getElementById('config-ocrTurnUpright')?.checked     ?? false,
     ocrStraighten:       document.getElementById('config-ocrStraighten')?.checked      ?? false,
     smallerPhotos:       document.getElementById('config-smallerPhotos')?.checked      ?? true,
+    // Just assemble: off unless ticked; a snapshot from before these existed restores them off.
+    leaveOutIndex:       document.getElementById('config-leaveOutIndex')?.checked === true,
+    leaveOutPageNumbers: document.getElementById('config-leaveOutPageNumbers')?.checked === true,
+    leaveOutBookmarks:   document.getElementById('config-leaveOutBookmarks')?.checked === true,
+    justAssembleOnce:    document.getElementById('config-justAssembleOnce')?.checked === true,
     // No separate `watermark` flag: the text field IS the toggle, so its
     // text is the only thing worth persisting.
     watermarkText:       document.getElementById('config-watermarkText')?.value        || '',
@@ -163,6 +168,10 @@ export function applyFormConfig(raw) {
   _chk('config-ocrTurnUpright',     c.ocrTurnUpright);
   _chk('config-ocrStraighten',      c.ocrStraighten);
   _chk('config-smallerPhotos',      c.smallerPhotos);
+  _chk('config-leaveOutIndex',      c.leaveOutIndex === true);
+  _chk('config-leaveOutPageNumbers', c.leaveOutPageNumbers === true);
+  _chk('config-leaveOutBookmarks',  c.leaveOutBookmarks === true);
+  _chk('config-justAssembleOnce',   c.justAssembleOnce === true);
   _set('config-watermarkText',      reconcileWatermark(c.watermark, c.watermarkText));
   _set('config-watermarkColour',    c.watermarkColour || '#999999');
   if (c.watermarkOpacity !== undefined) {

@@ -1,5 +1,5 @@
 /**
- * Icons for markup built in JavaScript: the site's shared Material Symbols
+ * Icons for markup built in JavaScript: the site's shared Lucide icons
  * (static/js/shared/icons.js, loaded ahead of the app scripts). Returns an
  * inline <svg> string, or nothing where that script is absent (under test).
  */

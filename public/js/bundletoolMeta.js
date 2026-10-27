@@ -58,12 +58,14 @@ function groupRowsByPage(rows) {
  * @param {Object} cv - flat config values, keyed by config path
  * @returns {string}
  */
-export function formatOutlineItem(entry, section, cv) {
+export function formatOutlineItem(entry, section, cv, frontMatterOffset = 0) {
   const style = cv['index.outlineItemStyle'];
   const { title, date } = entry;
+  // The page as the footer prints it: under roman or skip front matter the documents are numbered from 1
+  // after the cover and index, so the physical position less the front matter (buildOutlineTree).
   const page = cv['pageNumbering.pageNumberPerSection']
     ? `${section?.sectionLabel || ''}${entry.beginsOnPageOfSection}`
-    : (entry.actualPdfStartPageWithToc ?? entry.beginsOnPdfPage);
+    : (entry.actualPdfStartPageWithToc ?? entry.beginsOnPdfPage) - frontMatterOffset;
 
   switch (style) {
     case 'withPage':        return `${title} - pg. ${page}`;
@@ -148,16 +150,27 @@ export function buildOutlineTree(tocEntries, cv, indexPageIndex) {
   }
   const pad = maxTabNumber > 0 ? maxTabNumber.toString().length : 1;
 
+  // Under roman or skip front matter the footers number the documents from 1, so a bookmark's "pg." does
+  // too: the front matter is every page before the first document (the cover and the index, or the cover
+  // alone when the index is left out), the same count the email splitter works out (bundletoolSplit.js).
+  let frontMatterOffset = 0;
+  if ((cv['pageNumbering.frontMatterNumbering'] || 'continuous') !== 'continuous') {
+    const firsts = tocEntries.flatMap((s) => s.entries.map((e) => e.actualPdfStartPageWithToc || e.beginsOnPdfPage))
+      .filter((n) => Number.isInteger(n) && n >= 1);
+    if (firsts.length) frontMatterOffset = Math.min(...firsts) - 1;
+  }
+
   // The label on the entry that jumps to the index is a setting (some prefer
-  // "go to index" or similar). Blank gives "Index".
-  const items = [{
+  // "go to index" or similar). Blank gives "Index". With the index left out
+  // (pageOptions.leaveOutIndex) there is no index to jump to, so no such entry.
+  const items = cv['pageOptions.leaveOutIndex'] === true ? [] : [{
     title: `[${'0'.padStart(pad, '0')}] ${String(cv['index.indexBookmarkLabel'] ?? '').trim() || 'Index'}`,
     pageIndex: indexPageIndex,
   }];
 
   for (const section of tocEntries) {
     const children = section.entries.map((entry) => ({
-      title: `[${entry.tabNumber.toString().padStart(pad, '0')}] ${formatOutlineItem(entry, section, cv)}`,
+      title: `[${entry.tabNumber.toString().padStart(pad, '0')}] ${formatOutlineItem(entry, section, cv, frontMatterOffset)}`,
       pageIndex: (entry.actualPdfStartPageWithToc || entry.beginsOnPdfPage) - 1,
     }));
 
@@ -236,6 +249,11 @@ export function buildBundleIndexPayload(tocEntries, cv) {
         watermarkOpacity: cv['pageOptions.watermarkOpacity'] ?? 28,
         // On unless the build said false, so a bundle reopens with the setting it was made with.
         smallerPhotos:   cv['pageOptions.smallerPhotos'] !== false,
+        // Just assemble: true only when the build said so, so an older reader, and a bundle reopened from
+        // before these existed, has all three off.
+        leaveOutIndex:       cv['pageOptions.leaveOutIndex'] === true,
+        leaveOutPageNumbers: cv['pageOptions.leaveOutPageNumbers'] === true,
+        leaveOutBookmarks:   cv['pageOptions.leaveOutBookmarks'] === true,
         coversheet:      cv['pageOptions.coversheet']      ?? false,
         // Which kind of cover page page 1 is. Readers treat an absent value as
         // 'uploaded' when there is a coversheet (coverSourceOf() in
@@ -364,7 +382,9 @@ export function applyMetaToDoc(doc, tocTableRowCoordinates, tocEntries, cv, onPr
   const links = addIndexHyperlinks(doc, tocTableRowCoordinates, tocEntries, cv);
   onProgress?.('Adding bookmarks…');
 
-  const bookmarks = setOutline(doc, buildOutlineTree(tocEntries, cv, indexPageIndex));
+  // Bookmarks left out (pageOptions.leaveOutBookmarks): no outline is written at all.
+  const bookmarks = cv['pageOptions.leaveOutBookmarks'] === true
+    ? 0 : setOutline(doc, buildOutlineTree(tocEntries, cv, indexPageIndex));
   onProgress?.('Preparing file for save…');
 
   const payloadLength = setMetadata(doc, tocEntries, cv);
@@ -385,6 +405,7 @@ export function flattenConfig(config) {
     'pageOptions.coversheet', 'pageOptions.printableBundle', 'pageOptions.coverSource',
     'pageOptions.pageSize', 'pageOptions.watermark', 'pageOptions.watermarkText',
     'pageOptions.watermarkColour', 'pageOptions.watermarkOpacity', 'pageOptions.smallerPhotos',
+    'pageOptions.leaveOutIndex', 'pageOptions.leaveOutPageNumbers', 'pageOptions.leaveOutBookmarks',
     'index.outlineItemStyle', 'index.fontFace', 'index.dateStyle', 'index.dateInputOrder', 'index.sectionPrefix',
     'index.indexBookmarkLabel',
     'heading.bundleTitle', 'heading.projectName',

@@ -193,6 +193,8 @@
     'section-picker-popover': 'section-picker-cancel',
     'download-picker-popover': 'download-picker-cancel',
     'cover-editor-modal': 'cover-editor-cancel',
+    // Escape also works with focus on a button, not only in the title box.
+    'ws-cover-modal': 'ws-cover-cancel',
     'rotate-modal': 'rotate-cancel',
     'email-split-modal': 'email-split-close',
     'bundle-preview-modal': 'bundle-preview-close',
@@ -215,6 +217,9 @@
         return;
       }
     }
+    // The finished panel (Bundle ready / Index ready) has a close cross: Escape presses it.
+    const readyClose = document.getElementById('overlay-close-x');
+    if (readyClose && !document.getElementById('processing-overlay')?.classList.contains('hidden')) { readyClose.click(); return; }
     // An undismissable dialog (the processing overlay) still holds Escape.
     if (document.querySelector('[role="dialog"]:not(.hidden)')) return;
     // Escape collapses Advanced Settings if it is the only thing open. It
@@ -334,6 +339,7 @@
     indexFontSize: 'medium', footerFontSize: 'medium',
     sectionPrefix: 'Section', showTableBorders: true, printableBundle: false, ocrAutoDetect: true,
     ocrTurnUpright: false, ocrStraighten: false, smallerPhotos: true,
+    leaveOutIndex: false, leaveOutPageNumbers: false, leaveOutBookmarks: false, justAssembleOnce: false,
     pageNumberPerSection: false, splitBy: 'size',
     courtName: '', matterOf: '', partyLabel1: '', partyLabel2: '', caseNumberLabel: 'CASE NO:', preparedByLabel: 'Prepared by:', partyJoiner: '-&-', coverLayout: 'classic',
     coverCaseLine: 'court', coverLabelPlacement: 'below', coverPartyAlign: 'centre',
@@ -376,6 +382,10 @@
       ocrTurnUpright: document.getElementById('config-ocrTurnUpright')?.checked === true,
       ocrStraighten: document.getElementById('config-ocrStraighten')?.checked === true,
       smallerPhotos: document.getElementById('config-smallerPhotos')?.checked ?? true,
+      leaveOutIndex: document.getElementById('config-leaveOutIndex')?.checked === true,
+      leaveOutPageNumbers: document.getElementById('config-leaveOutPageNumbers')?.checked === true,
+      leaveOutBookmarks: document.getElementById('config-leaveOutBookmarks')?.checked === true,
+      justAssembleOnce: document.getElementById('config-justAssembleOnce')?.checked === true,
       pageNumberPerSection: document.getElementById('config-pageNumberPerSection').checked,
       splitBy: document.getElementById('config-splitBy')?.value || 'size',
       // The court, statute line and party labels are firm-level defaults worth
@@ -453,6 +463,11 @@
     {
       const el = document.getElementById('config-smallerPhotos');
       if (el && d.smallerPhotos !== undefined) el.checked = d.smallerPhotos;
+    }
+    // Just assemble. A key a saved setting or link does not carry leaves the switch as it is (off on a fresh page).
+    for (const key of ['leaveOutIndex', 'leaveOutPageNumbers', 'leaveOutBookmarks', 'justAssembleOnce']) {
+      const el = document.getElementById(`config-${key}`);
+      if (el && d[key] !== undefined) el.checked = d[key];
     }
     if (d.pageNumberPerSection !== undefined) document.getElementById('config-pageNumberPerSection').checked = d.pageNumberPerSection;
     if (d.splitBy) resetGroup('splitBy', d.splitBy);

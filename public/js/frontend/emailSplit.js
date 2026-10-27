@@ -251,7 +251,7 @@ function renderResults(parts) {
           <span class="split-part-name block text-gray-600 dark:text-slate-400">${esc(names[i])}</span>
           ${p.oversize ? '<span class="text-amber-700 dark:text-amber-400">This part is over the target size, so it may bounce. Consider compressing its documents or lowering the part size.</span>' : ''}
         </div>
-        <button type="button" data-part="${i}" class="email-split-download shrink-0 px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition" aria-label="Download ${esc(names[i])}">
+        <button type="button" data-part="${i}" class="email-split-download bt-btn--success shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition" aria-label="Download ${esc(names[i])}">
           Download
         </button>
       </div>`).join('');

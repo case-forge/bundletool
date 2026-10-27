@@ -46,13 +46,13 @@ export function removeEmptyPlaceholder(tbody) {
  */
 export const ROW_ACTIONS = Object.freeze([
   { cls: 'delete-row-btn', icon: 'close', title: 'Remove from bundle', name: (f) => `Remove ${f} from bundle`,
-    tone: 'text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300' },
+    tone: 'bt-btn-link--danger' },
   { cls: 'move-up-btn', icon: 'keyboard_arrow_up', title: 'Move up', name: (f) => `Move ${f} up` },
   { cls: 'move-down-btn', icon: 'keyboard_arrow_down', title: 'Move down', name: (f) => `Move ${f} down` },
   { cls: 'preview-row-btn', icon: 'visibility', title: 'Preview', name: (f) => `Preview ${f}`, titleNames: true },
 ]);
 
-const QUIET_TONE = 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200';
+const QUIET_TONE = 'bt-btn-link';
 
 /** The actions cell's buttons. No file name goes into this markup: labelRowActions sets those through the DOM. */
 export function rowActionsMarkup() {

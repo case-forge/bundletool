@@ -21,8 +21,9 @@
  *      page it is, the page is worse than unnumbered. Blanking the zone before
  *      drawing means the newest number is the only number.
  *
- *      The blanking rectangle extends 8pt either side and 4pt above and below
- *      the plate, as in the CLI.
+ *      The blanking rectangle is exactly the plate's size: an overhang showed as a
+ *      white halo round the plate on a dark page. (The CLI overhangs 8pt either
+ *      side and 4pt above and below.)
  *
  *      What it cannot cover: a footer left by a DIFFERENT configuration,
  *      such as a much larger font, or right-aligned when this run is centred, or a
@@ -107,8 +108,8 @@ export const FOOTER_STREAM_KEY = 'BundleToolFooter';
 export const PLATE_PADDING = 20;   // added to the text width
 export const PLATE_HEIGHT = 26;
 export const PLATE_Y = 8;
-export const BLANK_MARGIN_X = 8;   // blanking rectangle overhang, each side
-export const BLANK_MARGIN_Y = 4;
+export const BLANK_MARGIN_X = 0;   // blanking rectangle overhang, each side: none, so no white halo shows round the plate
+export const BLANK_MARGIN_Y = 0;
 
 /**
  * The CLI's baseline: 8pt above the plate's bottom edge. Used only when the ink
@@ -257,6 +258,29 @@ export function baselineFor(plateY, plateHeight, ink) {
   return plateY + (plateHeight - inkHeight) / 2 - ink.bottom;
 }
 
+/** A4 in points, used when a page's size or rotation cannot be read (a badly formed page box). */
+const FALLBACK_PAGE = { x: 0, y: 0, width: 595.28, height: 841.89, rotation: 0 };
+
+/**
+ * The visible size and rotation of a page. CropBox, not MediaBox: the CropBox is the region a reader displays, and
+ * pdf-lib falls back to the MediaBox when no CropBox is set. A page whose boxes cannot be read gets A4 with no
+ * rotation, so one bad page costs a footer in the wrong place at worst, never the whole bundle.
+ *
+ * @param {import('./bundletoolPdfLib.js').PDFPage} page
+ * @returns {{x: number, y: number, width: number, height: number, rotation: number}}
+ */
+export function pageGeometry(page) {
+  try {
+    const box = page.getCropBox();
+    const rotation = page.getRotation().angle;
+    if (![box.x, box.y, box.width, box.height, rotation].every(Number.isFinite)) throw new Error('not a number');
+    return { x: box.x, y: box.y, width: box.width, height: box.height, rotation };
+  } catch (err) {
+    console.warn(`[footer] could not read a page's size or rotation (${err.message}); using A4`);
+    return { ...FALLBACK_PAGE };
+  }
+}
+
 /**
  * Draws the footer on one page: blanking rectangle, plate, text, and the link
  * back to the index.
@@ -279,6 +303,9 @@ export function baselineFor(plateY, plateHeight, ink) {
  *        falls back to the CLI's fixed 8pt baseline.
  * @param {number|null} [opts.indexPageIndex] - link target; null for no link
  * @param {boolean} [opts.drawBlanking=true]  - false only for the negative-control test
+ * @param {number} [opts.blankMarginX=0] - how far the blanking rectangle overhangs the plate each side (0: exactly the
+ *   plate, so no white halo shows round it on a dark page; a wider overhang is a backstop for a foreign footer)
+ * @param {number} [opts.blankMarginY=0] - the same above and below the plate
  * @param {Object|null} [opts.plateColour] - pdf-lib rgb() colour for the plate;
  *        null keeps the CLI's composited grey
  * @param {number} [opts.plateOpacity=1] - 0..1. At 0 neither the plate NOR the
@@ -293,6 +320,7 @@ export function baselineFor(plateY, plateHeight, ink) {
 export function drawFooterOnPage(pdfDoc, page, {
   text, font, fontKey, fontSize, colour, align = 'centre',
   maxTextWidth = null, textInk = null, indexPageIndex = null, drawBlanking = true,
+  blankMarginX = BLANK_MARGIN_X, blankMarginY = BLANK_MARGIN_Y,
   plateColour = null, plateOpacity = 1, offset = 0,
 }) {
   const context = pdfDoc.context;
@@ -300,10 +328,8 @@ export function drawFooterOnPage(pdfDoc, page, {
   // pdf-lib falls back to the MediaBox when no CropBox is set. Positioning
   // against the MediaBox on a cropped page puts the footer outside the visible
   // area entirely.
-  const box = page.getCropBox();
-  const width = box.width;
-  const height = box.height;
-  const rotation = page.getRotation().angle;
+  const box = pageGeometry(page);
+  const { width, height, rotation } = box;
   const visible = visibleSize(rotation, width, height);
 
   const textWidth = font.widthOfTextAtSize(text, fontSize);
@@ -333,10 +359,10 @@ export function drawFooterOnPage(pdfDoc, page, {
     ops.push(
       setFillingGrayscaleColor(1),
       rectangle(
-        plate.x - BLANK_MARGIN_X,
-        plate.y - BLANK_MARGIN_Y,
-        plate.width + BLANK_MARGIN_X * 2,
-        plate.height + BLANK_MARGIN_Y * 2,
+        plate.x - blankMarginX,
+        plate.y - blankMarginY,
+        plate.width + blankMarginX * 2,
+        plate.height + blankMarginY * 2,
       ),
       fill(),
     );

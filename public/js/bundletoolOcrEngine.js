@@ -22,10 +22,16 @@
  * shape (see its README).
  *
  * SELF-HOSTED. lib.js resolves its own worker script, and that worker script
- * resolves its own two WASM files (the SIMD build and a non-SIMD fallback,
- * feature-detected between), all relative to wherever lib.js itself is
- * served from, which is why static/vendor/tesseract-wasm/ keeps all four
- * files together (scripts/build-vendor.mjs's own comment has the detail).
+ * resolves its WASM file relative to wherever lib.js itself is served from,
+ * which is why static/vendor/tesseract-wasm/ keeps the three files together
+ * (scripts/build-vendor.mjs's own comment has the detail).
+ *
+ * WEBASSEMBLY SIMD IS REQUIRED. The library feature-detects between a SIMD
+ * build and a non-SIMD fallback; only the SIMD build (tesseract-core.wasm) is
+ * shipped, because every browser the site supports (Chrome 111, Firefox 128,
+ * Safari 16.4, the stated minimum requirements) has WebAssembly SIMD. In an older
+ * browser the library would ask for tesseract-core-fallback.wasm, get a 404 and
+ * OCR would fail with an error; the rest of BundleTool is unaffected.
  * Nothing here points at a CDN; left to its own defaults this library
  * already does not.
  *

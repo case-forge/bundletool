@@ -193,6 +193,22 @@ export const validGenerateCover = [
     false,
   ];
 
+// Just assemble: three independent switches, each off by default. Leave out the index page, leave out
+// the page numbers (the footer stamp; numberingStyle is kept as chosen), leave out the bookmarks. All
+// three on gives exactly the input pages, in order.
+export const validLeaveOutIndex = [
+    true,
+    false,
+  ];
+export const validLeaveOutPageNumbers = [
+    true,
+    false,
+  ];
+export const validLeaveOutBookmarks = [
+    true,
+    false,
+  ];
+
 export const validWatermark = [
     true,
     false,
@@ -327,6 +343,17 @@ class Config {
         // a JPEG (bundletoolSmallerPhotos.js). Never a PDF that was added as a PDF. false keeps the pictures as
         // they were converted.
         smallerPhotos: true,
+        // Off by default. true combines the documents with NO index page: nothing is drawn, counted or
+        // linked for one. The first document page is page 1 (with a cover, the cover is unnumbered and
+        // the first document page is still page 1), so the build treats the front matter as "skip"
+        // (indexLeftOut() in bundletoolToc.js). index.justTheIndex wins over it: Preview Index asks for
+        // the index itself.
+        leaveOutIndex: false,
+        // Off by default. true draws no page-number footer (no number, plate or footer link) on any page.
+        // Its own flag, not numberingStyle "None", so the style chosen is still there when it is turned off.
+        leaveOutPageNumbers: false,
+        // Off by default. true writes no bookmarks (PDF outline) into the bundle.
+        leaveOutBookmarks: false,
       },
       // Case details that appear ONLY on the generated cover page. They follow
       // BundleToolCLI's BundleMetadata (court_name, applicant_name,
@@ -493,6 +520,15 @@ class Config {
     if (!validCoversheet.includes(this.options.pageOptions.coversheet)) {
       throw new Error(`Invalid coversheet option: ${this.options.pageOptions.coversheet}`);
     }
+    if (!validLeaveOutIndex.includes(this.options.pageOptions.leaveOutIndex)) {
+      throw new Error(`Invalid leave out index option: ${this.options.pageOptions.leaveOutIndex}`);
+    }
+    if (!validLeaveOutPageNumbers.includes(this.options.pageOptions.leaveOutPageNumbers)) {
+      throw new Error(`Invalid leave out page numbers option: ${this.options.pageOptions.leaveOutPageNumbers}`);
+    }
+    if (!validLeaveOutBookmarks.includes(this.options.pageOptions.leaveOutBookmarks)) {
+      throw new Error(`Invalid leave out bookmarks option: ${this.options.pageOptions.leaveOutBookmarks}`);
+    }
     if (!validGenerateCover.includes(this.options.pageOptions.generateCover)) {
       throw new Error(`Invalid generateCover option: ${this.options.pageOptions.generateCover}`);
     }
@@ -584,7 +620,7 @@ class Config {
       heading: ["claimNumber", "bundleTitle", "projectName", "author", "fontSize"],
       pageNumbering: ["footerFont", "footerFontSize", "alignment", "numberingStyle", "footerPrefix", "pageNumberColour", "pageNumberPerSection", "plateColour", "plateOpacity", "footerLink", "frontMatterNumbering", "footerOffset"],
       index: ["fontFace", "fontSize", "dateStyle", "dateInputOrder", "outlineItemStyle", "showTableBorders", "justTheIndex", "sectionPrefix", "indexBookmarkLabel", "headingText"],
-      pageOptions: ["pageSize", "printableBundle", "coversheet", "generateCover", "coverSource", "watermark", "watermarkText", "watermarkColour", "watermarkOpacity", "smallerPhotos"],
+      pageOptions: ["pageSize", "printableBundle", "coversheet", "generateCover", "coverSource", "watermark", "watermarkText", "watermarkColour", "watermarkOpacity", "smallerPhotos", "leaveOutIndex", "leaveOutPageNumbers", "leaveOutBookmarks"],
       cover: ["courtName", "matterOf", "applicantName", "respondentName", "partyLabel1", "partyLabel2", "extraText", "claimNumber", "bundleTitle", "author", "layout", "caseNumberLine", "partyLabelPlacement", "partyAlign", "caseNumberAlign", "headingAlign", "titleLines", "caseNumberLabel", "preparedByLabel", "partyJoiner"],
       ocr: ["autoDetect", "mode", "turnUpright", "straighten"],
     };

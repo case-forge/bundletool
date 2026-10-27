@@ -228,6 +228,38 @@ export function dropObjectStreams(doc) {
 }
 
 /**
+ * How many pages a document has, even when its page tree is malformed.
+ *
+ * `getPageCount()` reads the page tree and throws on some damaged files. The first fallback counts the page list;
+ * the last counts the page objects themselves. `viaFallback` is true when the ordinary count failed, so the caller
+ * can say the file is damaged instead of reporting the count as if the file were sound.
+ *
+ * @param {PDFDocument} doc
+ * @returns {{count: number, viaFallback: boolean}}
+ */
+export function countPagesTolerantly(doc) {
+  try {
+    return { count: doc.getPageCount(), viaFallback: false };
+  } catch (err) {
+    console.warn(`[pdf] page count failed (${err.message}); counting the page list instead`);
+  }
+  try {
+    return { count: doc.getPages().length, viaFallback: true };
+  } catch (err) {
+    console.warn(`[pdf] page list failed (${err.message}); counting page objects instead`);
+  }
+  let count = 0;
+  try {
+    for (const [, object] of doc.context.enumerateIndirectObjects()) {
+      if (object instanceof PDFDict && object.get(PDFName.of('Type')) === PDFName.of('Page')) count++;
+    }
+  } catch (err) {
+    console.warn(`[pdf] page object count failed (${err.message})`);
+  }
+  return { count, viaFallback: true };
+}
+
+/**
  * Loads a PDF, refusing encryption and disclosing damage.
  *
  * @param {Uint8Array|ArrayBuffer} input
@@ -284,12 +316,14 @@ export async function loadPdf(input, _unlockDepth = 0) {
 
   dropObjectStreams(doc);
 
-  const pageCount = doc.getPageCount();
+  const { count: pageCount, viaFallback } = countPagesTolerantly(doc);
+  if (pageCount === 0 && viaFallback) throw new UnreadablePdfError(undefined, new Error('no pages could be counted'));
   const declared = declaredPageCount(doc);
-  const pagesMissingContent = countPagesMissingContent(doc);
+  let pagesMissingContent = 0;
+  try { pagesMissingContent = countPagesMissingContent(doc); } catch { /* a malformed page tree: the count above already says so */ }
 
   const countMismatch = declared != null && declared !== pageCount;
-  const damaged = neededRecovery || countMismatch || pagesMissingContent > 0;
+  const damaged = neededRecovery || viaFallback || countMismatch || pagesMissingContent > 0;
 
   return {
     doc,

@@ -13,6 +13,8 @@ import {
   createTocEntries,
   makeTocPages,
   makeDummyTocPages,
+  indexLeftOut,
+  setPhysicalStartPages,
   } from './bundletoolToc.js';
 import {
   addPageNumberingViaWorker,
@@ -120,10 +122,16 @@ export async function processTheBundle(filesMap, indexData, config, onProgress, 
     pageOptions: { coversheet: coverSource !== 'none', coverSource },
   });
 
+  // Leave out the index page (pageOptions.leaveOutIndex): decided once, here. It also sets this build's
+  // front matter numbering to "skip", so the first document page is page 1 (indexLeftOut()).
+  const noIndex = indexLeftOut(config);
+
   // The index pages are merged in front of the documents and the cover, if any,
   // is prepended in front of the index, so the index is page 1 without a
   // cover and page 2 with one. The "Index" bookmark always links here.
-  // Assuming page 1 is only right half the time.
+  // Assuming page 1 is only right half the time. With the index left out the
+  // same page is the first document page, which is where the footer's "index"
+  // link then goes.
   const indexPageIndex = coverSource !== 'none' ? 1 : 0;
 
   // Where the footer's own hyperlink goes is a setting: the index (the
@@ -188,24 +196,30 @@ export async function processTheBundle(filesMap, indexData, config, onProgress, 
   }
   onProgress?.('Generating index pages…');
 
-  console.log('[5/13] Generating dummy TOC pages...');
   let expectedLengthOfToc = 0;
-  try {
-    expectedLengthOfToc = await makeDummyTocPages(tocEntries, tocOptions, config);
-    console.log(`[5/13]...done - dummy TOC PDF length: ${expectedLengthOfToc} pages`)
-  } catch (error) {
-    console.error(`[ERROR] Failed to generate dummy TOC pages: `, error.message);
-    throw error;
-  }
+  let tocPdf = null, tocTableRowCoordinates = [];
+  if (noIndex) {
+    // No index is drawn or counted: the documents start straight after the cover, if any.
+    console.log('[5-6/13] Index left out (pageOptions.leaveOutIndex)');
+    setPhysicalStartPages(tocEntries, 0);
+  } else {
+    console.log('[5/13] Generating dummy TOC pages...');
+    try {
+      expectedLengthOfToc = await makeDummyTocPages(tocEntries, tocOptions, config);
+      console.log(`[5/13]...done - dummy TOC PDF length: ${expectedLengthOfToc} pages`)
+    } catch (error) {
+      console.error(`[ERROR] Failed to generate dummy TOC pages: `, error.message);
+      throw error;
+    }
 
-  console.log('[6/13] Generating TOC pages...');
-  let tocPdf, tocTableRowCoordinates;
-  try {
-    [tocPdf, tocTableRowCoordinates] = await makeTocPages(tocEntries, tocOptions, config, expectedLengthOfToc);
-    console.log(`[6/13]...done - TOC PDF size: ${tocPdf?.length || 0} bytes`)
-  } catch (error) {
-    console.error(`[ERROR] Failed to generate TOC pages: `, error.message);
-    throw error;
+    console.log('[6/13] Generating TOC pages...');
+    try {
+      [tocPdf, tocTableRowCoordinates] = await makeTocPages(tocEntries, tocOptions, config, expectedLengthOfToc);
+      console.log(`[6/13]...done - TOC PDF size: ${tocPdf?.length || 0} bytes`)
+    } catch (error) {
+      console.error(`[ERROR] Failed to generate TOC pages: `, error.message);
+      throw error;
+    }
   }
 
   if (config.getOption('index.justTheIndex')) {

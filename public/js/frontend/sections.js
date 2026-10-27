@@ -49,16 +49,16 @@ export function nextSectionLabel() {
 function section0000HeaderHTML() {
   return `
     <td class="px-2 py-2">
-      <input type="text" class="section-label-input" placeholder="A" title="Section label, such as A, B or 1" maxlength="${MAX_SECTION_LABEL_CHARS}" />
+      <input type="text" class="section-label-input" placeholder="A" title="Section label, such as A, B or 1" aria-label="Section label" maxlength="${MAX_SECTION_LABEL_CHARS}" />
     </td>
     <td colspan="3" class="px-2 py-2">
-      <input type="text" class="section-name-input" placeholder="Type section name" maxlength="500" />
+      <input type="text" class="section-name-input" placeholder="Type section name" aria-label="Section name" maxlength="500" />
     </td>
     <td class="px-4 py-3 flex gap-2 actions-cell">
-      <button type="button" class="section-delete-btn text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition" data-section-id="0000" title="Delete this section" aria-label="Delete this section">${icon('close', 'w-4 h-4 pointer-events-none')}</button>
-      <button type="button" class="move-up-btn text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition" title="Move section up" aria-label="Move section up">${icon('keyboard_arrow_up', 'w-4 h-4 pointer-events-none')}</button>
-      <button type="button" class="move-down-btn text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition" title="Move section down" aria-label="Move section down">${icon('keyboard_arrow_down', 'w-4 h-4 pointer-events-none')}</button>
-      <button type="button" class="section-add-ws-btn text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition" title="Add a witness statement cover page" aria-label="Add a witness statement cover page">${icon('title', 'w-4 h-4 pointer-events-none')}</button>
+      <button type="button" class="section-delete-btn bt-btn-link--danger transition" data-section-id="0000" title="Delete this section" aria-label="Delete this section">${icon('close', 'w-4 h-4 pointer-events-none')}</button>
+      <button type="button" class="move-up-btn bt-btn-link transition" title="Move section up" aria-label="Move section up">${icon('keyboard_arrow_up', 'w-4 h-4 pointer-events-none')}</button>
+      <button type="button" class="move-down-btn bt-btn-link transition" title="Move section down" aria-label="Move section down">${icon('keyboard_arrow_down', 'w-4 h-4 pointer-events-none')}</button>
+      <button type="button" class="section-add-ws-btn bt-btn-link transition" title="Add a witness statement cover page" aria-label="Add a witness statement cover page">${icon('title', 'w-4 h-4 pointer-events-none')}</button>
     </td>`;
 }
 
@@ -97,16 +97,16 @@ export function createSectionTbody(rawSectionID, label, name) {
   tbody.innerHTML = `
     <tr class="section-header-row">
       <td class="px-2 py-2">
-        <input type="text" class="section-label-input" title="Section label, such as A, B or 1" maxlength="${MAX_SECTION_LABEL_CHARS}" />
+        <input type="text" class="section-label-input" title="Section label, such as A, B or 1" aria-label="Section label" maxlength="${MAX_SECTION_LABEL_CHARS}" />
       </td>
       <td colspan="3" class="px-2 py-2">
-        <input type="text" class="section-name-input" placeholder="Type section name" maxlength="500" />
+        <input type="text" class="section-name-input" placeholder="Type section name" aria-label="Section name" maxlength="500" />
       </td>
       <td class="px-4 py-3 flex gap-2 actions-cell">
-        <button type="button" class="section-delete-btn text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition" title="Delete this section" aria-label="Delete this section">${icon('close', 'w-4 h-4 pointer-events-none')}</button>
-        <button type="button" class="move-up-btn text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition" title="Move section up" aria-label="Move section up">${icon('keyboard_arrow_up', 'w-4 h-4 pointer-events-none')}</button>
-        <button type="button" class="move-down-btn text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition" title="Move section down" aria-label="Move section down">${icon('keyboard_arrow_down', 'w-4 h-4 pointer-events-none')}</button>
-        <button type="button" class="section-add-ws-btn text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition" title="Add a witness statement cover page" aria-label="Add a witness statement cover page">${icon('title', 'w-4 h-4 pointer-events-none')}</button>
+        <button type="button" class="section-delete-btn bt-btn-link--danger transition" title="Delete this section" aria-label="Delete this section">${icon('close', 'w-4 h-4 pointer-events-none')}</button>
+        <button type="button" class="move-up-btn bt-btn-link transition" title="Move section up" aria-label="Move section up">${icon('keyboard_arrow_up', 'w-4 h-4 pointer-events-none')}</button>
+        <button type="button" class="move-down-btn bt-btn-link transition" title="Move section down" aria-label="Move section down">${icon('keyboard_arrow_down', 'w-4 h-4 pointer-events-none')}</button>
+        <button type="button" class="section-add-ws-btn bt-btn-link transition" title="Add a witness statement cover page" aria-label="Add a witness statement cover page">${icon('title', 'w-4 h-4 pointer-events-none')}</button>
       </td>
     </tr>`;
   const headerRow = tbody.querySelector('.section-header-row');

@@ -4,7 +4,7 @@ import { stripUnsuitableChars, stripMultiline, uniqueFilename, isWatermarkText, 
 import { buildIndexData, makeFileRow } from './fileRows.js';
 import { ensureEmptyPlaceholder, removeEmptyPlaceholder } from './fileRows.js';
 import { showProcessingOverlay, hideProcessingOverlay, showBundleReadyState, showIndexReadyState, openBundlePreview } from './bundleUI.js';
-import { showErrorModal, showUploadWarningModal, confirmMissingInfo, confirmStructureWarning, confirmUnnamedSections, confirmLargeBundle, isMemoryError, isLoadingError } from './modals.js';
+import { showErrorModal, showUploadWarningModal, confirmMissingInfo, confirmStructureWarning, confirmUnnamedSections, confirmLargeBundle, isMemoryError, isLoadingError, showPageNotice } from './modals.js';
 import { createSectionTbody, createSection0000HeaderRow } from './sections.js';
 import { setCoversheetSelected } from './coversheet.js';
 import { saveNow, saveFinishedBundle, markDirty } from '../bundletoolAutosave.js';
@@ -19,6 +19,7 @@ import { COVER_FOLLOW, getCoverOverride, setCoverOverride } from './coverOverrid
 import { stopAllReading } from './ocrReading.js';
 import { settleReadingBeforeBuild } from './ocrWait.js';
 import { filesForBundle } from './smallerPhotos.js';
+import { resetJustAssembleAfterBuild } from './justAssemble.js';
 
 /**
  * A document's page count and any unapplied redaction markers, read once. A reopened bundle's documents
@@ -101,6 +102,10 @@ export function gatherConfigOptions() {
       watermarkOpacity: Number(document.getElementById('config-watermarkOpacity')?.value ?? 28),
       // On unless switched off: a missing control (?? true) is the default, as for ocr.autoDetect below.
       smallerPhotos:   document.getElementById('config-smallerPhotos')?.checked ?? true,
+      // Just assemble: three independent switches, off unless ticked.
+      leaveOutIndex:       document.getElementById('config-leaveOutIndex')?.checked === true,
+      leaveOutPageNumbers: document.getElementById('config-leaveOutPageNumbers')?.checked === true,
+      leaveOutBookmarks:   document.getElementById('config-leaveOutBookmarks')?.checked === true,
     },
     cover: {
       courtName:      stripUnsuitableChars(document.getElementById('config-courtName')?.value || ''),
@@ -275,6 +280,11 @@ export async function handleFormSubmit(e, form, opts = {}) {
       openBundlePreview(pdfBytes, bundleFilename);
     } else {
       showBundleReadyState(pdfBytes, bundleFilename);
+      // Just assemble with "Just this once": the bundle is made, so the switches go back to off and stay off.
+      resetJustAssembleAfterBuild(document, {
+        save: () => { window.saveDefaultConfig?.(); markDirty(); },
+        notify: (message) => showPageNotice({ code: null, title: 'Just assemble', message }),
+      });
     }
     markBuildFinished();
     return;
@@ -462,6 +472,11 @@ export function applyExtractedConfig(rawConfig) {
   {
     const el = document.getElementById('config-smallerPhotos');
     if (el) el.checked = extractedConfig.pageOptions?.smallerPhotos !== false;
+  }
+  // Just assemble: a bundle or manifest that does not say true (older ones say nothing) reopens with each off.
+  for (const key of ['leaveOutIndex', 'leaveOutPageNumbers', 'leaveOutBookmarks']) {
+    const el = document.getElementById(`config-${key}`);
+    if (el) el.checked = extractedConfig.pageOptions?.[key] === true;
   }
   if (extractedConfig.index?.sectionPrefix !== undefined)
     document.getElementById('config-sectionPrefix').value = extractedConfig.index.sectionPrefix;

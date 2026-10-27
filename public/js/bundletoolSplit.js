@@ -149,7 +149,8 @@ export async function inspectBundleForSplit(bundleBytes) {
  */
 export function describePartPages(payload, fromPage, toPage, totalPages) {
   const numbering = payload?.config?.pageNumbering || {};
-  const style = numbering.numberingStyle || 'PageX';
+  // Page numbers left out (pageOptions.leaveOutPageNumbers): nothing is printed, as under None.
+  const style = payload?.config?.pageOptions?.leaveOutPageNumbers === true ? 'None' : (numbering.numberingStyle || 'PageX');
   const front = numbering.frontMatterNumbering || 'continuous';
   const perSection = numbering.pageNumberPerSection === true;
   const firstDoc = Math.min(...(payload?.sections || []).flatMap((sec) => (sec.files || []).map((f) => Number(f.page)))

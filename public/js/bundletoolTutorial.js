@@ -128,6 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// An arrow for the Back and Next buttons: the site's own icon (shared/icons.js), nothing when that script is absent.
+function arrowIcon(name) {
+  return typeof window.cfIcon === 'function' ? window.cfIcon(name, 'tut-arrow') : '';
+}
+
 function startTutorial() {
   const opener = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
   buildUI();
@@ -243,11 +248,11 @@ function buildUI() {
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
         <div id="tut-dots" style="display:flex;gap:5px;flex-shrink:0;"></div>
         <div style="display:flex;gap:8px;">
-          <button id="tut-prev" style="padding:8px 16px;background:transparent;border:none;border-radius:8px;font-size:var(--fs-body);font-weight:500;color:${tone.inkDim};cursor:pointer;display:none;">
-            Back
+          <button id="tut-prev" style="padding:8px 16px;background:transparent;border:none;border-radius:8px;font-size:var(--fs-body);font-weight:500;color:${tone.inkDim};cursor:pointer;display:none;align-items:center;gap:6px;">
+            ${arrowIcon('arrow_back')}Back
           </button>
-          <button id="tut-next" style="padding:8px 22px;background:${tone.accent};border:none;border-radius:8px;font-size:var(--fs-body);font-weight:700;color:#fff;cursor:pointer;">
-            Next
+          <button id="tut-next" style="padding:8px 22px;background:${tone.accent};border:none;border-radius:8px;font-size:var(--fs-body);font-weight:700;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+            Next${arrowIcon('arrow_forward')}
           </button>
         </div>
       </div>
@@ -285,10 +290,10 @@ function goToStep(index) {
   bodyEl.innerHTML = paras.map((p, i) =>
     `<span style="${i > 0 ? 'display:block;margin-top:10px;' : ''}">${p}</span>`
   ).join('');
-  document.getElementById('tut-next').textContent = isLast ? 'Finish' : 'Next';
+  document.getElementById('tut-next').innerHTML = isLast ? 'Finish' : `Next${arrowIcon('arrow_forward')}`;
   const announce = document.getElementById('tut-announce');
   if (announce) announce.textContent = `Step ${index + 1} of ${STEPS.length}. ${step.title}. ${bodyEl.textContent}`;
-  document.getElementById('tut-prev').style.display = index === 0 ? 'none' : '';
+  document.getElementById('tut-prev').style.display = index === 0 ? 'none' : 'inline-flex';
 
   const dots = document.getElementById('tut-dots');
   dots.innerHTML = STEPS.map((_, i) => {

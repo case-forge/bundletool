@@ -282,7 +282,7 @@ export function showBundleReadyState(pdfBytes, filename, opts = {}) {
           <div class="w-6 h-6 rounded-full bg-green-500 flex-shrink-0 flex items-center justify-center">
             ${icon('check', 'w-3.5 h-3.5 text-white')}
           </div>
-          <p class="text-sm font-semibold text-gray-800 dark:text-slate-100 flex-1">${readyMessage}</p>
+          <p id="processing-overlay-msg" class="text-sm font-semibold text-gray-800 dark:text-slate-100 flex-1">${readyMessage}</p>
           <button id="overlay-close-x" class="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition" aria-label="Close">
             ${icon('close', 'w-4 h-4')}
           </button>
@@ -297,7 +297,7 @@ export function showBundleReadyState(pdfBytes, filename, opts = {}) {
       // overlay, and without it the buttons carry the same visual weight
       // instead of Save towering over its neighbours.
       btns.innerHTML = `
-        <button id="overlay-save-btn" class="w-full px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition flex items-center justify-center gap-2">
+        <button id="overlay-save-btn" class="bt-btn--success w-full px-4 py-2.5 text-sm font-medium rounded-lg transition flex items-center justify-center gap-2">
           ${icon('download', 'w-4 h-4')}
           ${saveLabel}
         </button>
@@ -313,6 +313,8 @@ export function showBundleReadyState(pdfBytes, filename, opts = {}) {
       // are already saved.
     }
 
+    // The panel was rebuilt under the focused Cancel button: put focus on the first real action.
+    document.getElementById('overlay-save-btn')?.focus({ preventScroll: true });
     document.getElementById('overlay-save-btn')?.addEventListener('click', () => {
       triggerDownload(pdfBytes, filename);
       hideProcessingOverlay();

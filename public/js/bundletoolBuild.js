@@ -38,7 +38,8 @@ import { startWorker, watchForLazyLoadFailures } from '/js/shared/lazy-load.js';
  *
  * @param {Object} job
  * @param {Uint8Array|ArrayBuffer|null} job.coverBytes - one-page cover, already validated/generated
- * @param {Uint8Array|ArrayBuffer} job.tocBytes - the index pages
+ * @param {Uint8Array|ArrayBuffer|null} job.tocBytes - the index pages; null when the index is left out
+ *   (pageOptions.leaveOutIndex), and then the documents follow the cover, or start the bundle
  * @param {Array<{filename: string, buffer: ArrayBuffer|Uint8Array}>} job.fileEntries - sources, index order
  * @param {boolean} job.printable - blank page after any odd-length document
  * @param {string} job.pageSize - page size key for the pages this tool draws
@@ -56,7 +57,7 @@ import { startWorker, watchForLazyLoadFailures } from '/js/shared/lazy-load.js';
  */
 export async function buildBundlePdf(job, onProgress) {
   const {
-    coverBytes = null, tocBytes, fileEntries, printable = false, pageSize = 'a4',
+    coverBytes = null, tocBytes = null, fileEntries, printable = false, pageSize = 'a4',
     footerConfig, pageLabels = [], footerLinkPageIndex = null, frontMatterCount = 0,
     metaConfig, tocTableRowCoordinates, tocEntries, yieldToUi = false,
   } = job;
@@ -72,7 +73,7 @@ export async function buildBundlePdf(job, onProgress) {
     const { doc } = await loadPdf(coverBytes);
     await copyAllPages(dst, doc);
   }
-  {
+  if (tocBytes) {
     const { doc } = await loadPdf(tocBytes);
     await copyAllPages(dst, doc);
   }
@@ -152,7 +153,7 @@ export function runBuildViaWorker(job, onProgress) {
   };
   const transferables = [];
   if (message.coverBytes) transferables.push(message.coverBytes);
-  transferables.push(message.tocBytes);
+  if (message.tocBytes) transferables.push(message.tocBytes);
   for (const entry of message.fileEntries) transferables.push(entry.buffer);
 
   return new Promise((resolve, reject) => {

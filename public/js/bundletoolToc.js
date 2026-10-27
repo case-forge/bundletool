@@ -212,6 +212,44 @@ export async function createTocEntries(indexData, config) {
 }
 
 /**
+ * Whether this build leaves the index page out (pageOptions.leaveOutIndex), and if so, makes the
+ * numbering follow from it. One place, read by the browser build (bundletoolMain.js) and the command
+ * line (scripts/build-cli.mjs), so the two cannot number a bundle differently.
+ *
+ * THE RULE: with no index, the first document page is page 1. Without a cover that is physical page 1;
+ * with a cover, the cover carries no number and the page after it is page 1. So the front matter (the
+ * cover alone, or nothing) is numbered "skip" for this build, whatever pageNumbering.frontMatterNumbering
+ * says: under "continuous" the cover would be page 1 and the first document page 2, and under "roman"
+ * a lone cover would be "i". The written value is this build's config only; the setting the person chose
+ * is left alone on the page, so it is still there when the index is turned back on.
+ *
+ * Preview Index (index.justTheIndex) wins: it asks for the index itself, so the index is drawn.
+ *
+ * @param {Config} config
+ * @returns {boolean} true when the index is left out of this build
+ */
+export function indexLeftOut(config) {
+  const out = config.getOption('pageOptions.leaveOutIndex') === true && config.getOption('index.justTheIndex') !== true;
+  if (out) config.updateOptions({ pageNumbering: { frontMatterNumbering: 'skip' } });
+  return out;
+}
+
+/**
+ * Sets each section's and document's physical first page (actualPdfStartPageWithToc) for an index of
+ * `tocLength` pages, exactly as makeTocPages does while it draws one. A build with no index calls it with
+ * 0, so the bookmarks, the footer link and the embedded bundle index point at the real pages.
+ *
+ * @param {Array<Object>} tocEntries - from createTocEntries
+ * @param {number} tocLength - pages the index takes (0 when it is left out)
+ */
+export function setPhysicalStartPages(tocEntries, tocLength) {
+  for (const section of tocEntries) {
+    section.actualPdfStartPageWithToc = section.beginsOnPdfPage + tocLength;
+    for (const entry of section.entries) entry.actualPdfStartPageWithToc = entry.beginsOnPdfPage + tocLength;
+  }
+}
+
+/**
  * The index font, fetched once and base64-encoded once per URL for the life of
  * the page. A build calls makeTocPages TWICE (makeDummyTocPages measures how
  * many pages the index will be, then makeTocPages renders it for real), so

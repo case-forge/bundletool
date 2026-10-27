@@ -92,7 +92,8 @@ export function prepareOwnSplit(srcDoc, payload) {
   const hasCover = cfg.pageOptions?.coversheet === true && docs[0].start > 1;
   const docsStart = docs[0].start;
   const perSection = numbering.pageNumberPerSection === true;
-  const style = numbering.numberingStyle || 'PageX';
+  // A bundle built with its page numbers left out printed none, whatever its numbering style says.
+  const style = cfg.pageOptions?.leaveOutPageNumbers === true ? 'None' : (numbering.numberingStyle || 'PageX');
 
   // How the bundle labelled each of its pages, for the "Bundle page" column and the blanking width.
   const pageLabels = [];
