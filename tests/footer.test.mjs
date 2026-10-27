@@ -272,6 +272,8 @@ test('NEGATIVE CONTROL: the blanking rectangle stops re-bundled footers stacking
       colour: rgb(0.072, 0.021, 0.073), align: 'centre',
       maxTextWidth: f.widthOfTextAtSize(widest, 12),
       indexPageIndex: 0, drawBlanking: blank,
+      // The overhang is the backstop for a footer removal cannot reach: off by default (no halo), on here.
+      blankMarginX: 8, blankMarginY: 4,
     });
 
     if (first) {

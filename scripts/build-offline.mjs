@@ -54,6 +54,15 @@ const notFoundUrl = (tool) => tool.notFound.replace(/\.html$/, '');
 
 const sha = (buf) => createHash('sha256').update(buf).digest('hex');
 
+/**
+ * A page with the parts that change on every deploy without changing the page taken out: the commit ID and run
+ * number in the cf-build tag (the build-meta partial writes it). The page's label, and so the worker version,
+ * is computed from this, so a deploy that leaves a tool unchanged leaves its worker byte for byte the same and no
+ * browser reinstalls it. Pages are never checked against their label (they are fetched fresh at every install), so
+ * the label only has to change when the page does.
+ */
+export const pageForVersion = (buf) => Buffer.from(buf.toString('utf8').replace(/<meta\b[^>]*\bname=["']?cf-build\b[^>]*>/gi, '<meta name="cf-build">'));
+
 function attr(tag, name) {
   // Minified pages drop the quotes around a simple value, so the value may be bare.
   const m = new RegExp(`\\s${name}\\s*=\\s*("([^"]*)"|'([^']*)'|([^\\s"'=<>\`]+))`, 'i').exec(tag);
@@ -159,11 +168,17 @@ export function collect(publicDir, tool) {
 export function generate(publicDir, tool) {
   const { files, missing, soft: softSet } = collect(publicDir, tool);
   const essential = new Set(tool.essentialFonts);
+  const notFound = tool.notFound ? notFoundUrl(tool) : null;
+  // Pages are fetched fresh at every install and never verified against their hash: an edge can add to a page
+  // (an analytics snippet, an email obfuscation script) without the page being wrong, and a page is the one file a
+  // stale copy cannot hide behind a label (it is small, and it always comes from this install).
+  const fresh = [...tool.pages, ...(notFound ? [notFound] : [])];
+  const freshSet = new Set(fresh);
   const core = [], optional = [], soft = [];
   let coreBytes = 0, optionalBytes = 0, softBytes = 0;
   for (const p of [...files.keys()].sort()) {
     const buf = files.get(p);
-    const entry = [p, sha(buf).slice(0, 16)];
+    const entry = [p, sha(freshSet.has(p) ? pageForVersion(buf) : buf).slice(0, 16)];
     if (softSet.has(p)) { soft.push(entry); softBytes += buf.length; }
     else if (FONT_EXT.test(p) && !essential.has(p)) { optional.push(entry); optionalBytes += buf.length; }
     else { core.push(entry); coreBytes += buf.length; }
@@ -176,11 +191,6 @@ export function generate(publicDir, tool) {
     if (!fs.existsSync(file)) throw new Error(`the live file ${p} is not in the build`);
     liveBytes += fs.statSync(file).size;
   }
-  const notFound = tool.notFound ? notFoundUrl(tool) : null;
-  // Pages are fetched fresh at every install and never verified against their hash: an edge can add to a page
-  // (an analytics snippet, an email obfuscation script) without the page being wrong, and a page is the one file a
-  // stale copy cannot hide behind a label (it is small, and it always comes from this install).
-  const fresh = [...tool.pages, ...(notFound ? [notFound] : [])];
   const template = fs.readFileSync(TEMPLATE, 'utf8');
   const version = sha(JSON.stringify([tool.id, core, optional, soft, live, notFound, fresh, template])).slice(0, 12);
   const body = template

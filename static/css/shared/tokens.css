@@ -27,11 +27,24 @@
   --muted: #8f939d;
   --border: rgba(255, 255, 255, 0.07);
   --border-mid: rgba(255, 255, 255, 0.12);
+  /* The edge of a text field, select or text area: the text colour mixed in until it is 3:1 against the card or page
+     behind it (WCAG 2.1 SC 1.4.11, Non-text Contrast). A field with only a fill a shade off its background fails that. */
+  --field-edge: color-mix(in srgb, var(--text) 50%, transparent); /* 42% was 3:1 on the old #1c1f27 card; the lighter box card (--box-card) needs 50% */
   --green: #2ba870;
   --red: #c03535;
+  /* Destructive text and icons (delete, remove, clear, reset): 4.5:1 or better on the page and on a box. --red is a fill. */
+  --danger-ink: #f08a8a;
   --amber: #d4920a;
   --shadow: 0 20px 44px rgba(0, 0, 0, 0.45);
   --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.3);
+  /* Boxes (cards, panels, result lists): the paper-cutout look, a ground a tier off the page and a soft lift, with no
+     line drawn round the box. Applied to everything inside #main-content by the rule after the light block, so the
+     header, drawer and footer keep the shared --card / --surface. A box is drawn with var(--card), var(--surface) and
+     var(--box-lift) as usual; it is only inside the page body that the grounds resolve to these values. Only a form
+     field draws an edge (--field-edge, above). */
+  --box-card: #232834;
+  --box-surface: #181c25;
+  --box-lift: 0 1px 2px rgba(0, 0, 0, 0.5), 0 6px 18px rgba(0, 0, 0, 0.28);
   --radius: 16px;
   --radius-sm: 10px;
 }
@@ -54,12 +67,33 @@
   --muted: #5b6773;
   --border: rgba(58, 68, 76, 0.13);
   --border-mid: rgba(58, 68, 76, 0.24);
+  --field-edge: color-mix(in srgb, var(--text) 56%, transparent);
   --green: #1f6a52;
   --red: #8b2e2e;
+  --danger-ink: #8b2e2e;
   --amber: #9a6700;
   --shadow: 0 18px 38px rgba(26, 79, 140, 0.11);
   --shadow-sm: 0 4px 16px rgba(26, 79, 140, 0.07);
+  --box-card: #ffffff;
+  --box-surface: #f4eee1;
+  --box-lift: 0 1px 2px rgba(31, 41, 51, 0.16), 0 6px 16px rgba(31, 41, 51, 0.1);
 }
+
+/* The page body on every page (BundleTool's Classic palette keeps its own colours). --cf-* are BundleTool Modern's
+   aliases, resolved on <html>, so they are re-pointed here too. The text-field edge (--field-edge) is untouched. */
+html:not([data-palette="classic"]) #main-content {
+  --card: var(--box-card);
+  --surface: var(--box-surface);
+  --cf-card: var(--box-card);
+  --cf-surface: var(--box-surface);
+}
+
+/* Two tiers for the tools' boxes, the same on Chambers Finder, the Envelope Guide and BundleTool (Modern; Classic
+   follows it in its own colours, bundletool.css). The hero is the upper tier, --card; the main panels, cards and
+   tiles under it are --surface. Both lift off the page with --box-lift and draw no line round them (the
+   paper-cutout look): only a form field has an edge. A site's own CSS sets only layout on these. */
+.hero, .lh-hero { background: var(--card); box-shadow: var(--box-lift); }
+.toolbar-card, .status-block, .lh-form, .lh-preview { background: var(--surface); box-shadow: var(--box-lift); }
 
 /* One type scale for every page. A size is picked by what the text is, so the same kind of
    text is the same size on every page. */
@@ -73,4 +107,13 @@
   --fs-label: 14.4px;      /* form labels, secondary text, intro lines, compact controls */
   --fs-caption: var(--fs-label); /* hints, helper text, toasts, footer: the same size as a label, told apart by weight and colour */
   --fs-micro: 12.5px;      /* only uppercase table and group headings, badges, and the menu's tool tiles */
+}
+
+/* Every text field, select and text area on every page (BundleTool's Classic palette keeps its own look) carries the 3:1 edge above, whatever its own sheet says
+   (several drew a borderless "cutout"). !important only on the colour and style, and never while the field has focus,
+   so each page's own focus ring still shows. */
+html:not([data-palette="classic"]) :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="hidden"], [type="submit"], [type="button"], [type="reset"], [type="image"]), select, textarea):not(:focus, :focus-visible) {
+  border-style: solid !important;
+  border-color: var(--field-edge) !important;
+  border-width: 1px;
 }

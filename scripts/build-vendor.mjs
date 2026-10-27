@@ -44,11 +44,12 @@ for (const { pkg, file, dir } of BUNDLED) {
 }
 
 // Copied, not bundled. qrcode-generator is a plain UMD script loaded with a <script> tag, so its dist file is
-// copied under a banner. tesseract-wasm (OCR) ships already-built files, including two WASM binaries (SIMD and a
-// non-SIMD fallback the library picks between) and a worker that finds its WASM next to itself
-// (`new URL('./tesseract-worker.js', import.meta.url)` inside lib.js): re-bundling would break that, so the files
-// are copied as they are into one folder. Both are served from this origin, so both are redistributed and
-// recorded in NOTICE. eng.traineddata (public/ocr/) is not from npm: it is tesseract-ocr/tessdata_fast's "fast"
+// copied under a banner. tesseract-wasm (OCR) ships already-built files, including a WASM binary and a worker that
+// finds it next to itself (`new URL('./tesseract-worker.js', import.meta.url)` inside lib.js): re-bundling would
+// break that, so the files are copied as they are into one folder. Of the package's two WASM binaries only the SIMD
+// build is copied; WebAssembly SIMD is a stated minimum requirement for the site, so the non-SIMD
+// fallback is never used and is not shipped (vendor-packages.mjs). Both packages are served from this origin, so
+// both are redistributed and recorded in NOTICE. eng.traineddata (public/ocr/) is not from npm: it is tesseract-ocr/tessdata_fast's "fast"
 // English data, fetched once and committed, since it is not a versioned package.
 for (const { pkg, dir, files } of COPIED) {
   const version = versionOf(pkg);

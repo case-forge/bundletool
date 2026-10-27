@@ -96,3 +96,17 @@ test('the service-worker toast is still used when it exists, and no second one i
     delete globalThis.document; delete globalThis.window;
   }
 });
+
+test('only the SIMD build of the OCR engine is shipped, and WebAssembly SIMD is a stated minimum requirement', async () => {
+  const fs = await import('node:fs');
+  const tool = new URL('../', import.meta.url);
+  // The site's static/ sits beside this folder here and inside it in the standalone repository.
+  const root = [new URL('../', tool), tool].find((r) => fs.existsSync(new URL('static/vendor/tesseract-wasm/', r)));
+  assert.ok(root, 'static/vendor/tesseract-wasm/ was found');
+  assert.deepEqual(fs.readdirSync(new URL('static/vendor/tesseract-wasm/', root)).filter((f) => f.endsWith('.wasm')), ['tesseract-core.wasm'],
+    'tesseract-core-fallback.wasm (non-SIMD) is never used by a supported browser, so it is not vendored');
+  const { COPIED } = await import(new URL('scripts/vendor-packages.mjs', tool).href);
+  const tess = COPIED.find((c) => c.pkg === 'tesseract-wasm');
+  assert.ok(tess.files.every((f) => !/fallback/.test(f.to)), 'the vendor build does not copy it back');
+  assert.match(fs.readFileSync(new URL('public/js/bundletoolOcrEngine.js', tool), 'utf8'), /WEBASSEMBLY SIMD IS REQUIRED/);
+});

@@ -69,7 +69,8 @@
 		{{- $chromeJs := resources.Concat "bundletool/built/chrome.js" $jsParts | minify | fingerprint -}}
 		<script src="{{ $chromeJs.RelPermalink }}" defer></script>
 		{{- end }}
-		{{ partial "offline/register.html" (dict "tool" "bundletool") }}
+		{{- /* The Guide does not install the whole tool for a reader; it is stored once the tool is opened. */}}
+		{{ partial "offline/register.html" (dict "tool" "bundletool" "installs" (ne .Layout "guide")) }}
 	</head>
 	<body class="bg-stone-100 dark:bg-slate-950 text-gray-900 dark:text-slate-100">
 		{{ block "main" . }}{{ end }}

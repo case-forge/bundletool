@@ -43,6 +43,7 @@ import { basename, dirname, join, resolve, sep } from 'node:path';
 import { EXIT, CliError, parseArgs, readName, readVersion, runCli, helpResult } from './cli-contract.mjs';
 import { prettifyTitle, stripDoubleChars } from '../public/js/frontend/utils.js';
 import { isOverPd27aLimit, pd27aNote } from '../public/js/frontend/limits.js';
+import { JUST_ASSEMBLE } from './cli-docs.mjs';
 
 const TOOL = readName(new URL('../package.json', import.meta.url));
 const VERSION = readVersion(new URL('../package.json', import.meta.url));
@@ -102,7 +103,7 @@ async function readInside(docsDir, docsReal, name, what) {
 }
 
 async function build(ctx, argv) {
-  const args = parseArgs(argv, { flags: ['--json', '--help', '--version', '--config-keys', '--schema', '--force'], short: { h: '--help', V: '--version', f: '--force' } });
+  const args = parseArgs(argv, { flags: ['--json', '--help', '--version', '--config-keys', '--schema', '--force', ...JUST_ASSEMBLE.map((j) => j.flag)], short: { h: '--help', V: '--version', f: '--force' } });
   if (args.flags.version) return { body: { version: VERSION, schemaVersion: SCHEMA_VERSION }, text: VERSION };
   const help = await helpResult(args, buildHelpDoc);
   if (help) return help;
@@ -163,6 +164,10 @@ async function build(ctx, argv) {
     ctx.warn('unknown_config_key', `Ignored ${strays.length} config key${strays.length === 1 ? '' : 's'} this version does not know: ${shown.join(', ')}${strays.length > 8 ? ', ...' : ''}. Run with --config-keys for the full list.`);
   }
   try { config.updateOptions(schema.nestManifestConfig(manifest.config)); } catch (err) { throw new CliError('invalid_config', err.message); }
+  // Just assemble's flags (--no-index, --no-page-numbers, --no-bookmarks) switch their setting on for this run, over the manifest.
+  for (const { flag, key } of JUST_ASSEMBLE) {
+    if (args.flags[flag.slice(2)]) { const [group, field] = key.split('.'); config.updateOptions({ [group]: { [field]: true } }); }
+  }
 
   // ── Documents: each must be a plain name inside the directory and a real PDF ──
   const resolvedSections = [];
@@ -342,6 +347,8 @@ async function build(ctx, argv) {
   });
   config.updateOptions({ pageOptions: { coversheet: coverSource !== 'none', coverSource } });
   try { config.validateOptions(); } catch (err) { throw new CliError('invalid_config', err.message); }
+  // Leave out the index page: the same decision, and the same numbering rule, as the browser (indexLeftOut()).
+  const noIndex = toc.indexLeftOut(config);
   const indexPageIndex = coverSource !== 'none' ? 1 : 0;
   const footerLinkSetting = config.getOption('pageNumbering.footerLink') || 'index';
   const footerLinkPageIndex = footerLinkSetting === 'none' ? null : footerLinkSetting === 'top' ? 0 : indexPageIndex;
@@ -364,8 +371,14 @@ async function build(ctx, argv) {
       margins: { top: 25, right: 22, bottom: 25, left: 22 },
     };
     const tocEntries = await toc.createTocEntries(indexData, config);
-    expectedTocLength = await toc.makeDummyTocPages(tocEntries, tocOptions, config);
-    const [tocPdf, tocTableRowCoordinates] = await toc.makeTocPages(tocEntries, tocOptions, config, expectedTocLength);
+    let tocPdf = null; let tocTableRowCoordinates = [];
+    if (noIndex) {
+      expectedTocLength = 0;
+      toc.setPhysicalStartPages(tocEntries, 0);
+    } else {
+      expectedTocLength = await toc.makeDummyTocPages(tocEntries, tocOptions, config);
+      [tocPdf, tocTableRowCoordinates] = await toc.makeTocPages(tocEntries, tocOptions, config, expectedTocLength);
+    }
 
     const fileEntries = [];
     for (const section of tocEntries) {

@@ -2,7 +2,8 @@
 // data-sw and its scope in data-scope). The worker is built by scripts/build-offline.mjs; docs/offline-mode.md
 // describes the whole design. This file does four things and nothing else:
 //   1. registers the worker after the page has loaded (never under `hugo server`: the template does not emit
-//      this script there),
+//      this script there). A page marked data-install="existing" (BundleTool's Guide) only keeps a worker the
+//      tool already installed up to date: reading the Guide does not download the whole tool,
 //   2. applies a new version by itself at a safe moment (a page that has only just opened, or a tab nobody is
 //      looking at, and never while a bundle is being built), and until then offers it ("A new version is ready.
 //      Reload to use it."). Saved work is autosaved, so a reload loses nothing; a version that waited for a button
@@ -217,11 +218,15 @@
     }).catch(function () {});
   }
 
+  var existingOnly = script.dataset.install === 'existing';
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register(swUrl, { scope: scope, updateViaCache: 'none' }).then(function (reg) {
-      watch(reg);
-      var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 4000); };
-      idle(warm, { timeout: 10000 });
+    (existingOnly ? navigator.serviceWorker.getRegistration(scope) : Promise.resolve(true)).then(function (have) {
+      if (!have) return null;   // nothing installed yet, and this page does not install it
+      return navigator.serviceWorker.register(swUrl, { scope: scope, updateViaCache: 'none' }).then(function (reg) {
+        watch(reg);
+        var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 4000); };
+        idle(warm, { timeout: 10000 });
+      });
     }).catch(function () { /* no worker (private window, blocked storage): the tool simply needs the network */ });
   });
 })();

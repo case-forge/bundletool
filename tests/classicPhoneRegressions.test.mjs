@@ -44,7 +44,7 @@ test('the sort headings are keyboard buttons and the sorted one says so', () => 
 });
 
 test('Classic dark keeps outlines: section boxes, file rows and the phone file cards use the slate scale', () => {
-  assert.match(css, /\[data-palette=classic\]\[data-theme=dark\] \.section-label-input,\s*\n?\[data-palette=classic\]\[data-theme=dark\] \.section-name-input \{ border-color: var\(--color-slate-500\); \}/);
+  assert.match(css, /\[data-palette=classic\]\[data-theme=dark\] \.section-label-input:not\(:focus\),\s*\n?\[data-palette=classic\]\[data-theme=dark\] \.section-name-input:not\(:focus\) \{ border-color: var\(--color-slate-400\); \}/);
   assert.match(css, /\[data-palette=classic\]\[data-theme=dark\] #file-table tr\.file-row \{ border-color: var\(--color-slate-600\); \}/);
   assert.match(css, /\[data-palette=classic\]\[data-theme=dark\] #file-table \.section-tbody tr\.file-row \{ background: var\(--color-slate-800\)/);
 });

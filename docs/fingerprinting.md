@@ -1,17 +1,41 @@
-# Version-stamped file names
+# Version-stamped file names: built, measured, not shipped
 
-BundleTool serves its scripts and fonts under plain names, such as `public/js/frontend.js`, with `Cache-Control: no-cache`, so a browser checks each file with the server on every visit. A file whose name carries a stamp of its own content, such as `frontend.3fa9c1d2.js`, can instead be cached for a year, because a changed file gets a new name.
+BundleTool serves its scripts and fonts under plain names, such as `public/js/frontend.js`, with `Cache-Control: no-cache`, so a browser checks each file with the server on every visit (about 140 requests answered `304`). A file whose name carries a stamp of its own content, such as `frontend.3fa9c1d2.js`, could be cached for a year and never checked.
 
-This page sets out how to do that for BundleTool, what it is worth and where the traps are. It is a design, not a feature: none of it is built into the tool. It is written for anyone who wants to take it on.
+We built that, tested it and measured it, and did not ship it. This page records what was tried and what we found, so that nobody else spends the time. The design that follows the findings is how it was built, kept for reference.
 
-## What it is worth
+## What we found
 
-- **Fewer requests on a repeat visit.** Measured on the live site: about 91 fewer requests, and about 1.3 seconds saved on a 4G connection.
-- **Only for a visitor without the offline copy.** With the offline copy installed (`docs/offline-mode.md`), a repeat visit makes no requests for these files at all. In practice, the gain reaches a browser that blocks service workers, a private window, and the first visit after site data is cleared.
-- **Files from two versions can never meet in one page.** A page asks for the names it was built with. The offline copy already guarantees this in its own way (`docs/offline-mode.md`, "Reload to continue"), so stamped names would be a second guarantee, not the only one.
-- **Preloading becomes worthwhile.** Once a file can be cached for a year, `<link rel="modulepreload">` for the scripts every visit needs pays for itself.
+Measured on an HTTP/2 test setup (real `304`s, brotli, 40 ms and 10 Mbps, plus a slow 150 ms and 1.6 Mbps case), median of three, counts taken from the server log:
 
-Weigh that against a build step that every change to the tool's scripts then goes through.
+| Visit | Before | After |
+| --- | --- | --- |
+| Repeat visit, offline copy on | 1 request | 1 request |
+| Repeat visit, no offline copy | 171 requests, 606 ms | 26 requests, 596 ms |
+| Same, slow link | 2,080 ms | 2,413 ms (slower) |
+| Cold first visit | no difference | no difference |
+
+- **The offline copy had already solved it.** With the service worker in control (`docs/offline-mode.md`), a returning visitor makes one request. Stamped names only help a visitor without it, and 145 fewer requests over HTTP/2 saved tens of milliseconds, inside the noise.
+- **It was slower on a slow link.** Chrome sometimes asks twice for a module on a repeat visit, once to revalidate and once with no validator. After the change one of the files hit was the 249 KB PDF library. The same double request happens on the live site.
+- **The documented build failed on every fresh checkout.** The worker step imported esbuild from a folder the host never installs. The test suite was green and the deploy would have failed, because the build had only been run in the working tree.
+- **A new failure.** A tab left open across a deploy that changed a worker stops at "This page needs reloading", where before it silently mixed old and new code.
+- **An early "gain" was a measuring mistake.** A first run showed 0.66 s against 2.6 s with the service worker. The service worker was not controlling the page in the "before" run (its install failed on the slow link), so the run compared an immutable HTTP cache with `304`s.
+- **It costs.** About 1,180 lines, five build scripts, a manual change to the host's build command, and a rule that every new worker must be started through the table.
+
+## What we did instead
+
+The bytes returning visitors really paid were elsewhere. After every deploy the offline copy deleted its old cache before re-warming the eight optional fonts, so each returning visitor re-downloaded about 1.4 MB. Carrying the fonts over at install fixed that: a one-file deploy went from 1,439 KB and 14 requests to 55 KB and 6. Leaving the commit ID out of the offline version, and letting the install reuse the browser's cache, cut the rest.
+
+## If you still want to try
+
+- Measure the real path first: one repeat visit with the offline copy on, counted on the server.
+- Assert that the service worker controls the page before calling a visit "with the service worker".
+- Build on a clean checkout with the host's exact command before calling it done.
+- Write down what happens if the change is merged and the manual step is not done, and the reverse.
+- Set a gain threshold in advance (for example 300 ms on a repeat visit) and drop the idea if a two-hour prototype misses it.
+- If skew in tabs without the offline copy ever matters, Hugo's own `js.Build` and `fingerprint` can emit the map with no Node step and no host build change.
+
+## How it was built
 
 ## Why renaming the files is not enough
 

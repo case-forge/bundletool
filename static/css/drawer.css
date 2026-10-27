@@ -21,7 +21,6 @@
   width: 100%;
   max-width: 360px;
   background: var(--card);
-  border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 18px;

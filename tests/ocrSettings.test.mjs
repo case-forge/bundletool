@@ -80,7 +80,7 @@ test('Advanced Settings has both toggles, off unless set, each with help saying 
     assert.match(hint, /Scanned pages only/, `${id} help`);
   }
   // Both sit in the OCR panel, after the automatic check.
-  const panel = html.slice(html.indexOf('OCR (Searchable Text)'), html.indexOf('Split for Email</h4>'));
+  const panel = html.slice(html.indexOf('OCR (Searchable Text)'), html.indexOf('Split for Email</h3>'));
   assert.ok(panel.includes('config-ocrAutoDetect') && panel.includes('config-ocrTurnUpright') && panel.includes('config-ocrStraighten'));
 });
 

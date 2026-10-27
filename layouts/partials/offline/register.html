@@ -4,12 +4,17 @@
      build, or `hugo server`, never leaves a missing or stale worker: the stand-in clears any worker and caches
      an earlier deploy installed. Nothing registers under `hugo server`, so livereload is untouched, or when
      [params.offline] enabled is false in hugo.toml (the kill switch: the next deploy then ships the stand-in
-     for real, and every browser that had the worker removes it on its next visit). */ -}}
+     for real, and every browser that had the worker removes it on its next visit).
+     "installs" false (BundleTool's Guide) keeps the worker's updates and kill switch on that page but does not
+     install the tool from it: someone who only reads the Guide does not download the whole tool. The Guide is in
+     the tool's install set, so it is stored, and works offline, once the tool itself has been opened. */ -}}
 {{- $tool := .tool -}}
+{{- $installs := true -}}
+{{- if isset . "installs" -}}{{- $installs = .installs -}}{{- end -}}
 {{- $on := true -}}
 {{- with site.Params.offline -}}{{- if isset . "enabled" -}}{{- $on = .enabled -}}{{- end -}}{{- end -}}
 {{- $stand := resources.FromString (printf "%s/sw.js" $tool) (partial "offline/standin.js" .) -}}
 {{- $stand.Publish -}}
 {{- if and $on (not hugo.IsServer) -}}
-<script src="{{ "js/shared/sw-register.js" | relURL }}" data-sw="{{ printf "%s/sw.js" $tool | relURL }}" data-scope="{{ printf "%s/" $tool | relURL }}" defer></script>
+<script src="{{ "js/shared/sw-register.js" | relURL }}" data-sw="{{ printf "%s/sw.js" $tool | relURL }}" data-scope="{{ printf "%s/" $tool | relURL }}"{{ if not $installs }} data-install="existing"{{ end }} defer></script>
 {{- end -}}

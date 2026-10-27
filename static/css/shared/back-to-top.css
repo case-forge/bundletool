@@ -1,6 +1,6 @@
-/* Shared #cf-ascend return-to-top button: the Material FAB every product
+/* Shared #cf-ascend return-to-top button: the round return-to-top button every product
  * uses, driven entirely by shared/tokens.css custom properties (--card,
- * --shadow, --shadow-sm, --text-dim, --orange). No border: a Material FAB
+ * --shadow, --shadow-sm, --text-dim, --orange). No border: a paper-look button
  * carries no stroke, only elevation (box-shadow), so hover raises the shadow
  * rather than changing a border colour.
  */

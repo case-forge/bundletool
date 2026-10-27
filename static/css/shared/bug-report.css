@@ -7,7 +7,6 @@
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 12px 14px; border-radius: var(--radius-sm, 10px);
   background: var(--card, #1c1f27); color: var(--text, #f0ebe3);
-  border: 1px solid var(--border-mid, rgba(255, 255, 255, .12));
   box-shadow: var(--shadow, 0 20px 44px rgba(0, 0, 0, .45));
   font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
@@ -27,7 +26,6 @@
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 12px 14px; border-radius: var(--radius-sm, 10px);
   background: var(--card, #1c1f27); color: var(--text, #f0ebe3);
-  border: 1px solid var(--border-mid, rgba(255, 255, 255, .12));
   box-shadow: var(--shadow, 0 20px 44px rgba(0, 0, 0, .45));
   font: var(--fs-label, 14.4px)/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }

@@ -5,7 +5,8 @@
  * default fonts) in one cache named for this exact build, so the whole tool opens with the network off and every
  * file comes from the same version. A new deploy changes this file, the browser installs the new worker in the
  * background, and the page offers "A new version is ready. Reload to use it."; the old cache goes when the new
- * worker takes over. Other fonts are stored the first time they are used and, when the browser is idle, ahead of use.
+ * worker takes over. Other fonts are stored the first time they are used and, when the browser is idle, ahead of use;
+ * a new version copies the ones already stored from the old cache at install, so a deploy does not download them again.
  *
  * What it never does: cache or read a person's documents, touch another origin, send anything anywhere, or answer a
  * request for a file it does not list (those go to the network exactly as if it were not there).
@@ -55,12 +56,28 @@ async function labelOf(buffer) {
   return hex;
 }
 
-// Fetches a file straight from the server (never the browser's HTTP cache, which could hold an older copy) and
-// returns the response to store. A file that is not the exact one this build lists is refused, so a stale copy from
-// an edge, a challenge page answered 200 or a half-deployed site is never stored under the right label.
-async function fetchListed(path, hash) {
-  const response = await fetch(new Request(path, { cache: 'reload', credentials: 'same-origin' }));
+// Fetches a file, always asking the server whether it is current ('no-cache'): a copy the browser already holds in
+// its HTTP cache (the page has just loaded most of these files, or another tool's install has) is reused when the
+// server answers 304, so an install does not download the same files a second time, and a changed file is
+// downloaded. One failed attempt (the network dropped, or the server answered an error) is tried once more before it
+// counts: on a slow or flaky link a single "Failed to fetch" among a hundred files would otherwise throw the whole
+// install away.
+async function fetchFresh(path) {
+  let response;
+  try {
+    response = await fetch(new Request(path, { cache: 'no-cache', credentials: 'same-origin' }));
+    if (response.ok) return response;
+  } catch (error) { /* tried once more below */ }
+  response = await fetch(new Request(path, { cache: 'no-cache', credentials: 'same-origin' }));
   if (!response.ok) throw new Error(path + ' answered ' + response.status);
+  return response;
+}
+
+// Fetches a file (revalidated with the server, see fetchFresh) and returns the response to store. A file that is not
+// the exact one this build lists is refused, so a stale copy from the HTTP cache or an edge, a challenge page
+// answered 200 or a half-deployed site is never stored under the right label.
+async function fetchListed(path, hash) {
+  const response = await fetchFresh(path);
   if (FRESH.has(path)) return response;
   const copy = response.clone();
   const got = await labelOf(await response.arrayBuffer());
@@ -98,7 +115,8 @@ async function earlierCaches() {
 }
 
 // Stores every entry not already present: files whose hash an earlier version's cache already holds are copied
-// from it, so a deploy that changes three scripts downloads three scripts, not the whole tool again.
+// from it, so a deploy that changes three scripts downloads three scripts, not the whole tool again. With copyOnly,
+// an entry no earlier cache holds is left out rather than downloaded (the optional fonts at install).
 async function fill(entries, options) {
   const cache = await caches.open(CACHE);
   const meta = await readMeta(cache);
@@ -124,6 +142,7 @@ async function fill(entries, options) {
           }
         }
         if (!done) {
+          if (options.copyOnly) continue;
           await cache.put(path, await fetchListed(path, hash));
         }
         meta[path] = hash;
@@ -143,9 +162,7 @@ async function fill(entries, options) {
 async function fillLive() {
   const cache = await caches.open(CACHE);
   for (const path of LIVE) {
-    const response = await fetch(new Request(path, { cache: 'reload', credentials: 'same-origin' }));
-    if (!response.ok) throw new Error(path + ' answered ' + response.status);
-    await cache.put(path, response);
+    await cache.put(path, await fetchFresh(path));
   }
 }
 
@@ -159,6 +176,10 @@ self.addEventListener('install', function (event) {
       await fill(CORE, { strict: true, lanes: 6 });
       await fillLive();
       await fill(SOFT, { strict: false, lanes: 3 });
+      // Optional files the earlier version had already stored (a font someone used) are copied now, while its cache
+      // still exists: it is deleted when this version takes over, and warming up afterwards would download them all
+      // again on every deploy. Nothing is downloaded here; fonts never used are still left for use or idle time.
+      await fill(OPTIONAL, { strict: false, lanes: 2, copyOnly: true });
     } catch (error) {
       // Leave nothing half-filled behind: the partial cache is deleted and the failure remembered.
       await caches.delete(CACHE);

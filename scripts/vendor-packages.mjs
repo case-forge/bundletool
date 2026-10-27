@@ -24,9 +24,11 @@ export const BUNDLED = [
 export const COPIED = [
   // A plain UMD script loaded with a <script> tag (share by QR code): copied under a banner, not bundled.
   { pkg: 'qrcode-generator', dir: 'shared', files: [{ from: 'dist/qrcode.js', to: 'matrix-render.js' }], contains: [] },
-  // OCR. lib.js finds its worker and the worker finds its .wasm files next to itself, so the files are copied
-  // into one folder as they are. lib.js and the worker carry comlink inside them, and the .wasm files are
-  // Tesseract and Leptonica compiled to WebAssembly.
+  // OCR. lib.js finds its worker and the worker finds its .wasm file next to itself, so the files are copied
+  // into one folder as they are. lib.js and the worker carry comlink inside them, and the .wasm file is
+  // Tesseract and Leptonica compiled to WebAssembly. Only the SIMD build is shipped: the package's non-SIMD
+  // tesseract-core-fallback.wasm is for browsers without WebAssembly SIMD, and every browser the site supports has
+  // it (the site's stated minimum requirements), so the fallback would only ever be downloaded, never run.
   {
     pkg: 'tesseract-wasm',
     dir: 'shared',
@@ -34,7 +36,6 @@ export const COPIED = [
       { from: 'dist/lib.js', to: 'tesseract-wasm/lib.js' },
       { from: 'dist/tesseract-worker.js', to: 'tesseract-wasm/tesseract-worker.js' },
       { from: 'dist/tesseract-core.wasm', to: 'tesseract-wasm/tesseract-core.wasm' },
-      { from: 'dist/tesseract-core-fallback.wasm', to: 'tesseract-wasm/tesseract-core-fallback.wasm' },
     ],
     contains: ['comlink', 'tesseract-ocr', 'leptonica'],
   },

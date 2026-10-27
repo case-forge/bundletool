@@ -325,7 +325,7 @@ test('Advanced Settings has the switch, on by default, with help saying it appli
   assert.match(hint, /^On by default\./);
   assert.match(hint, /Only photos and pictures BundleTool converted/);
   assert.match(hint, /never a PDF/);
-  const panel = html.slice(html.indexOf('Page Setup</h4>'), html.indexOf('OCR (Searchable Text)'));
+  const panel = html.slice(html.indexOf('Page Setup</h3>'), html.indexOf('OCR (Searchable Text)'));
   assert.ok(panel.includes('config-smallerPhotos'), 'in the Page Setup panel');
 });
 

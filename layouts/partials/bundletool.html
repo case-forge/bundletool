@@ -9,10 +9,10 @@
     <!-- Step 1: Basic Information -->
     <div id="step-1-info" class="step-card">
       <div class="step-header">
-        <h3 class="text-base font-bold text-white flex items-center">
+        <h2 class="text-base font-bold text-white flex items-center">
           <span class="bt-step-badge">1</span>
           Basic Information
-        </h3>
+        </h2>
         <div class="flex items-center gap-2 shrink-0">
           <!-- The header's Clear All, hidden until any of the four fields
                below has something typed in it, as in the Review Table. Icon
@@ -137,10 +137,10 @@
     <!-- Step 2: Select Documents -->
     <div id="file-drop-zone" class="step-card">
       <div class="step-header">
-        <h3 class="text-base font-bold text-white flex items-center">
+        <h2 class="text-base font-bold text-white flex items-center">
           <span class="bt-step-badge">2</span>
           Select Documents
-        </h3>
+        </h2>
         <button type="button" class="step-collapse bt-step-toggle" aria-expanded="true" aria-label="Collapse this section" data-target="step-2-body">
           {{ partial "shared/icon.html" (dict "name" "keyboard_arrow_down" "class" "bt-icon-chevron") }}
         </button>
@@ -163,7 +163,7 @@
             <p id="file-input-hint" class="bt-hint">PDFs, photos and Word documents</p>
           </div>
           <div id="sections-column" class="bt-empty-col">
-            <button type="button" id="add-section-btn" class="add-section-btn bt-btn bt-btn--secondary bt-btn--block">
+            <button type="button" id="add-section-btn" class="add-section-btn bt-btn bt-btn--tertiary bt-btn--block">
               {{ partial "shared/icon.html" (dict "name" "segment" "class" "w-4 h-4 mr-2 shrink-0") }}
               Add Section
             </button>
@@ -173,10 +173,10 @@
               <button type="button" id="section-template-export-btn" class="bt-text-link font-medium hover:underline">export</button>
               a section layout as a file
             </p>
-            <input type="file" id="section-template-import-input" accept="application/json" class="sr-only" />
+            <input type="file" id="section-template-import-input" accept="application/json" class="sr-only" aria-label="Import a section layout file" />
           </div>
           <div id="coversheet-column" class="bt-empty-col">
-            <button type="button" id="cover-editor-open" class="bt-btn bt-btn--secondary bt-btn--block">
+            <button type="button" id="cover-editor-open" class="bt-btn bt-btn--tertiary bt-btn--block">
               {{ partial "shared/icon.html" (dict "name" "description" "class" "w-4 h-4 mr-2 shrink-0") }}
               <span id="coversheet-btn-text">Add Coversheet</span>
             </button>
@@ -188,7 +188,7 @@
             <div class="bt-hint" id="coversheet-section">
               <span id="coversheet-filename" class="italic hidden"></span>
               <span id="coversheet-converted" class="hidden bt-badge-converted" title="Converted from a Word document. Fonts, headers, footers and manual page breaks are not carried over. Check the converted page against the original before relying on it in the bundle.">converted</span>
-              <button id="coversheet-clear-btn" type="button" class="hidden text-red-400 hover:text-red-600 dark:hover:text-red-400 font-medium ml-1">Remove</button>
+              <button id="coversheet-clear-btn" type="button" class="bt-btn-link--danger-soft hidden font-medium ml-1">Remove</button>
             </div>
           </div>
         </div>
@@ -196,7 +196,7 @@
     </div>
 
     <!-- Validation progress bar (shown while files are being read and validated) -->
-    <div id="validation-progress" class="hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 shadow-sm">
+    <div id="validation-progress" class="hidden rounded-xl bg-white dark:bg-slate-800 px-4 py-3 shadow-sm">
       <div class="flex items-center justify-between mb-1.5">
         <span class="text-xs font-medium text-slate-600 dark:text-slate-400">Validating input files…</span>
         <span id="validation-progress-label" class="text-xs text-slate-400 dark:text-slate-500"></span>
@@ -210,17 +210,17 @@
     <div id="file-table" class="step-card">
       <div class="step-header flex-wrap">
         <div>
-          <h3 class="text-base font-bold text-white flex items-center">
+          <h2 class="text-base font-bold text-white flex items-center">
             <span class="bt-step-badge">3</span>
             Review Table
-          </h3>
+          </h2>
         </div>
         <div class="flex items-center gap-2 shrink-0 flex-wrap justify-end">
           <!-- Download and Clear All, hidden until a document has been added. The pair is built
                as Share and Reset are in Advanced Settings: the same classes, gap and nudge. -->
           <button id="download-docs-btn" type="button" hidden
             title="Download these documents, with any changes BundleTool made" aria-label="Download documents"
-            class="bt-icon-circle bt-icon-circle--accent">
+            class="bt-icon-circle bt-icon-circle--accent bt-icon-circle--pair">
             {{ partial "shared/icon.html" (dict "name" "download" "class" "w-4 h-4 pointer-events-none") }}
           </button>
           <button id="clear-all-rows-btn" type="button" hidden
@@ -286,30 +286,30 @@
 
     <!-- Section add-files popover (shown when clicking main add-files while sectioned) -->
     <div id="section-picker-popover" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/30" role="dialog" aria-modal="true" aria-labelledby="section-picker-popover-title">
-      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-200 dark:border-slate-700 p-4 w-80 max-w-full mx-4">
-        <h4 id="section-picker-popover-title" class="bt-subtitle mb-3">Add files to which section?</h4>
+      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl p-4 w-80 max-w-full mx-4">
+        <h3 id="section-picker-popover-title" class="bt-subtitle mb-3">Add files to which section?</h3>
         <div id="section-picker-list" class="bt-picker-list flex flex-col gap-2 mb-3"></div>
-        <button id="section-picker-cancel" type="button" class="w-full text-xs text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition py-1">Cancel</button>
+        <button id="section-picker-cancel" type="button" class="bt-btn-link w-full text-xs py-1">Cancel</button>
       </div>
     </div>
 
     <!-- What the Review Table's Download button downloads: each section, the documents in no
          section, or all of them (frontend/documentDownload.js). The same picker as the one above. -->
     <div id="download-picker-popover" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/30" role="dialog" aria-modal="true" aria-labelledby="download-picker-popover-title">
-      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-200 dark:border-slate-700 p-4 w-80 max-w-full mx-4">
-        <h4 id="download-picker-popover-title" class="bt-subtitle mb-3">Download which documents?</h4>
+      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl p-4 w-80 max-w-full mx-4">
+        <h3 id="download-picker-popover-title" class="bt-subtitle mb-3">Download which documents?</h3>
         <div id="download-picker-list" class="bt-picker-list flex flex-col gap-2 mb-3"></div>
-        <button id="download-picker-cancel" type="button" class="w-full text-xs text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition py-1">Cancel</button>
+        <button id="download-picker-cancel" type="button" class="bt-btn-link w-full text-xs py-1">Cancel</button>
       </div>
     </div>
 
     <!-- Step 4: Generate or Configure -->
     <div id="step-4-choice" class="step-card no-docs">
       <div class="step-header">
-        <h3 class="text-base font-bold text-white flex items-center">
+        <h2 class="text-base font-bold text-white flex items-center">
           <span class="bt-step-badge">4</span>
           Create Bundle
-        </h3>
+        </h2>
         <button type="button" class="step-collapse bt-step-toggle" aria-expanded="true" aria-label="Collapse this section" data-target="step-4-body">
           {{ partial "shared/icon.html" (dict "name" "keyboard_arrow_down" "class" "bt-icon-chevron") }}
         </button>
@@ -345,12 +345,12 @@
     <!-- Step 5: Advanced Settings -->
     <div id="advanced-settings" class="step-card">
       <div class="step-header">
-        <h3 class="text-base font-bold text-white flex items-center">
+        <h2 class="text-base font-bold text-white flex items-center">
           <span class="bt-step-badge shrink-0">
             {{ partial "shared/icon.html" (dict "name" "settings" "class" "bt-icon") }}
           </span>
           Advanced Settings
-        </h3>
+        </h2>
         <div class="flex items-center gap-2 shrink-0">
           <!-- Share and Reset, hidden until a setting differs from the
                factory default: the same reveal-when-relevant pattern as the
@@ -358,7 +358,7 @@
                settingsDiff() decides. -->
           <button id="share-advanced-btn" type="button" hidden
             title="Share these settings as a code" aria-label="Share settings"
-            class="bt-icon-circle bt-icon-circle--accent">
+            class="bt-icon-circle bt-icon-circle--accent bt-icon-circle--pair">
             {{ partial "shared/icon.html" (dict "name" "share" "class" "w-4 h-4 pointer-events-none") }}
           </button>
           <button id="reset-advanced-btn" type="button" hidden
@@ -375,9 +375,69 @@
       <div id="advanced-settings-body" class="hidden">
       <div class="p-3 space-y-3">
 
+        <!-- Just Assemble: three independent switches, each off by default (pageOptions.leaveOutIndex,
+             leaveOutPageNumbers, leaveOutBookmarks; the same keys on the command line). Nothing else is
+             disabled or hidden while they are on: the index and page-number settings keep their values for
+             when they are turned off. Just This Once (browser only) puts all four back to off after the next
+             bundle is made (frontend/justAssemble.js). -->
+        <div class="cf-panel">
+          <h4 class="bt-panel-title mb-2">Just Assemble</h4>
+          <p class="bt-hint mb-2">Put documents together with nothing added. Turn on all three to get exactly your pages, for example six photos of a statement as one six-page PDF. The index and page number settings below apply when these are off.</p>
+          <div class="bt-grid-3">
+            <div>
+              <p class="flex items-center bt-label mb-1">
+                {{ partial "shared/icon.html" (dict "name" "playlist_remove" "class" "bt-icon-tiny") }}
+                Leave Out Index
+              </p>
+              <label class="bt-toggle-wrap">
+                <input type="checkbox" id="config-leaveOutIndex" class="sr-only peer" aria-label="Leave Out Index">
+                <div class="bt-toggle-pill bg-gray-200 dark:bg-slate-500 peer after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+                <span aria-hidden="true" class="bt-toggle-label text-xs text-gray-500 dark:text-slate-400 transition after:content-['Off'] peer-checked:after:content-['On']"></span>
+              </label>
+              <p class="bt-hint mt-1">No index page. The first document page is page 1 (after the cover, if there is one, which is not numbered).</p>
+            </div>
+            <div>
+              <p class="flex items-center bt-label mb-1">
+                {{ partial "shared/icon.html" (dict "name" "numbers" "class" "bt-icon-tiny") }}
+                Leave Out Page Numbers
+              </p>
+              <label class="bt-toggle-wrap">
+                <input type="checkbox" id="config-leaveOutPageNumbers" class="sr-only peer" aria-label="Leave Out Page Numbers">
+                <div class="bt-toggle-pill bg-gray-200 dark:bg-slate-500 peer after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+                <span aria-hidden="true" class="bt-toggle-label text-xs text-gray-500 dark:text-slate-400 transition after:content-['Off'] peer-checked:after:content-['On']"></span>
+              </label>
+              <p class="bt-hint mt-1">No page number on any page. Your numbering style is kept for when this is off.</p>
+            </div>
+            <div>
+              <p class="flex items-center bt-label mb-1">
+                {{ partial "shared/icon.html" (dict "name" "bookmark_remove" "class" "bt-icon-tiny") }}
+                Leave Out Bookmarks
+              </p>
+              <label class="bt-toggle-wrap">
+                <input type="checkbox" id="config-leaveOutBookmarks" class="sr-only peer" aria-label="Leave Out Bookmarks">
+                <div class="bt-toggle-pill bg-gray-200 dark:bg-slate-500 peer after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+                <span aria-hidden="true" class="bt-toggle-label text-xs text-gray-500 dark:text-slate-400 transition after:content-['Off'] peer-checked:after:content-['On']"></span>
+              </label>
+              <p class="bt-hint mt-1">No bookmarks in the PDF.</p>
+            </div>
+            <div>
+              <p class="flex items-center bt-label mb-1">
+                {{ partial "shared/icon.html" (dict "name" "counter_1" "class" "bt-icon-tiny") }}
+                Just This Once
+              </p>
+              <label class="bt-toggle-wrap">
+                <input type="checkbox" id="config-justAssembleOnce" class="sr-only peer" aria-label="Just This Once">
+                <div class="bt-toggle-pill bg-gray-200 dark:bg-slate-500 peer after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+                <span aria-hidden="true" class="bt-toggle-label text-xs text-gray-500 dark:text-slate-400 transition after:content-['Off'] peer-checked:after:content-['On']"></span>
+              </label>
+              <p class="bt-hint mt-1">Turns these back off after the next bundle is made, so the one after is normal.</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Index Options -->
         <div class="cf-panel">
-          <h4 class="bt-panel-title mb-2">Index Options</h4>
+          <h3 class="bt-panel-title mb-2">Index Options</h3>
 
           <div class="bt-grid-3">
 
@@ -440,7 +500,7 @@
             <!-- Date Reading Order -->
             <div>
               <label for="config-dateInputOrder" class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "calendar_month" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "calendar_clock" "class" "bt-icon-tiny") }}
                 Date Reading Order
               </label>
               <select id="config-dateInputOrder" class="w-full px-2 py-1 bt-input">
@@ -514,7 +574,7 @@
              per-bundle design choice, so they sit with the rest of the
              remembered settings rather than inside the coversheet maker. -->
         <div class="cf-panel">
-          <h4 class="bt-panel-title mb-2">Coversheet</h4>
+          <h3 class="bt-panel-title mb-2">Coversheet</h3>
           <div class="bt-grid-3">
             <!-- Party Labels, Case Number Label, Prepared By Label and Party Joiner are each a choice of presets and
                  nothing else (no "Other"). The hidden inputs are the stored settings (config-partyLabel1/2, empty
@@ -543,7 +603,7 @@
                  of it, kept in step by frontend/advancedState.js. -->
             <div>
               <label for="config-caseNumberLabelPreset" class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "dashboard" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "hash" "class" "bt-icon-tiny") }}
                 Case Number Label
               </label>
               <select id="config-caseNumberLabelPreset" class="w-full px-2 py-1 bt-input">
@@ -564,7 +624,7 @@
                  columns, A4, sans). -->
             <div>
               <label for="config-preparedByLabelPreset" class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "dashboard" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "user_pen" "class" "bt-icon-tiny") }}
                 Prepared By Label
               </label>
               <select id="config-preparedByLabelPreset" class="w-full px-2 py-1 bt-input">
@@ -587,7 +647,7 @@
                  typing past it. -->
             <div>
               <label for="config-partyJoinerPreset" class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "dashboard" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "ampersand" "class" "bt-icon-tiny") }}
                 Party Joiner
               </label>
               <select id="config-partyJoinerPreset" class="w-full px-2 py-1 bt-input">
@@ -599,7 +659,7 @@
             </div>
             <div>
               <p class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "dashboard" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "columns_2" "class" "bt-icon-tiny") }}
                 Cover Layout
               </p>
               <div class="bt-segmented">
@@ -611,7 +671,7 @@
             </div>
             <div>
               <p class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "dashboard" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "gavel" "class" "bt-icon-tiny") }}
                 Case Number
               </p>
               <div class="bt-segmented">
@@ -623,7 +683,7 @@
             </div>
             <div>
               <p class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "format_align_left" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "align_h_center" "class" "bt-icon-tiny") }}
                 Case Number Position
               </p>
               <div class="bt-segmented">
@@ -636,7 +696,7 @@
             </div>
             <div>
               <p class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "format_align_left" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "align_center" "class" "bt-icon-tiny") }}
                 Heading Position
               </p>
               <div class="bt-segmented">
@@ -649,7 +709,7 @@
             </div>
             <div>
               <p class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "dashboard" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "rows_2" "class" "bt-icon-tiny") }}
                 Party Labels Sit
               </p>
               <div class="bt-segmented">
@@ -661,7 +721,7 @@
             </div>
             <div>
               <p class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "format_align_left" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "align_h_space" "class" "bt-icon-tiny") }}
                 Party Position
               </p>
               <div class="bt-segmented">
@@ -674,7 +734,7 @@
             </div>
             <div>
               <p class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "dashboard" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "equal" "class" "bt-icon-tiny") }}
                 Title Lines
               </p>
               <div class="bt-segmented">
@@ -692,7 +752,7 @@
              configuration rather than in Basic Information. The watermark
              below marks every page, not just the index and cover. -->
         <div class="cf-panel">
-          <h4 class="bt-panel-title mb-2">Confidentiality &amp; Security</h4>
+          <h3 class="bt-panel-title mb-2">Confidentiality &amp; Security</h3>
           <div class="bt-grid-3">
 
             <div>
@@ -709,7 +769,7 @@
                   placeholder="Optional"
                   maxlength="500"
                 />
-                <button type="button" data-pw-toggle="config-bundlePassword" tabindex="-1"
+                <button type="button" data-pw-toggle="config-bundlePassword"
                   class="pw-eye absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-200 transition"
                   aria-label="Show password" aria-pressed="false" title="Show password" hidden>
                   {{ partial "shared/icon.html" (dict "name" "visibility" "class" "pw-eye-open w-4 h-4") }}
@@ -748,11 +808,11 @@
 
         <!-- Page Setup: what applies to the pages themselves rather than to the numbers on them. -->
         <div class="cf-panel">
-          <h4 class="bt-panel-title mb-2">Page Setup</h4>
+          <h3 class="bt-panel-title mb-2">Page Setup</h3>
           <div class="bt-grid-3">
             <div>
               <label for="config-pageSize" class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "description" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "file" "class" "bt-icon-tiny") }}
                 Page Size
               </label>
               <select id="config-pageSize" class="w-full px-2 py-1 bt-input">
@@ -781,7 +841,7 @@
                  bundle is built, to documents BundleTool made from pictures only (frontend/smallerPhotos.js). -->
             <div>
               <p class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "description" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "image_down" "class" "bt-icon-tiny") }}
                 Smaller Photos
               </p>
               <label class="bt-toggle-wrap">
@@ -799,11 +859,11 @@
              OCR on a document in the Review Table always works, on or off. The two settings after it
              are off by default and change only scanned pages as they are read (bundletoolOcrReorient.js). -->
         <div class="cf-panel">
-          <h4 class="bt-panel-title mb-2">OCR (Searchable Text)</h4>
+          <h3 class="bt-panel-title mb-2">OCR (Searchable Text)</h3>
           <div class="bt-grid-3">
             <div>
               <p class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "description" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "scan_text" "class" "bt-icon-tiny") }}
                 Detect and Read Scanned Pages Automatically
               </p>
               <label class="bt-toggle-wrap">
@@ -817,7 +877,7 @@
             <!-- Turn Sideways Pages Upright (config-ocrTurnUpright, ocr.turnUpright): off by default. -->
             <div>
               <p class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "description" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "rotate_cw" "class" "bt-icon-tiny") }}
                 Turn Sideways Scanned Pages Upright
               </p>
               <label class="bt-toggle-wrap">
@@ -831,7 +891,7 @@
             <!-- Straighten Tilted Pages (config-ocrStraighten, ocr.straighten): off by default. -->
             <div>
               <p class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "description" "class" "bt-icon-tiny") }}
+                {{ partial "shared/icon.html" (dict "name" "scan_line" "class" "bt-icon-tiny") }}
                 Straighten Tilted Scanned Pages
               </p>
               <label class="bt-toggle-wrap">
@@ -847,7 +907,7 @@
         <!-- Split for Email: which way the Split for email dialog opens. It is only the starting choice;
              the dialog can still be switched, and it falls back to size for a PDF that records no sections. -->
         <div class="cf-panel">
-          <h4 class="bt-panel-title mb-2">Split for Email</h4>
+          <h3 class="bt-panel-title mb-2">Split for Email</h3>
           <div class="bt-grid-3">
             <div>
               <p class="flex items-center bt-label mb-1">
@@ -866,7 +926,7 @@
 
         <!-- Page Numbering. Every setting stays editable whatever the others say. -->
         <div class="cf-panel">
-          <h4 class="bt-panel-title mb-2">Page Numbering</h4>
+          <h3 class="bt-panel-title mb-2">Page Numbering</h3>
 
           <div class="bt-grid-3">
 
@@ -1016,7 +1076,7 @@
         </div>
 
         <div class="cf-panel">
-          <h4 class="bt-panel-title mb-2">Interface</h4>
+          <h3 class="bt-panel-title mb-2">Interface</h3>
           <div class="bt-grid-3">
             <div>
               <p class="flex items-center bt-label mb-1">
@@ -1043,7 +1103,7 @@
 </div>
 
 <!-- Autosave restore modal -->
-<div id="autosave-modal" class="hidden flex items-center justify-center bt-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="autosave-modal-title">
+<div id="autosave-modal" data-return-focus="#drawer-btn" class="hidden flex items-center justify-center bt-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="autosave-modal-title">
   <div class="bt-modal-panel p-4 max-w-xs w-full mx-4 flex flex-col max-h-[80vh]">
     <div class="flex items-center justify-between mb-3 shrink-0">
       <h3 id="autosave-modal-title" class="bt-subtitle">Rewind to an earlier save</h3>
@@ -1054,14 +1114,14 @@
     <p class="bt-hint mb-3 shrink-0">Your work saves here automatically as you go. Rewinding replaces the current documents and settings with the save you pick</p>
     <div id="autosave-snapshot-list" class="space-y-2 overflow-y-auto"></div>
     <div class="shrink-0 mt-3 pt-3 border-t border-gray-200 dark:border-slate-600 text-center">
-      <button id="autosave-delete-all-btn" type="button" class="bt-btn-flush text-xs text-red-400 hover:text-red-600 dark:hover:text-red-400">Delete all saved copies</button>
+      <button id="autosave-delete-all-btn" type="button" class="bt-btn-flush bt-btn-flush--danger text-xs">Delete all saved copies</button>
       <p id="autosave-delete-all-note" class="bt-hint mt-1" role="status">Removes every working copy and finished bundle this browser has stored. What is on this page stays until you close or refresh it, and nothing is saved again until you change something</p>
     </div>
   </div>
 </div>
 
 <!-- Finished bundles modal -->
-<div id="finished-bundles-modal" class="hidden flex items-center justify-center bt-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="finished-bundles-modal-title">
+<div id="finished-bundles-modal" data-return-focus="#drawer-btn" class="hidden flex items-center justify-center bt-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="finished-bundles-modal-title">
   <div class="bt-modal-panel p-4 max-w-xs w-full mx-4 flex flex-col max-h-[80vh]">
     <div class="flex items-center justify-between mb-3 shrink-0">
       <h3 id="finished-bundles-modal-title" class="bt-subtitle">Recent bundles</h3>
@@ -1072,7 +1132,7 @@
     <p class="bt-hint mb-3 shrink-0">Saved in this browser</p>
     <div id="finished-bundles-list" class="space-y-2 overflow-y-auto"></div>
     <div class="shrink-0 mt-3 pt-3 border-t border-gray-200 dark:border-slate-600 text-center">
-      <button id="finished-delete-all-btn" type="button" class="bt-btn-flush text-xs text-red-400 hover:text-red-600 dark:hover:text-red-400">Delete all saved copies</button>
+      <button id="finished-delete-all-btn" type="button" class="bt-btn-flush bt-btn-flush--danger text-xs">Delete all saved copies</button>
       <p id="finished-delete-all-note" class="bt-hint mt-1" role="status">Removes every working copy and finished bundle this browser has stored. What is on this page stays until you close or refresh it, and nothing is saved again until you change something</p>
     </div>
   </div>
@@ -1160,10 +1220,10 @@
         <button id="email-split-again" type="button" class="px-4 py-2 bt-btn-neutral bt-btn-neutral--muted">
           Change settings
         </button>
-        <button id="email-split-download-all" type="button" class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition">
+        <button id="email-split-download-all" type="button" class="bt-btn--success px-4 py-2 text-sm font-medium rounded-lg transition">
           Download all
         </button>
-        <button id="email-split-download-zip" type="button" class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition">
+        <button id="email-split-download-zip" type="button" class="bt-btn--success px-4 py-2 text-sm font-medium rounded-lg transition">
           Download zip
         </button>
       </div>
@@ -1230,14 +1290,14 @@
 </div>
 
 <div id="restore-notice" class="hidden mx-auto max-w-4xl mb-4 px-4" role="status">
-  <div class="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-700 p-4">
+  <div class="rounded-xl bg-amber-50 dark:bg-amber-950/40 p-4">
     <p id="restore-notice-title" class="text-sm font-semibold text-amber-900 dark:text-amber-200 mb-1"></p>
     <p id="restore-notice-msg" class="text-sm text-amber-800 dark:text-amber-300 mb-3"></p>
     <p id="restore-notice-code" class="hidden bt-hint bt-error-code"></p>
-    <button id="restore-notice-dismiss" type="button" class="px-3 py-1.5 text-sm font-medium text-amber-900 dark:text-amber-200 hover:underline">
+    <button id="restore-notice-dismiss" type="button" class="bt-btn-link--notice px-3 py-1.5 text-sm font-medium">
       Dismiss
     </button>
-    <button id="restore-notice-delete-all" type="button" class="px-3 py-1.5 text-sm font-medium text-red-700 dark:text-red-400 hover:underline">Delete all</button>
+    <button id="restore-notice-delete-all" type="button" class="bt-btn-link--danger-deep px-3 py-1.5 text-sm font-medium">Delete all</button>
   </div>
 </div>
 
@@ -1247,9 +1307,9 @@
     <p class="text-sm font-medium text-gray-800 dark:text-slate-200 mb-1 break-all" id="pdf-password-name"></p>
     <p class="bt-caption mb-3">Enter the document's password and BundleTool will unlock it on your device. Nothing is uploaded anywhere.</p>
     <div class="relative mb-1">
-      <input type="password" id="pdf-password-input" autocomplete="off"
+      <input type="password" id="pdf-password-input" autocomplete="off" aria-label="PDF password"
         class="w-full px-2 py-1.5 pr-9 bt-input" />
-      <button type="button" data-pw-toggle="pdf-password-input" tabindex="-1"
+      <button type="button" data-pw-toggle="pdf-password-input"
                 class="pw-eye absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-200 transition"
                 aria-label="Show password" aria-pressed="false" title="Show password" hidden>
                 {{ partial "shared/icon.html" (dict "name" "visibility" "class" "pw-eye-open w-4 h-4") }}
@@ -1301,7 +1361,7 @@
          for the person to confirm or discard. -->
     <p id="ce-draft-restored-notice" class="bt-hint mb-3 shrink-0" hidden>
       Restored what you last typed here, not yet saved to the coversheet.
-      <button type="button" id="ce-draft-discard" class="bt-text-link font-medium hover:underline">Discard and start fresh</button>
+      <button type="button" id="ce-draft-discard" class="bt-btn-link--danger-deep font-medium hover:underline">Discard and start fresh</button>
     </p>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto min-h-0 grow">
       <div class="ce-fields space-y-2">
@@ -1356,7 +1416,7 @@
              <iframe>: the native viewer varies by browser (Firefox shows its
              own PDF.js toolbar, Brave can show nothing at all). The rounded
              frame keeps the page from sitting flush in a near-square corner. -->
-        <div class="relative w-full bg-gray-100 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 overflow-hidden" style="aspect-ratio: 210 / 297; border-radius: 16px;">
+        <div class="relative w-full bg-gray-100 dark:bg-slate-900 overflow-hidden" style="aspect-ratio: 210 / 297; border-radius: 16px;">
           <canvas id="cover-editor-preview" aria-label="Coversheet preview" class="absolute w-full h-full object-contain" style="inset: 20px; width: calc(100% - 40px); height: calc(100% - 40px);"></canvas>
           <div id="cover-editor-no-preview" class="hidden absolute inset-0 flex items-center justify-center p-6 text-center">
             <p class="bt-caption">The preview could not be drawn. Your coversheet is still generated exactly as these fields describe, and everything here still works. <span class="bt-error-code">Error code BT-COVER-08</span></p>
@@ -1454,7 +1514,7 @@
       <p id="rotate-remove-question" class="bt-caption"></p>
       <div class="flex gap-3 justify-center mt-2">
         <button id="rotate-remove-keep" type="button" class="px-4 py-2 bt-btn-flush">Keep it</button>
-        <button id="rotate-remove-yes" type="button" class="bt-btn-modal bg-red-500 hover:bg-red-600 text-white">Remove page</button>
+        <button id="rotate-remove-yes" type="button" class="bt-btn-modal bt-btn--danger">Remove page</button>
       </div>
     </div>
     <div class="bt-rotate-footer flex gap-3 justify-end mt-3 shrink-0">
@@ -1468,7 +1528,7 @@
   <div class="bt-modal-panel p-5 max-w-sm w-full mx-4">
     <div class="flex items-start justify-between gap-3 mb-3">
       <h3 id="share-code-modal-title" class="bt-subtitle">Share these settings</h3>
-      <button id="share-code-modal-close" type="button" class="text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition shrink-0" aria-label="Close">
+      <button id="share-code-modal-close" type="button" class="bt-btn-link shrink-0" aria-label="Close">
         {{ partial "shared/icon.html" (dict "name" "close" "class" "bt-icon") }}
       </button>
     </div>
@@ -1488,7 +1548,7 @@
         {{ partial "shared/icon.html" (dict "name" "close" "class" "bt-icon") }}
       </button>
     </div>
-    <div class="relative w-full grow min-h-0 bg-gray-100 dark:bg-slate-900 rounded border border-gray-200 dark:border-slate-700 overflow-hidden">
+    <div class="relative w-full grow min-h-0 bg-gray-100 dark:bg-slate-900 rounded overflow-hidden">
       <iframe id="bundle-preview-frame" title="Bundle preview" class="absolute inset-0 w-full h-full"></iframe>
       <div id="bundle-preview-no-viewer" class="hidden absolute inset-0 flex items-center justify-center p-6 text-center">
         <p class="bt-caption">This browser cannot display PDF previews (most phones cannot). Your bundle was still built exactly as configured. Use Save bundle below to download and open it.</p>
@@ -1549,7 +1609,7 @@
       <button id="bundle-detected-asis" type="button" class="w-full px-4 bt-btn-neutral bt-btn--tall">
         Add it as one document
       </button>
-      <button id="bundle-detected-skip" type="button" class="w-full px-4 py-2 text-sm font-medium text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition">
+      <button id="bundle-detected-skip" type="button" class="bt-btn-link w-full px-4 py-2 text-sm font-medium">
         Skip this file
       </button>
     </div>
@@ -1581,7 +1641,7 @@
     <h3 id="bundle-confirm-modal-title" class="bt-modal-title mb-2">Missing information</h3>
     <p id="bundle-confirm-msg" class="bt-caption mb-5"></p>
     <div class="bt-modal-actions">
-      <button id="bundle-confirm-addinfo" type="button" class="px-4 py-2 bt-btn-neutral">
+      <button id="bundle-confirm-addinfo" type="button" class="px-4 py-2 bt-btn-flush">
         Add info
       </button>
       <button id="bundle-confirm-sure" type="button" class="bt-btn-modal bt-btn--primary">
@@ -1596,7 +1656,7 @@
     <h3 id="unnamed-sections-modal-title" class="bt-modal-title mb-2">Sections without a name</h3>
     <p id="unnamed-sections-msg" class="bt-caption mb-5"></p>
     <div class="bt-modal-actions">
-      <button id="unnamed-sections-name" type="button" class="px-4 py-2 bt-btn-neutral">
+      <button id="unnamed-sections-name" type="button" class="px-4 py-2 bt-btn-flush">
         Name them
       </button>
       <button id="unnamed-sections-continue" type="button" class="bt-btn-modal bt-btn--primary">
@@ -1704,7 +1764,7 @@
         <button id="delete-section-move-btn" type="button" class="w-full px-4 bt-btn-neutral bt-btn-neutral--muted bt-btn--tall">
           Move files to another section…
         </button>
-        <button id="delete-section-remove-btn" type="button" class="w-full px-4 py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition">
+        <button id="delete-section-remove-btn" type="button" class="bt-btn--danger w-full px-4 py-2.5 text-sm font-medium rounded-lg transition">
           Remove files
         </button>
         <button id="delete-section-cancel-btn" type="button" class="w-full px-4 bt-btn-flush bt-btn--tall">
@@ -1732,7 +1792,7 @@
       <button id="clear-all-cancel-btn" type="button" class="px-4 py-2 bt-btn-flush">
         Cancel
       </button>
-      <button id="clear-all-confirm-btn" type="button" class="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition">
+      <button id="clear-all-confirm-btn" type="button" class="bt-btn--danger px-4 py-2 text-sm font-medium rounded-lg transition">
         Clear all
       </button>
     </div>
@@ -1749,7 +1809,7 @@
       <button id="basic-info-clear-cancel-btn" type="button" class="px-4 py-2 bt-btn-flush">
         Cancel
       </button>
-      <button id="basic-info-clear-confirm-btn" type="button" class="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition">
+      <button id="basic-info-clear-confirm-btn" type="button" class="bt-btn--danger px-4 py-2 text-sm font-medium rounded-lg transition">
         Clear fields
       </button>
     </div>
@@ -1766,7 +1826,7 @@
       <button id="advanced-reset-cancel-btn" type="button" class="px-4 py-2 bt-btn-flush">
         Cancel
       </button>
-      <button id="advanced-reset-confirm-btn" type="button" class="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition">
+      <button id="advanced-reset-confirm-btn" type="button" class="bt-btn--danger px-4 py-2 text-sm font-medium rounded-lg transition">
         Reset all
       </button>
     </div>
@@ -1812,7 +1872,7 @@
       <a id="error-modal-report-link" href="https://caseforge.uk/contact/" target="_blank" rel="noopener noreferrer" class="hidden bt-btn-modal bt-btn--primary text-center">
         Report this bug
       </a>
-      <button id="error-modal-close" type="button" class="bt-btn-modal bt-btn--primary">
+      <button id="error-modal-close" type="button" class="bt-btn-modal bt-btn-neutral">
         Close
       </button>
     </div>

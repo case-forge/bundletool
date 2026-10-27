@@ -130,7 +130,7 @@ test('with 100 sections the picker lists all of them, and "Create new section" i
   assert.match(templateBlock(html, 'section-picker-list'), /class="bt-picker-list /);
   assert.match(css, /\.bt-picker-list \{[^}]*overflow-y: auto;/);
   assert.match(css, /\.bt-picker-list button:disabled \{ opacity: 0\.5; cursor: not-allowed; \}/);
-  assert.match(css, /#add-section-btn:disabled \{ opacity: 0\.5; cursor: not-allowed; \}/);
+  assert.match(css, /\.bt-btn:disabled \{ opacity: 0\.5; cursor: not-allowed; \}/);
 });
 
 // ── Labels ──────────────────────────────────────────────────────────────────────

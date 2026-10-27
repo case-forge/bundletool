@@ -46,6 +46,9 @@ export const SETTING_HELP = {
   'pageOptions.watermarkText': 'The watermark wording. Blank draws CONFIDENTIAL.',
   'pageOptions.watermarkColour': 'Watermark colour, #rrggbb.',
   'pageOptions.watermarkOpacity': 'Watermark opacity, 0 to 100.',
+  'pageOptions.leaveOutIndex': 'Just assemble. true leaves out the index page: none is drawn or counted, there is no Index bookmark, and the first document page is page 1 (with a cover, the cover is unnumbered and the page after it is page 1, whatever pageNumbering.frontMatterNumbering says). The index.* settings are kept for when it is false again. Also --no-index.',
+  'pageOptions.leaveOutPageNumbers': 'Just assemble. true draws no page-number footer (no number, plate or footer link) on any page. pageNumbering.numberingStyle is kept as it is, for when it is false again. Also --no-page-numbers.',
+  'pageOptions.leaveOutBookmarks': 'Just assemble. true writes no bookmarks (PDF outline). Also --no-bookmarks. All three Just assemble settings true give exactly the input pages, in order.',
   'pageOptions.smallerPhotos': 'true (the default) puts each JPEG or PNG the tool turned into a page into the bundle at most 2000 pixels on its long edge, as a JPEG at quality 85, after OCR has read the full picture; the page looks the same and the file is much smaller. A PDF is never changed. false keeps the pictures as they are. Needs @napi-rs/canvas; without it the pictures stay as they are (photo_not_smaller).',
   'cover.courtName': 'The court line at the top of a generated cover.',
   'cover.matterOf': 'The subheading lines under the court, one per newline (for example the statute).',
@@ -72,6 +75,17 @@ export const SETTING_HELP = {
   'ocr.straighten': 'true turns a scanned page OCR finds tilted (up to 10 degrees) level, by wrapping its content in a rotation about the page\'s centre: the scan is not redrawn, the page keeps its size and its outer corners are trimmed. The text layer is drawn level over it. A page with links, form fields or comments is left as scanned (ocr_not_straightened). Only pages OCR reads that have no text of their own. Off by default.',
   'ocr.mode': 'auto (the default) OCRs a page only if its own text layer is too short to search, the same check and threshold the browser uses; off skips the check for every file (a file\'s own "forceOcr" still overrides off for that one file). Needs @napi-rs/canvas and tesseract-wasm on this machine; if either is not available, the bundle still builds, just without a text layer for the pages that needed OCR (ocr_unavailable).',
 };
+
+/**
+ * Just assemble: three independent switches, each a setting (pageOptions.*) and a command-line flag that
+ * turns it on for one run. Declared once here; build-cli.mjs reads the flags from this table and the help
+ * lists them from it. All three together give exactly the input pages, in order.
+ */
+export const JUST_ASSEMBLE = [
+  { flag: '--no-index', key: 'pageOptions.leaveOutIndex', what: 'Leave out the index page (pageOptions.leaveOutIndex true).' },
+  { flag: '--no-page-numbers', key: 'pageOptions.leaveOutPageNumbers', what: 'Leave out the page numbers (pageOptions.leaveOutPageNumbers true).' },
+  { flag: '--no-bookmarks', key: 'pageOptions.leaveOutBookmarks', what: 'Leave out the bookmarks (pageOptions.leaveOutBookmarks true).' },
+];
 
 /** Allowed values by setting key, taken from the engine's own valid* lists (names in bundletoolConfig.js). */
 const ALLOWED = (c) => ({
@@ -152,6 +166,18 @@ export const EXAMPLES = [
     },
     note: 'The manifest is data only. Put the source files in docs/. The result says how many pages the cover, index and documents came to.',
   },
+  {
+    title: 'Just assemble: combine three photos and a PDF into one PDF of exactly those pages, with no index, page numbers or bookmarks',
+    args: ['--json', '--no-index', '--no-page-numbers', '--no-bookmarks', 'manifest.json', 'docs', 'combined.pdf'],
+    files: {
+      'manifest.json': {
+        schemaVersion: 1,
+        sections: [{ files: [{ filename: 'page-1.pdf' }, { filename: 'page-2.pdf' }, { filename: 'page-3.pdf' }, { filename: 'notes.pdf' }] }],
+      },
+      'docs/page-1.pdf': '@pdf:1', 'docs/page-2.pdf': '@pdf:1', 'docs/page-3.pdf': '@pdf:1', 'docs/notes.pdf': '@pdf:2',
+    },
+    note: 'The three flags are the same as pageOptions.leaveOutIndex, leaveOutPageNumbers and leaveOutBookmarks set true in config; each works on its own too. JPEG and PNG photos are named the same way as PDFs.',
+  },
   { title: 'List every setting the manifest\'s "config" may carry, with its default', args: ['--config-keys'], files: {} },
   { title: 'Print the manifest\'s JSON Schema', args: ['--schema'], files: {} },
 ];
@@ -177,6 +203,7 @@ export async function buildDoc({ version, limits }) {
     usage: ['bundletool [--json] <manifest.json> <docs-dir> <output.pdf>', 'bundletool --config-keys | --schema | --version', 'bundletool --help [topic]'],
     options: [
       ['--json', 'Write exactly one JSON object to stdout, on success and on failure, and nothing else.'],
+      ...JUST_ASSEMBLE.map(({ flag, what }) => [flag, what]),
       ['--force', 'Overwrite the output file if it already exists (refused otherwise, with output_exists). Also -f.'],
       ['--config-keys', 'List every setting the manifest\'s "config" may carry, with its default.'],
       ['--schema', 'Print the manifest\'s JSON Schema.'],

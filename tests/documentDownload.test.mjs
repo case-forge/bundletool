@@ -101,7 +101,7 @@ test('the Download button sits beside Clear All as Share sits beside Reset: same
   const header = /<div id="file-table"[\s\S]*?<div class="([^"]*)">\s*<!--[\s\S]*?-->\s*<button id="download-docs-btn"[\s\S]*?<\/button>\s*<button id="clear-all-rows-btn"/.exec(html);
   assert.ok(header, 'Download comes straight before Clear All');
   assert.match(header[1], /\bflex items-center gap-2 shrink-0\b/, 'in a row with the same gap and alignment as Advanced Settings');
-  assert.match(css, /#share-advanced-btn,\s*#download-docs-btn\s*\{\s*margin-right: -\.25rem;/, 'the same nudge towards its neighbour');
+  assert.match(css, /\.bt-icon-circle--pair\s*\{\s*margin-right: -\.25rem;/, 'the same nudge towards its neighbour');
   assert.match(css, /\.bt-icon-circle--accent:hover\s*\{/);
   assert.match(css, /\[data-palette=modern\] \.bt-icon-circle--accent:hover\s*\{/);
 });

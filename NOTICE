@@ -56,7 +56,7 @@ THIRD-PARTY-LICENSES/ holds the full licence text of every package and
 component shipped, inside the vendored files and outside them: each npm
 package's own licence file, verbatim; for the parts that are not npm packages
 (pdf.js, Tesseract and Leptonica inside the OCR engine, eng.traineddata,
-Tailwind CSS, Material Symbols) the project's own licence file, verbatim; and
+Tailwind CSS, Lucide) the project's own licence file, verbatim; and
 for the two packages that ship no licence file (qrcode-generator,
 @pdf-lib/fontkit) the MIT text with the copyright line the project gives.
 Together with this file it is the record each licence asks for.
@@ -155,9 +155,10 @@ BSD-2-Clause
     https://github.com/tesseract-ocr/tesseract) and Leptonica (its own
     permissive BSD-style licence), stripped of browser-irrelevant code
     (image-format parsing the browser's own Canvas already does) and
-    compiled to WebAssembly, one SIMD build and one non-SIMD fallback the
-    library itself feature-detects between. Depends on comlink (below).
-    Self-hosted: lib.js, tesseract-worker.js and both .wasm files are copied
+    compiled to WebAssembly. Of the package's SIMD build and non-SIMD
+    fallback only the SIMD build is shipped (WebAssembly SIMD is a minimum
+    requirement). Depends on comlink (below).
+    Self-hosted: lib.js, tesseract-worker.js and tesseract-core.wasm are copied
     unmodified from the package's own dist/ by scripts/build-vendor.mjs into
     static/vendor/tesseract-wasm/, the one directory the library resolves
     everything relative to by default, so nothing here is fetched from a
@@ -310,12 +311,12 @@ licence field, named because they are not simply permissive:
 Icons and artwork
 -----------------
 
-Material Symbols: https://github.com/google/material-design-icons
-Copyright (c) Google LLC
-Apache-2.0
+Lucide: https://lucide.dev
+Copyright (c) 2026 Lucide Icons and Contributors
+ISC
 
-    The interface icons throughout the site, via the @material-symbols/svg-400
-    package, as the inline SVG paths in data/icons.json.
+    The interface icons throughout the site, via the lucide-static
+    package, as the inline SVG shapes in data/icons.json.
 
 Fonts
 -----
