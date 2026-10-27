@@ -34,7 +34,7 @@ BunTool's own roadmap is the yardstick, so the changes are grouped against it. E
 
 Part done:
 
-- **Caching.** The shared page chrome is fingerprinted and cached for a year. BundleTool's own scripts and its fonts have fixed names, so they are revalidated on every visit (`no-cache`). Caching them for longer would need a build step that fingerprints them, which this repository does not have.
+- **Caching.** The shared page chrome is fingerprinted and cached for a year. BundleTool's own scripts and its fonts have fixed names, so they are revalidated on every visit (`no-cache`). Caching them for longer by fingerprinting them was tried twice and rejected for good: the first attempt gained about 1.3 s on a repeat visit, and only for a visitor with no offline copy, such as one whose ad blocker stops the service worker; the second was built, measured and audited, and was unusable (`docs/fingerprinting.md`). It is not planned.
 
 ### Beyond the roadmap
 

@@ -1,9 +1,9 @@
 # Architecture
 
 How the code under `public/js/` is organised. This is for someone changing
-the code; for what the tool does and how to run it, see `README.md`. A design
-for serving these files under version-stamped names, so they can be cached
-for a year, is in `docs/fingerprinting.md`.
+the code; for what the tool does and how to run it, see `README.md`. Serving
+these files under version-stamped names was tried and rejected for good; see
+`docs/fingerprinting.md`.
 
 The PDF engine is **@cantoo/pdf-lib** (MIT) throughout, the only PDF engine
 the application loads. Every module reaches it through one file,

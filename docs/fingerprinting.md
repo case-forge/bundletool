@@ -1,8 +1,8 @@
-# Version-stamped file names: built, measured, not shipped
+# Version-stamped file names: rejected for good
 
 BundleTool serves its scripts and fonts under plain names, such as `public/js/frontend.js`, with `Cache-Control: no-cache`, so a browser checks each file with the server on every visit (about 140 requests answered `304`). A file whose name carries a stamp of its own content, such as `frontend.3fa9c1d2.js`, could be cached for a year and never checked.
 
-We built that, tested it and measured it, and did not ship it. This page records what was tried and what we found, so that nobody else spends the time. The design that follows the findings is how it was built, kept for reference.
+**Rejected for good. Do not propose it again.** Two serious attempts were made. The first showed essentially no gain: about 1.3 s on a repeat visit, and only for a visitor with no offline copy (for example one whose ad blocker stops the service worker). The second built it in full, measured it and audited it, and found it unusable. This page records what was tried and what we found, so that nobody else spends the time. The design that follows the findings is how it was built, kept for reference.
 
 ## What we found
 
@@ -25,15 +25,6 @@ Measured on an HTTP/2 test setup (real `304`s, brotli, 40 ms and 10 Mbps, plus a
 ## What we did instead
 
 The bytes returning visitors really paid were elsewhere. After every deploy the offline copy deleted its old cache before re-warming the eight optional fonts, so each returning visitor re-downloaded about 1.4 MB. Carrying the fonts over at install fixed that: a one-file deploy went from 1,439 KB and 14 requests to 55 KB and 6. Leaving the commit ID out of the offline version, and letting the install reuse the browser's cache, cut the rest.
-
-## If you still want to try
-
-- Measure the real path first: one repeat visit with the offline copy on, counted on the server.
-- Assert that the service worker controls the page before calling a visit "with the service worker".
-- Build on a clean checkout with the host's exact command before calling it done.
-- Write down what happens if the change is merged and the manual step is not done, and the reverse.
-- Set a gain threshold in advance (for example 300 ms on a repeat visit) and drop the idea if a two-hour prototype misses it.
-- If skew in tabs without the offline copy ever matters, Hugo's own `js.Build` and `fingerprint` can emit the map with no Node step and no host build change.
 
 ## How it was built
 
