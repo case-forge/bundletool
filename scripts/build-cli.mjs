@@ -67,7 +67,7 @@ function kindName({ kind, zip }) {
 /** Loads the PDF engine and the bundle modules after the Node shim is in place. */
 async function loadEngine() {
   await import('./node-compat.mjs');
-  const [{ default: Config }, { IndexData }, pages, toc, meta, build, schema, cover, sniff, photo, limits] = await Promise.all([
+  const [{ default: Config }, { IndexData }, pages, toc, meta, build, schema, cover, sniff, photo, limits, restore] = await Promise.all([
     import('../public/js/bundletoolConfig.js'),
     import('../public/js/bundletoolIndexData.js'),
     import('../public/js/bundletoolPages.js'),
@@ -79,8 +79,9 @@ async function loadEngine() {
     import('../public/js/bundletoolSniff.js'),
     import('../public/js/bundletoolPhotoPdf.js'),
     import('../public/js/frontend/limits.js'),
+    import('../public/js/bundletoolRestore.js'),
   ]);
-  return { Config, IndexData, pages, toc, meta, build, schema, cover, sniff, photo, limits };
+  return { Config, IndexData, pages, toc, meta, build, schema, cover, sniff, photo, limits, restore };
 }
 
 /** A file that is a plain name and really lives inside `docsReal` (symbolic links resolved). Returns its bytes. */
@@ -103,7 +104,7 @@ async function readInside(docsDir, docsReal, name, what) {
 }
 
 async function build(ctx, argv) {
-  const args = parseArgs(argv, { flags: ['--json', '--help', '--version', '--config-keys', '--schema', '--force', ...JUST_ASSEMBLE.map((j) => j.flag)], short: { h: '--help', V: '--version', f: '--force' } });
+  const args = parseArgs(argv, { flags: ['--json', '--help', '--version', '--config-keys', '--schema', '--force', '--unpack', ...JUST_ASSEMBLE.map((j) => j.flag)], short: { h: '--help', V: '--version', f: '--force' } });
   if (args.flags.version) return { body: { version: VERSION, schemaVersion: SCHEMA_VERSION }, text: VERSION };
   const help = await helpResult(args, buildHelpDoc);
   if (help) return help;
@@ -111,6 +112,22 @@ async function build(ctx, argv) {
     const { Config, schema } = await loadEngine();
     const defaults = schema.flattenManifestConfig(new Config().options);
     return { body: { configKeys: defaults }, text: Object.entries(defaults).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join('\n') };
+  }
+  if (args.flags.unpack) {
+    if (args.positionals.length !== 2) throw new CliError('usage_missing_arguments', '--unpack takes exactly <bundle.pdf> <out-dir>. Run with --help.', { exit: EXIT.USAGE });
+    const [bundleArg, outDirArg] = args.positionals;
+    let bundleBytes;
+    try { bundleBytes = new Uint8Array(await readFile(resolve(bundleArg))); } catch (err) { throw new CliError('file_not_found', `The bundle ${bundleArg} could not be read (${err.code ?? 'error'}).`); }
+    const engine = await loadEngine();
+    const { unpackBundle } = await import('./cliUnpack.mjs');
+    let result;
+    try { result = await unpackBundle({ bundleBytes, outDir: outDirArg, force: args.flags.force, engine, readBundle: engine.restore.openBundle }); } catch (err) {
+      if (err instanceof CliError) throw err;
+      if (err.notABundle) throw new CliError('not_a_bundle', err.message);
+      throw new CliError('invalid_pdf', `${bundleArg} could not be opened as a PDF.`);
+    }
+    if (result.blankPagesRemoved) ctx.warn('blank_pages_removed', `Removed the "intentionally left blank" page from ${result.blankPagesRemoved} document(s); print mode is still on in the manifest, so a rebuild adds them again.`);
+    return { body: { schemaVersion: SCHEMA_VERSION, unpacked: result.out, documents: result.documents, coverSource: result.coverSource, printable: result.printable, bundleVersion: result.version } };
   }
   if (args.positionals.length < 3) throw new CliError('usage_missing_arguments', 'Needs <manifest.json> <docs-dir> <output.pdf>. Run with --help.', { exit: EXIT.USAGE });
   if (args.positionals.length > 3) throw new CliError('usage_too_many_arguments', 'Takes exactly three arguments: <manifest.json> <docs-dir> <output.pdf>.', { exit: EXIT.USAGE });
@@ -192,11 +209,16 @@ async function build(ctx, argv) {
   // the whole build anyway. The rotate type check is inline in the loop below.
   for (const section of manifest.sections ?? []) {
     for (const entry of section.files ?? []) {
+      if (entry.removePages !== undefined && !(Array.isArray(entry.removePages) && entry.removePages.length > 0 && entry.removePages.every((n) => Number.isInteger(n) && n >= 1))) {
+        throw new CliError('invalid_manifest', `${entry.filename}: removePages must be a list of page numbers counted from 1, not ${JSON.stringify(entry.removePages)}.`, { details: { file: entry.filename } });
+      }
       if (entry.forceOcr !== undefined && typeof entry.forceOcr !== 'boolean') {
         throw new CliError('invalid_manifest', `${entry.filename}: forceOcr must be true or false, not ${JSON.stringify(entry.forceOcr)}.`, { details: { file: entry.filename } });
       }
     }
   }
+  const firstSection = (manifest.sections ?? [])[0];
+  const sectionIdOffset = firstSection && !firstSection.sectionID && !firstSection.sectionLabel && !firstSection.sectionName ? 0 : 1;
   for (const [sectionIndex, section] of (manifest.sections ?? []).entries()) {
     const files = [];
     for (const entry of section.files ?? []) {
@@ -233,6 +255,14 @@ async function build(ctx, argv) {
       const check = await pages.validateAndCountPages(bytes);
       if (check.error) {
         throw new CliError(check.errorKind === 'encrypted' ? 'encrypted_pdf' : 'invalid_pdf', `${entry.filename}: ${check.error}`, { details: { file: entry.filename } });
+      }
+      if (entry.removePages) {
+        try { bytes = await pages.removePdfPages(bytes, entry.removePages.map((n) => n - 1)); } catch (err) {
+          throw new CliError('invalid_manifest', `${entry.filename}: removePages: ${err.message}.`, { details: { file: entry.filename } });
+        }
+        const recount = await pages.validateAndCountPages(bytes);
+        if (recount.error) throw new CliError('invalid_pdf', `${entry.filename}: ${recount.error}`, { details: { file: entry.filename } });
+        check.pageCount = recount.pageCount;
       }
       if (entry.rotate) bytes = await pages.rotatePdfBytes(bytes, entry.rotate);
 
@@ -309,8 +339,10 @@ async function build(ctx, argv) {
       fileBytesByFilename.set(entry.filename, bytes);
     }
     resolvedSections.push({
-      // Optional in a manifest: left out, a section is numbered by its position ("0000", "0001", ...).
-      sectionID: section.sectionID ?? String(sectionIndex).padStart(4, '0'),
+      // Optional in a manifest: left out, a section is numbered by its position ("0001", "0002", ...), so the
+      // first section shows its heading. Only a first section with neither label nor name takes "0000", the
+      // headerless zeroth section, so its documents sit above the first heading as they always did.
+      sectionID: section.sectionID ?? String(sectionIndex + sectionIdOffset).padStart(4, '0'),
       sectionLabel: section.sectionLabel ?? '',
       sectionName: section.sectionName ?? '',
       files,

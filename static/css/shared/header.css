@@ -18,7 +18,7 @@
 /* The header reads its own copy of the shared surface and text colours, so it is the same colour
    on every page, including Chambers Finder (whose --surface differs) and BundleTool's Modern dark
    (which sets its own --text). BundleTool's Classic palette keeps its own, being Classic's alone. */
-[data-theme="light"]:not([data-palette="classic"]) .home-header { --surface: #faf6ee; --text: #1f2933; color: #1f2933; }
+[data-theme="light"]:not([data-palette="classic"]) .home-header { --surface: #f6f0e7; --text: #1e2939; color: #1e2939; }
 [data-theme="dark"]:not([data-palette="classic"]) .home-header { --surface: #13161c; --text: #f0ebe3; color: #f0ebe3; }
 
 .home-mark { display: flex; align-items: center; gap: 10px; }
@@ -60,7 +60,7 @@
   padding: 0;
 }
 .theme-btn:hover { color: var(--text); }
-.theme-btn.active { background: var(--orange-fill); color: #fff; }
+.theme-btn.active { background: var(--orange-fill); color: #fdfbf7; }
 
 /* Buttons and form controls use the page's own font, not the browser's default (Arial on
    Home, Contact, Privacy and Envelope Guide). Family only: sizes stay each page's own. */

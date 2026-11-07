@@ -279,6 +279,9 @@ export function buildBundleIndexPayload(tocEntries, cv) {
         claimNumber:    cv['cover.claimNumber']    ?? null,
         bundleTitle:    cv['cover.bundleTitle']    ?? null,
         author:         cv['cover.author']         ?? null,
+        // How the cover is laid out and worded. Stored only when the build supplied them, so a reopened bundle
+        // keeps its own look and an older bundle (which stored none) still falls back to the defaults it was drawn with.
+        ...Object.fromEntries(COVER_LOOK_KEYS.filter((k) => cv[k] !== undefined).map((k) => [k.slice('cover.'.length), cv[k]])),
       },
       // The two OCR settings that change scanned pages, so a reopened bundle keeps them. Written only when one is
       // on: a bundle made with both off (the default) carries no ocr group, and reopens with both off.
@@ -391,6 +394,12 @@ export function applyMetaToDoc(doc, tocTableRowCoordinates, tocEntries, cv, onPr
   console.log(`[meta] ${links} index links, ${bookmarks} bookmarks, ${payloadLength}-char bundle index`);
 }
 
+/** The cover's layout and wording settings, stored with a bundle so reopening it redraws the same cover. */
+const COVER_LOOK_KEYS = [
+  'cover.layout', 'cover.caseNumberLine', 'cover.partyLabelPlacement', 'cover.partyAlign', 'cover.caseNumberAlign',
+  'cover.headingAlign', 'cover.titleLines', 'cover.caseNumberLabel', 'cover.preparedByLabel', 'cover.partyJoiner',
+];
+
 /**
  * Flattens a Config instance into the plain dictionary the worker receives.
  * One list, used by both the direct and worker paths, so they cannot drift
@@ -420,6 +429,7 @@ export function flattenConfig(config) {
     'cover.courtName', 'cover.matterOf', 'cover.applicantName', 'cover.respondentName',
     'cover.partyLabel1', 'cover.partyLabel2',
     'cover.extraText', 'cover.claimNumber', 'cover.bundleTitle', 'cover.author',
+    ...COVER_LOOK_KEYS,
     'ocr.turnUpright', 'ocr.straighten',
   ];
   const out = {};

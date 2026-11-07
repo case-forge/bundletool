@@ -9,74 +9,74 @@
   --bg: #0e1014;
   --surface: #13161c;
   --card: #1c1f27;
-  --orange: #e8610c;
-  /* Background of a filled button or badge carrying white text. #e8610c is 3.42:1 with white,
-     under the 4.5 floor; #c04f08 (the shade of BundleTool's Add Documents button and the radius chips) is 4.81:1. */
-  --orange-fill: #c04f08;
-  --orange-soft: rgba(232, 97, 12, 0.15);
-  --accent-bg: rgba(232, 97, 12, 0.07);
-  --accent-bg-mid: rgba(232, 97, 12, 0.20);
-  --accent-strong: rgba(232, 97, 12, 0.18);
-  --accent-border: rgba(232, 97, 12, 0.26);
-  --accent-focus: rgba(232, 97, 12, 0.18);
+  --orange: #ff6900;
+  /* Background of a filled button or badge carrying white text. #ff6900 is 3.42:1 with white,
+     under the 4.5 floor; #bb4d00 (the shade of BundleTool's Add Documents button and the radius chips) is 4.81:1. */
+  --orange-fill: #bb4d00;
+  --orange-soft: rgba(255, 105, 0, 0.15);
+  --accent-bg: rgba(255, 105, 0, 0.07);
+  --accent-bg-mid: rgba(255, 105, 0, 0.20);
+  --accent-strong: rgba(255, 105, 0, 0.18);
+  --accent-border: rgba(255, 105, 0, 0.26);
+  --accent-focus: rgba(255, 105, 0, 0.18);
   --text: #f0ebe3;
   --text-dim: rgba(240, 235, 227, 0.66);
   /* It carries the status-block captions and the radius label, so it must
-     clear the 4.5 floor: #8f939d is 5.36:1 on --card and still reads as the
+     clear the 4.5 floor: #99a1af is 5.36:1 on --card and still reads as the
      quiet ink of the pair. */
-  --muted: #8f939d;
-  --border: rgba(255, 255, 255, 0.07);
-  --border-mid: rgba(255, 255, 255, 0.12);
+  --muted: #99a1af;
+  --border: rgba(253, 251, 247, 0.07);
+  --border-mid: rgba(253, 251, 247, 0.12);
   /* The edge of a text field, select or text area: the text colour mixed in until it is 3:1 against the card or page
      behind it (WCAG 2.1 SC 1.4.11, Non-text Contrast). A field with only a fill a shade off its background fails that. */
   --field-edge: color-mix(in srgb, var(--text) 50%, transparent); /* 42% was 3:1 on the old #1c1f27 card; the lighter box card (--box-card) needs 50% */
-  --green: #2ba870;
-  --red: #c03535;
+  --green: #00bc7d;
+  --red: #c10007;
   /* Destructive text and icons (delete, remove, clear, reset): 4.5:1 or better on the page and on a box. --red is a fill. */
-  --danger-ink: #f08a8a;
-  --amber: #d4920a;
-  --shadow: 0 20px 44px rgba(0, 0, 0, 0.45);
-  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --danger-ink: #ff6467;
+  --amber: #d08700;
+  --shadow: 0 20px 44px rgba(14, 16, 20, 0.45);
+  --shadow-sm: 0 4px 16px rgba(14, 16, 20, 0.3);
   /* Boxes (cards, panels, result lists): the paper-cutout look, a ground a tier off the page and a soft lift, with no
      line drawn round the box. Applied to everything inside #main-content by the rule after the light block, so the
      header, drawer and footer keep the shared --card / --surface. A box is drawn with var(--card), var(--surface) and
      var(--box-lift) as usual; it is only inside the page body that the grounds resolve to these values. Only a form
      field draws an edge (--field-edge, above). */
   --box-card: #232834;
-  --box-surface: #181c25;
-  --box-lift: 0 1px 2px rgba(0, 0, 0, 0.5), 0 6px 18px rgba(0, 0, 0, 0.28);
+  --box-surface: #1c1f27;
+  --box-lift: 0 1px 2px rgba(14, 16, 20, 0.5), 0 6px 18px rgba(14, 16, 20, 0.28);
   --radius: 16px;
   --radius-sm: 10px;
 }
 
 [data-theme="light"] {
   color-scheme: light;
-  --bg: #f0ebe1;
-  --surface: #faf6ee;
-  --card: #ffffff;
-  --orange: #1a4f8c;
+  --bg: #eae5dc;
+  --surface: #f6f0e7;
+  --card: #fdfbf7;
+  --orange: #00598a;
   --orange-fill: var(--orange);
-  --orange-soft: rgba(26, 79, 140, 0.09);
-  --accent-bg: rgba(26, 79, 140, 0.07);
-  --accent-bg-mid: rgba(26, 79, 140, 0.13);
-  --accent-strong: rgba(26, 79, 140, 0.18);
-  --accent-border: rgba(26, 79, 140, 0.26);
-  --accent-focus: rgba(26, 79, 140, 0.18);
-  --text: #1f2933;
-  --text-dim: rgba(31, 41, 51, 0.72);   /* 0.65 would be 4.41:1 on --bg, under the 4.5 floor */
-  --muted: #5b6773;
-  --border: rgba(58, 68, 76, 0.13);
-  --border-mid: rgba(58, 68, 76, 0.24);
+  --orange-soft: rgba(0, 89, 138, 0.09);
+  --accent-bg: rgba(0, 89, 138, 0.07);
+  --accent-bg-mid: rgba(0, 89, 138, 0.13);
+  --accent-strong: rgba(0, 89, 138, 0.18);
+  --accent-border: rgba(0, 89, 138, 0.26);
+  --accent-focus: rgba(0, 89, 138, 0.18);
+  --text: #1e2939;
+  --text-dim: rgba(30, 41, 57, 0.72);   /* 0.65 would be 4.41:1 on --bg, under the 4.5 floor */
+  --muted: #4a5565;
+  --border: rgba(30, 41, 57, 0.13);
+  --border-mid: rgba(30, 41, 57, 0.24);
   --field-edge: color-mix(in srgb, var(--text) 56%, transparent);
-  --green: #1f6a52;
-  --red: #8b2e2e;
-  --danger-ink: #8b2e2e;
-  --amber: #9a6700;
-  --shadow: 0 18px 38px rgba(26, 79, 140, 0.11);
-  --shadow-sm: 0 4px 16px rgba(26, 79, 140, 0.07);
-  --box-card: #ffffff;
-  --box-surface: #f4eee1;
-  --box-lift: 0 1px 2px rgba(31, 41, 51, 0.16), 0 6px 16px rgba(31, 41, 51, 0.1);
+  --green: #006045;
+  --red: #9f0712;
+  --danger-ink: #9f0712;
+  --amber: #a65f00;
+  --shadow: 0 18px 38px rgba(0, 89, 138, 0.11);
+  --shadow-sm: 0 4px 16px rgba(0, 89, 138, 0.07);
+  --box-card: #fdfbf7;
+  --box-surface: #f6f0e7;
+  --box-lift: 0 1px 2px rgba(30, 41, 57, 0.16), 0 6px 16px rgba(30, 41, 57, 0.1);
 }
 
 /* The page body on every page (BundleTool's Classic palette keeps its own colours). --cf-* are BundleTool Modern's
@@ -102,11 +102,11 @@ html:not([data-palette="classic"]) #main-content {
   --fs-page-title: 35.2px; /* Contact, Privacy, Success, 404, Guide, Envelope Guide */
   --fs-page-title-fluid: clamp(28px, 7vw, var(--fs-page-title)); /* a page title on a phone: the same on every page */
   --fs-large: 21.6px;      /* the wordmark, a court's name, an empty-state message */
-  --fs-heading: 19px;      /* section and step headings, orb names */
+  --fs-heading: 20px;      /* section and step headings, orb names */
   --fs-body: 16px;         /* body text, inputs, selects, textareas, buttons, menu rows */
   --fs-label: 14.4px;      /* form labels, secondary text, intro lines, compact controls */
   --fs-caption: var(--fs-label); /* hints, helper text, toasts, footer: the same size as a label, told apart by weight and colour */
-  --fs-micro: 12.5px;      /* only uppercase table and group headings, badges, and the menu's tool tiles */
+  --fs-micro: 13px;        /* only uppercase table and group headings, badges, and the menu's tool tiles */
 }
 
 /* Every text field, select and text area on every page (BundleTool's Classic palette keeps its own look) carries the 3:1 edge above, whatever its own sheet says

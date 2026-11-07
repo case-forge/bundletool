@@ -81,16 +81,6 @@ const POINTS_PER_INCH = 72;
  * images. */
 export const OCR_MAX_IMAGE_PIXELS = 90_000_000;
 
-/** The most declared image pixels ONE PAGE may carry, all its images (and their soft masks) added together,
- * judged from the PDF's own dictionaries before pdf.js decodes anything (bundletoolPdfInspect.js's
- * findOverBudgetImagePages). OCR_MAX_IMAGE_PIXELS above judges each image alone, so it is not a memory bound:
- * measured peak RSS in a fresh process was 1.29 GB for one 88 Mpx image, 1.45 GB for eight 36 Mpx images and
- * 1.62 GB for four 64 Mpx images on one page, against 1.43 GB for the 100 Mpx image the cap was written to stop.
- * A page is therefore held to what the single-image cap already allowed: still above a legitimate A3 page at
- * 600 DPI (7016 x 9921, 69.6 Mpx) and the 88 Mpx single image, and below every several-image page that costs
- * more than they do. A page over it is left unread, the same as one with an over-cap image. */
-export const OCR_MAX_PAGE_IMAGE_PIXELS = OCR_MAX_IMAGE_PIXELS;
-
 /**
  * One recognised word, in the rasterised image's own pixel space (top-left origin, y growing down:
  * tesseract-wasm's own rect convention, kept here so the caller needs no translation before this).

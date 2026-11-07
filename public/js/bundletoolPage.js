@@ -195,7 +195,7 @@
     'cover-editor-modal': 'cover-editor-cancel',
     // Escape also works with focus on a button, not only in the title box.
     'ws-cover-modal': 'ws-cover-cancel',
-    'rotate-modal': 'rotate-cancel',
+    'rotate-modal': 'rotate-close',
     'email-split-modal': 'email-split-close',
     'bundle-preview-modal': 'bundle-preview-close',
     'share-code-modal': 'share-code-modal-close',
@@ -339,9 +339,8 @@
     indexFontSize: 'medium', footerFontSize: 'medium',
     sectionPrefix: 'Section', showTableBorders: true, printableBundle: false, ocrAutoDetect: true,
     ocrTurnUpright: false, ocrStraighten: false, smallerPhotos: true,
-    leaveOutIndex: false, leaveOutPageNumbers: false, leaveOutBookmarks: false, justAssembleOnce: false,
     pageNumberPerSection: false, splitBy: 'size',
-    courtName: '', matterOf: '', partyLabel1: '', partyLabel2: '', caseNumberLabel: 'CASE NO:', preparedByLabel: 'Prepared by:', partyJoiner: '-&-', coverLayout: 'classic',
+    courtName: '', matterOf: '', partyLabel1: '', partyLabel2: '', caseNumberLabel: 'CASE NO:', preparedByLabel: 'Prepared by:', partyJoiner: '-and-', coverLayout: 'classic',
     coverCaseLine: 'court', coverLabelPlacement: 'below', coverPartyAlign: 'centre',
     coverCaseAlign: 'right', coverHeadingAlign: 'left',
   };
@@ -382,10 +381,6 @@
       ocrTurnUpright: document.getElementById('config-ocrTurnUpright')?.checked === true,
       ocrStraighten: document.getElementById('config-ocrStraighten')?.checked === true,
       smallerPhotos: document.getElementById('config-smallerPhotos')?.checked ?? true,
-      leaveOutIndex: document.getElementById('config-leaveOutIndex')?.checked === true,
-      leaveOutPageNumbers: document.getElementById('config-leaveOutPageNumbers')?.checked === true,
-      leaveOutBookmarks: document.getElementById('config-leaveOutBookmarks')?.checked === true,
-      justAssembleOnce: document.getElementById('config-justAssembleOnce')?.checked === true,
       pageNumberPerSection: document.getElementById('config-pageNumberPerSection').checked,
       splitBy: document.getElementById('config-splitBy')?.value || 'size',
       // The court, statute line and party labels are firm-level defaults worth
@@ -403,8 +398,8 @@
       caseNumberLabel: document.getElementById('config-caseNumberLabel')?.value ?? 'CASE NO:',
       // Blank is a real value here (no label), different from the default "Prepared by:", so ?? not ||.
       preparedByLabel: document.getElementById('config-preparedByLabel')?.value ?? 'Prepared by:',
-      // Blank is a real value here (no joining word), different from the default "-&-", so ?? not ||.
-      partyJoiner: document.getElementById('config-partyJoiner')?.value ?? '-&-',
+      // Blank is a real value here (no joining word), different from the default "-and-", so ?? not ||.
+      partyJoiner: document.getElementById('config-partyJoiner')?.value ?? '-and-',
       coverLayout: document.getElementById('config-coverLayout')?.value || 'classic',
       coverCaseLine: document.getElementById('config-coverCaseLine')?.value || 'court',
       coverLabelPlacement: document.getElementById('config-coverLabelPlacement')?.value || 'below',
@@ -463,11 +458,6 @@
     {
       const el = document.getElementById('config-smallerPhotos');
       if (el && d.smallerPhotos !== undefined) el.checked = d.smallerPhotos;
-    }
-    // Just assemble. A key a saved setting or link does not carry leaves the switch as it is (off on a fresh page).
-    for (const key of ['leaveOutIndex', 'leaveOutPageNumbers', 'leaveOutBookmarks', 'justAssembleOnce']) {
-      const el = document.getElementById(`config-${key}`);
-      if (el && d[key] !== undefined) el.checked = d[key];
     }
     if (d.pageNumberPerSection !== undefined) document.getElementById('config-pageNumberPerSection').checked = d.pageNumberPerSection;
     if (d.splitBy) resetGroup('splitBy', d.splitBy);

@@ -316,7 +316,7 @@ test('the window shows "Put back as scanned" exactly on the pages the record say
   await until(() => !$('rotate-remove').disabled, 'the window settled');
   assert.deepEqual([...new Set(state.frontendInputData[name].ocrPages.straightened.map(([page]) => page))], [2]);
   await walk(name, 3, 'after removing page 2');
-  $('rotate-cancel').click();
+  $('rotate-close').click();
 
   // Opened again: the same, from the record.
   await openDocumentWindow(name, opener);
@@ -325,7 +325,7 @@ test('the window shows "Put back as scanned" exactly on the pages the record say
   const stored = new Uint8Array(await state.filesMap.get(name).arrayBuffer());
   const back = difference(await render(scan, 1), await render(stored, 1));
   assert.ok(back.share < 0.0005, `page 1 as scanned: ${(100 * back.share).toFixed(3)}% of pixels differ`);
-  $('rotate-cancel').click();
+  $('rotate-close').click();
   delete state.frontendInputData[name];
   state.filesMap.delete(name);
 });

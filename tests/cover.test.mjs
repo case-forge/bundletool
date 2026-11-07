@@ -355,7 +355,7 @@ test('flattenCoverConfig reads exactly the fields the cover draws', () => {
     // The label printed before who prepared the bundle.
     'cover.preparedByLabel': 'Prepared by:',
     // The word joining the two parties on the classic design.
-    'cover.partyJoiner': '-&-',
+    'cover.partyJoiner': '-and-',
     // The cover is drawn at the bundle's page size, so layoutCover needs to
     // know it. A4 is the default.
     'pageOptions.pageSize': 'a4',
@@ -478,7 +478,7 @@ test('classic: every field the cover is given reaches the page, in order', async
     'BETWEEN:',
     'MS A SAMPLE',
     'APPLICANT',
-    '-&-',
+    '-and-',
     'MR B EXAMPLE',
     'RESPONDENT',
     'BUNDLE FOR HEARING ON 14 MARCH 2026',
@@ -493,7 +493,7 @@ test('classic: every field the cover is given reaches the page, in order', async
     'the case name is redundant with the BETWEEN: block and must not be drawn twice');
 
   const order = ['IN THE FAMILY COURT', 'CASE NO', 'IN THE MATTER OF', 'BETWEEN:',
-    'MS A SAMPLE', 'APPLICANT', '-&-', 'MR B EXAMPLE', 'RESPONDENT',
+    'MS A SAMPLE', 'APPLICANT', '-and-', 'MR B EXAMPLE', 'RESPONDENT',
     'BUNDLE FOR HEARING ON', 'Prepared by:'];
   let at = -1;
   for (const token of order) {
@@ -526,7 +526,7 @@ test('classic: one party named on its own does not join it to a missing other ha
   assert.ok(text.includes('MS A SAMPLE'));
   assert.ok(text.includes('APPLICANT'));
   assert.ok(!text.includes('RESPONDENT'), 'an unnamed respondent must not get a label to itself');
-  assert.ok(!text.includes('-&-'), 'nothing to join, so no "-&-"');
+  assert.ok(!text.includes('-and-'), 'nothing to join, so no "-and-"');
 });
 
 test('classic: up to 4 names a side stack centred, one per line, each numbered, and a 5th is dropped', async (t) => {

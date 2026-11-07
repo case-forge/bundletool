@@ -488,3 +488,100 @@ test('a bundle over 350 pages warns about Practice Direction 27A, without failin
     assert.equal(b.json.warnings.find((w) => w.code === 'over_pd27a_page_limit'), undefined, 'exactly 350 is not over the limit');
   } finally { fs.rmSync(d, { recursive: true, force: true }); }
 });
+
+test('a manifest without sectionID builds the same index as one numbered 0001, 0002 by position, first section heading included', async (t) => {
+  if (spawnSync('pdftotext', ['-v']).error) return t.skip('pdftotext is needed to read the index page');
+  const d = tmp();
+  try {
+    const docs = path.join(d, 'docs'); fs.mkdirSync(docs, { recursive: true });
+    for (const n of ['a.pdf', 'b.pdf']) fs.writeFileSync(path.join(docs, n), await fx.makePdf(2, n));
+    const sections = (ids) => [
+      { ...(ids && { sectionID: '0001' }), sectionLabel: 'A', sectionName: 'Preliminary Documents', files: [{ filename: 'a.pdf' }] },
+      { ...(ids && { sectionID: '0002' }), sectionLabel: 'B', sectionName: 'Statements', files: [{ filename: 'b.pdf' }] },
+    ];
+    const indexText = (ids) => {
+      const mp = path.join(d, `m${ids}.json`); const out = path.join(d, `out${ids}.pdf`);
+      fs.writeFileSync(mp, JSON.stringify({ schemaVersion: 1, sections: sections(ids) }));
+      const r = cli(['--json', mp, docs, out]);
+      assert.equal(r.status, 0, r.stdout + r.stderr);
+      return spawnSync('pdftotext', ['-f', '1', '-l', '1', '-layout', out, '-'], { encoding: 'utf8' }).stdout;
+    };
+    const omitted = indexText(false);
+    assert.match(omitted, /A: Preliminary Documents\s+2-3/, 'the first section keeps its heading row');
+    assert.equal(omitted, indexText(true));
+  } finally { fs.rmSync(d, { recursive: true, force: true }); }
+});
+
+const pageCountOf = async (file) => (await loadPdf(new Uint8Array(fs.readFileSync(file)))).doc.getPageCount();
+
+test('--unpack: a print mode bundle with a generated cover comes back as its documents without the blank pages, and rebuilds', async (t) => {
+  if (spawnSync('pdftotext', ['-v']).error) return t.skip('pdftotext is needed to read pages');
+  const d = tmp();
+  try {
+    const docs = path.join(d, 'docs'); fs.mkdirSync(docs);
+    fs.writeFileSync(path.join(docs, 'odd.pdf'), await fx.makePdf(3, 'ODD'));
+    fs.writeFileSync(path.join(docs, 'even.pdf'), await fx.makePdf(2, 'EVEN'));
+    const mp = path.join(d, 'm.json');
+    fs.writeFileSync(mp, JSON.stringify({ schemaVersion: 1,
+      config: { 'pageOptions.printableBundle': true, 'pageOptions.generateCover': true, 'cover.courtName': 'IN THE FAMILY COURT AT LEEDS', 'cover.applicantName': 'A SAMPLE', 'cover.respondentName': 'B EXAMPLE', 'cover.partyJoiner': '-vs-' },
+      sections: [{ sectionLabel: 'A', sectionName: 'Papers', files: [{ filename: 'odd.pdf' }, { filename: 'even.pdf' }] }] }));
+    const built = path.join(d, 'built.pdf');
+    assert.equal(cli(['--json', mp, docs, built]).status, 0);
+    assert.equal(await pageCountOf(built), 1 + 1 + 4 + 2, 'cover, index, the odd document padded to 4, the even one');
+
+    const out = path.join(d, 'unpacked');
+    const u = cli(['--json', '--unpack', built, out]);
+    assert.equal(u.status, 0, u.stdout + u.stderr);
+    assert.equal(u.json.documents, 2);
+    assert.equal(u.json.coverSource, 'generated');
+    assert.ok(u.json.warnings.some((w) => w.code === 'blank_pages_removed'));
+    assert.equal(await pageCountOf(path.join(out, 'docs', 'odd.pdf')), 3, 'the blank page is gone');
+    assert.equal(await pageCountOf(path.join(out, 'docs', 'even.pdf')), 2);
+    const manifest = JSON.parse(fs.readFileSync(path.join(out, 'manifest.json'), 'utf8'));
+    assert.equal(manifest.config['cover.partyJoiner'], '-vs-');
+    assert.equal(manifest.config['pageOptions.generateCover'], true);
+
+    manifest.config['pageOptions.printableBundle'] = false;
+    const m2 = path.join(out, 'manifest.json'); fs.writeFileSync(m2, JSON.stringify(manifest));
+    const again = path.join(d, 'again.pdf');
+    assert.equal(cli(['--json', m2, path.join(out, 'docs'), again]).status, 0);
+    assert.equal(await pageCountOf(again), 1 + 1 + 3 + 2, 'print mode off: no padding page');
+    const first = spawnSync('pdftotext', ['-f', '1', '-l', '1', again, '-'], { encoding: 'utf8' }).stdout;
+    assert.match(first, /FAMILY COURT AT LEEDS/);
+    assert.match(first, /-vs-/);
+    assert.match(spawnSync('pdftotext', ['-f', '2', '-l', '2', '-layout', again, '-'], { encoding: 'utf8' }).stdout, /A: Papers/);
+  } finally { rm(d); }
+});
+
+test('--unpack refuses a PDF with no BundleTool index, and a folder that already holds files unless --force', async () => {
+  const d = tmp();
+  try {
+    const plain = path.join(d, 'plain.pdf'); fs.writeFileSync(plain, await fx.makePdf(2, 'PLAIN'));
+    const r = cli(['--json', '--unpack', plain, path.join(d, 'o1')]);
+    assert.equal(r.status, 3);
+    assert.equal(r.json.error.code, 'not_a_bundle');
+    const busy = path.join(d, 'busy'); fs.mkdirSync(busy); fs.writeFileSync(path.join(busy, 'x'), 'x');
+    assert.equal(cli(['--json', '--unpack', plain, busy]).json.error.code, 'not_a_bundle', 'a plain PDF is refused before the folder is looked at');
+    assert.equal(cli(['--json', '--unpack', plain]).status, 2, 'two arguments are needed');
+  } finally { rm(d); }
+});
+
+test('removePages leaves the named pages out of a document, counted from 1, and refuses a page that is not there or an empty list', async () => {
+  const d = tmp();
+  try {
+    const docs = path.join(d, 'docs'); fs.mkdirSync(docs);
+    fs.writeFileSync(path.join(docs, 'a.pdf'), await fx.makePdf(4, 'A'));
+    const build = (removePages) => {
+      const mp = path.join(d, 'm.json');
+      fs.writeFileSync(mp, JSON.stringify({ schemaVersion: 1, sections: [{ sectionLabel: 'A', files: [{ filename: 'a.pdf', removePages }] }] }));
+      return cli(['--json', mp, docs, path.join(d, 'o.pdf'), '--force']);
+    };
+    const ok = build([2, 4]);
+    assert.equal(ok.status, 0, ok.stdout + ok.stderr);
+    assert.equal(ok.json.pages.source, 2);
+    assert.equal(build([9]).json.error.code, 'invalid_manifest');
+    assert.equal(build([]).json.error.code, 'invalid_manifest');
+    assert.equal(build([1, 2, 3, 4]).json.error.code, 'invalid_manifest', 'a document keeps at least one page');
+    assert.equal(build(['x']).json.error.code, 'invalid_manifest');
+  } finally { rm(d); }
+});

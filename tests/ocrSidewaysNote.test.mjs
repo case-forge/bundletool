@@ -108,7 +108,7 @@ test('the window shows the note on the page found sideways, drops it once the pa
   $('rotate-right').click();
   $('rotate-right').click();
   await until(() => $('rotate-page-note').textContent === 'This page looks upside down.', 'turned the wrong way');
-  $('rotate-cancel').click();
+  $('rotate-close').click();
 
   // Removing page 1 moves the sideways page to page 1, and its note with it.
   await openWith('side2.pdf', bytes, record([[2, 90, 0]]), 3);
@@ -117,7 +117,7 @@ test('the window shows the note on the page found sideways, drops it once the pa
   await until(() => $('rotate-message').textContent === 'Page 1 removed.', 'page 1 removed');
   assert.deepEqual(state.frontendInputData['side2.pdf'].ocrPages.sideways, [[1, 90, 0]]);
   await until(() => $('rotate-page-note').textContent === 'This page looks sideways.', 'the note now on page 1');
-  $('rotate-cancel').click();
+  $('rotate-close').click();
 });
 
 test('from a real reading: a page read on its side gets the note with turning off, and none once turning on has turned it', async (t) => {

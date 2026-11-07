@@ -30,9 +30,3 @@ test('a page with an over-cap image is skipped and reported, not silently left',
   const result = await ocrDocument(await pdfWithImage(10000, 10000), { force: true });
   assert.deepEqual(result, { bytes: null, ocredPages: 0, skippedPages: [1] });
 });
-
-test('a page whose images are each under the cap but together over the page budget is skipped and reported', async () => {
-  // four 8000 x 8000 images: 64 Mpx each, 256 Mpx together; peaked at 1.62 GB when decoded
-  const result = await ocrDocument(await pdfWithImage(8000, 8000, 4), { force: true });
-  assert.deepEqual(result, { bytes: null, ocredPages: 0, skippedPages: [1] });
-});

@@ -1,7 +1,7 @@
 /**
  * The document window's "This page" and "Whole document" (frontend/rotate.js): a turn on one page shows on that page
  * only and writes only that page's rotation; several pages can each be turned; switching the choice carries the turn
- * the page in view shows; Cancel still leaves the file untouched.
+ * the page in view shows; closing the window writes what was turned, and the choice starts on This page every time.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -22,22 +22,25 @@ async function drawnSideways(t) {
   return $('rotate-preview').width > $('rotate-preview').height;
 }
 
-test('the window opens on Whole document, as a turn always applied before', async () => {
+test('the window opens on This page, every time, whatever it was left on', async () => {
   await open('scope.pdf', 3);
-  assert.equal($('rotate-scope-document').checked, true);
+  assert.equal($('rotate-scope-page').checked, true);
+  assert.equal(Boolean($('rotate-scope-document').checked), false);
   $('rotate-right').click();
-  assert.equal($('rotate-apply').textContent, 'Turn document');
-  $('rotate-cancel').click();
+  assert.equal($('rotate-status').textContent, 'This page turned right, 90 degrees');
+  choose('document');
+  $('rotate-close').click();
+  await open('scope-again.pdf', 3);
+  assert.equal($('rotate-scope-page').checked, true, 'not what the last window was left on');
+  $('rotate-close').click();
 });
 
-test('This page: the turn shows on the page shown only, and Turn page writes only that page', async (t) => {
+test('This page: the turn shows on the page shown only, and closing writes only that page', async (t) => {
   const { name, file } = await open('one-page.pdf', 3);
   $('rotate-next').click();
   choose('page');
   $('rotate-right').click();
   assert.equal($('rotate-status').textContent, 'This page turned right, 90 degrees');
-  assert.equal($('rotate-apply').textContent, 'Turn page');
-  assert.equal($('rotate-apply').disabled, false);
   const sideways2 = await drawnSideways(t);
   if (sideways2 !== null) {
     assert.equal(sideways2, true, 'page 2 is drawn turned');
@@ -45,7 +48,7 @@ test('This page: the turn shows on the page shown only, and Turn page writes onl
     assert.equal(await drawnSideways(t), false, 'page 1 is drawn as it was');
   }
   assert.equal(state.filesMap.get(name), file, 'nothing written yet');
-  $('rotate-apply').click();
+  $('rotate-close').click();
   assert.equal(modal.classList.contains('hidden'), true);
   await until(() => state.filesMap.get(name) !== file, 'the turned file');
   assert.deepEqual(await anglesOf(state.filesMap.get(name)), [0, 90, 0]);
@@ -59,8 +62,7 @@ test('several pages can each be turned their own way, written together', async (
   $('rotate-next').click();
   $('rotate-next').click();
   $('rotate-left').click();                      // page 3 left
-  assert.equal($('rotate-apply').textContent, 'Turn pages');
-  $('rotate-apply').click();
+  $('rotate-close').click();
   await until(() => state.filesMap.get(name) !== file, 'the turned file');
   assert.deepEqual(await anglesOf(state.filesMap.get(name)), [90, 0, 270, 0]);
 });
@@ -72,28 +74,26 @@ test('switching to Whole document gives every page the turn the page in view sho
   $('rotate-right').click();
   choose('document');
   assert.equal($('rotate-status').textContent, 'Turned right, 90 degrees');
-  assert.equal($('rotate-apply').textContent, 'Turn document');
   choose('page');
-  assert.equal($('rotate-apply').textContent, 'Turn page', 'only the page in view keeps the turn');
+  assert.equal($('rotate-status').textContent, 'This page turned right, 90 degrees', 'only the page in view keeps the turn');
   $('rotate-prev').click();
   choose('document');
-  assert.equal($('rotate-apply').disabled, true, 'page 1 shows no turn, so the whole document takes none');
+  assert.equal($('rotate-ocr-note').classList.contains('hidden'), true, 'page 1 shows no turn, so the whole document takes none');
   $('rotate-right').click();
-  $('rotate-apply').click();
+  $('rotate-close').click();
   await until(() => state.filesMap.get(name) !== file, 'the turned file');
   assert.deepEqual(await anglesOf(state.filesMap.get(name)), [90, 90, 90]);
 });
 
-test('Cancel after turning single pages leaves the file untouched', async () => {
-  const { name, file } = await open('cancel-pages.pdf', 3);
+test('closing after turning single pages writes those pages, and no others', async () => {
+  const { name, file } = await open('close-pages.pdf', 3);
   choose('page');
   $('rotate-right').click();
   $('rotate-next').click();
   $('rotate-right').click();
-  $('rotate-cancel').click();
-  await tick();
-  assert.equal(state.filesMap.get(name), file);
-  assert.deepEqual(await anglesOf(state.filesMap.get(name)), [0, 0, 0]);
+  $('rotate-close').click();
+  await until(() => state.filesMap.get(name) !== file, 'the turned file');
+  assert.deepEqual(await anglesOf(state.filesMap.get(name)), [90, 90, 0]);
 });
 
 test('Redo OCR writes a single page\'s turn first, and only that page\'s', async () => {
@@ -105,8 +105,8 @@ test('Redo OCR writes a single page\'s turn first, and only that page\'s', async
   $('rotate-ocr').click();
   await until(() => seen.length === 1, 'Redo OCR to start');
   assert.deepEqual(seen[0], [0, 270, 0]);
-  await until(() => !$('rotate-ocr').disabled, 'Redo OCR to finish');
-  assert.equal($('rotate-apply').disabled, true);
-  $('rotate-cancel').click();
+  await until(() => $('rotate-ocr-label').textContent === 'OCR', 'Redo OCR to finish');
+  assert.equal($('rotate-ocr-note').classList.contains('hidden'), true);
+  $('rotate-close').click();
   assert.deepEqual(await anglesOf(state.filesMap.get(name)), [0, 270, 0]);
 });

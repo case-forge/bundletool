@@ -29,7 +29,7 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "sectionID": { "type": "string", "pattern": "^[0-9]{4}$", "description": "Optional. Four digits, unique per section. Left out, sections are numbered by position: 0000, 0001, and so on." },
+          "sectionID": { "type": "string", "pattern": "^[0-9]{4}$", "description": "Optional. Four digits, unique per section. Left out, sections are numbered by position from 0001; a first section with no label or name takes 0000, the headerless zeroth section." },
           "sectionLabel": { "type": "string", "maxLength": 500 },
           "sectionName": { "type": "string", "maxLength": 500 },
           "files": {
@@ -44,6 +44,7 @@
                 "date": { "type": ["string", "null"], "maxLength": 40 },
                 "pageCount": { "type": "integer", "description": "Ignored: the real page count is read from the file." },
                 "rotate": { "enum": [90, 180, 270], "description": "Optional. Turn every page of this document clockwise by this many degrees, added to any rotation the file already carries." },
+                "removePages": { "type": "array", "items": { "type": "integer", "minimum": 1 }, "minItems": 1, "description": "Optional. Page numbers of this document to leave out, counted from 1, applied before rotate. A document keeps at least one page." },
                 "forceOcr": { "type": "boolean", "description": "Optional, default false. true runs OCR on every page of this document regardless of its own text layer, overriding ocr.mode for this file only." }
               }
             }

@@ -65,7 +65,7 @@ test('the window says "This page looks blank" for a blank page, and nothing for 
   await until(() => $('rotate-page-note').textContent === '', 'the note cleared on page 1');
   assert.equal(state.filesMap.get(name), file, 'nothing is removed or changed: the file is the very same');
   assert.equal(state.frontendInputData[name].pageCount, 2);
-  $('rotate-cancel').click();
+  $('rotate-close').click();
 });
 
 test('another check can add its own note to the same line, after the blank note, and one that fails says nothing', async (t) => {
@@ -83,5 +83,5 @@ test('another check can add its own note to the same line, after the blank note,
   $('rotate-next').click();
   await until(() => $('rotate-page-note').textContent.includes('sideways'), 'both notes on page 2');
   assert.equal($('rotate-page-note').textContent, 'This page looks blank. This page looks sideways.');
-  $('rotate-cancel').click();
+  $('rotate-close').click();
 });

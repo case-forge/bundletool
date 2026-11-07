@@ -110,9 +110,9 @@ export function collectCv() {
   // a missing element (?? not ||) falls back to the default and a genuinely blank box stays blank.
   cv['cover.preparedByLabel'] = stripUnsuitableChars(document.getElementById('config-preparedByLabel')?.value ?? 'Prepared by:');
   // Blank means no joining word at all (just the gap), a real and different value from the
-  // default "-&-", so a missing element (?? not ||) falls back to the default and a genuinely
+  // default "-and-", so a missing element (?? not ||) falls back to the default and a genuinely
   // blank box stays blank.
-  cv['cover.partyJoiner'] = stripUnsuitableChars(document.getElementById('config-partyJoiner')?.value ?? '-&-');
+  cv['cover.partyJoiner'] = stripUnsuitableChars(document.getElementById('config-partyJoiner')?.value ?? '-and-');
   return cv;
 }
 

@@ -1075,13 +1075,11 @@ test('pdf-lib opens the file to write only after every page is read and the OCR 
   assert.equal(result.ok, true);
   assert.equal(result.ocredPages, 2);
   assert.deepEqual(result.failures.map((f) => f.page), [2]);
-  // Two opens, and only two: the page-budget scan (cliOcrDocument.mjs's overBudgetPages), which finishes before pdf.js
-  // opens the file or any page is read, and pass 2, which starts only once every page is read and the engine closed.
+  // One open: pass 2, which starts only once every page is read and the engine closed.
   const opens = events.flatMap((e, i) => (e === 'pdf-lib opened' ? [i] : []));
-  assert.equal(opens.length, 2, `expected the budget scan and pass 2 to open pdf-lib, got: ${events.join(', ')}`);
-  const [scanOpen, passTwoOpen] = opens;
-  assert.ok(!events.slice(0, scanOpen + 1).some((e) => e.endsWith('read') || e === 'engine closed'), `the scan must come before any page is read: ${events.join(', ')}`);
-  const reads = events.slice(scanOpen + 1, passTwoOpen);
+  assert.equal(opens.length, 1, `expected only pass 2 to open pdf-lib, got: ${events.join(', ')}`);
+  const [passTwoOpen] = opens;
+  const reads = events.slice(0, passTwoOpen);
   assert.deepEqual(reads.filter((e) => e !== 'region read'), ['page read', 'page read', 'engine closed'], `order was: ${events.join(', ')}`);
   assert.equal(reads.at(-1), 'engine closed', `order was: ${events.join(', ')}`);
   assert.ok(!events.slice(passTwoOpen).some((e) => e.endsWith('read')), `a page was read after pdf-lib opened the file: ${events.join(', ')}`);
@@ -1218,40 +1216,6 @@ test('a legitimate large embedded image, comfortably under the cap, produces the
   // extractText() with a single space regardless of the original glyph spacing, so run-length
   // between words is not meaningful here, only that all three words were read correctly.
   assert.match(pageText, /LEGITIMATE\s+LARGE\s+SCAN/i, `expected the recognised text in the output layer, got: ${pageText.slice(0, 200)}`);
-});
-
-// The per-image cap above judges each image alone; several images under it on one page cost as much as the bomb
-// (four 8000x8000 images peaked at 1.62 GB). The page's declared pixels, added together, are held to
-// OCR_MAX_PAGE_IMAGE_PIXELS before pdf.js decodes anything. The images here are 1-byte streams that only DECLARE a
-// size, so a page that is wrongly read costs nothing and the test cannot be slow or large.
-test('a page whose images are each under the cap but together over the page budget fails that page with an ocr_failed detail', async (t) => {
-  if (!(await haveOcrRuntime())) return t.skip('@napi-rs/canvas / tesseract-wasm not available on this machine');
-  const { PDFDocument, PDFName } = await import('@cantoo/pdf-lib');
-  const doc = await PDFDocument.create();
-  const page = doc.addPage([612, 792]);
-  const images = {};
-  for (let i = 0; i < 4; i++) {
-    images[`Im${i}`] = doc.context.register(doc.context.stream(new Uint8Array([0]), { Type: 'XObject', Subtype: 'Image', Width: 8000, Height: 8000, ColorSpace: 'DeviceGray', BitsPerComponent: 8 }));
-  }
-  page.node.normalizedEntries().Resources.set(PDFName.of('XObject'), doc.context.obj(images));
-  const result = await ocrDocument(await doc.save(), { force: true });
-  assert.equal(result.ok, true); // a per-page failure, not a document-level one
-  assert.equal(result.ocredPages, 0);
-  assert.equal(result.bytes, null);
-  assert.equal(result.failures.length, 1);
-  assert.equal(result.failures[0].page, 1);
-  assert.match(result.failures[0].detail, /too large/);
-});
-
-test('an A3 page at 600 DPI is not failed by the page budget', async (t) => {
-  if (!(await haveOcrRuntime())) return t.skip('@napi-rs/canvas / tesseract-wasm not available on this machine');
-  const { PDFDocument, PDFName } = await import('@cantoo/pdf-lib');
-  const doc = await PDFDocument.create();
-  const page = doc.addPage([842, 1191]);
-  const ref = doc.context.register(doc.context.stream(new Uint8Array([0]), { Type: 'XObject', Subtype: 'Image', Width: 7016, Height: 9921, ColorSpace: 'DeviceGray', BitsPerComponent: 8 }));
-  page.node.normalizedEntries().Resources.set(PDFName.of('XObject'), doc.context.obj({ Im1: ref }));
-  const result = await ocrDocument(await doc.save(), { force: true });
-  assert.deepEqual(result.failures.filter((f) => /too large to read safely/.test(f.detail)), []);
 });
 
 /** Strips line comments and block comments (not string-aware, but neither of these two source

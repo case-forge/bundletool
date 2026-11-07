@@ -44,7 +44,7 @@
    the background lights up. */
 [data-theme="dark"] .drawer-btn:hover,
 [data-theme="dark"] .drawer-btn[aria-expanded="true"] {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(253, 251, 247, 0.14);
 }
 
 .drawer-panel {
@@ -67,7 +67,7 @@
   max-width: calc(100vw - 24px);
   overflow-y: auto;
 }
-/* Light mode only: var(--card) is plain #ffffff in light mode, which reads
+/* Light mode only: var(--card) is plain #fdfbf7 in light mode, which reads
    as an unrelated white box next to the beige page and the beige .lh-paper
    preview (tool.css). Dark mode's --card (#1c1f27) is a real elevated tone
    distinct from --bg (#0e1014), so it stays. */

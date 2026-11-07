@@ -24,6 +24,7 @@ import { setup as setupFileRows } from './frontend/fileRows.js';
 import { setup as setupSections } from './frontend/sections.js';
 import { setup as setupCoversheet } from './frontend/coversheet.js';
 import { setup as setupCoverEditor } from './frontend/coverEditor.js';
+import { setup as setupRulePicker } from './frontend/rulePicker.js';
 import { setup as setupAdvancedState } from './frontend/advancedState.js';
 import { setup as setupFileProcessing, hasPendingRowBatches } from './frontend/fileProcessing.js';
 import { setup as setupBundleGeneration, runPreviewIndex } from './frontend/bundleGeneration.js';
@@ -389,6 +390,7 @@ window.addEventListener('DOMContentLoaded', () => {
   setupFileRows();
   setupSections();
   setupCoversheet();
+  setupRulePicker();
   setupCoverEditor();
   setupAdvancedState();
   setupFileProcessing();

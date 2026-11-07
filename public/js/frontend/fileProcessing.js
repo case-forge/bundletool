@@ -101,13 +101,21 @@ export async function parseDateFromAddedFilename(filename, chrono) {
  * @param {HTMLElement} [targetTbody] the section to add to (the first section when omitted)
  * @param {Element|null} [beforeRow] the row the new rows go in front of (the end of the section when
  *   null). It is checked again for each file, because a row can go while a file is being read.
+ * @param {{allowRepeats?: boolean}} [opts] allowRepeats: add files that are already in the bundle too ("Add anyway");
+ *   each is stored under a name of its own, as a revised document with the same name is
  */
-export async function processFiles(files, targetTbody, beforeRow = null) {
+export async function processFiles(files, targetTbody, beforeRow = null, { allowRepeats = false } = {}) {
   if (!targetTbody) targetTbody = getDefaultSection0000();
 
-  // Dropping a folder's worth of PDFs twice should not build a doubled bundle.
-  const duplicates = files.filter(isAlreadyAdded).map(f => f.name);
-  files = files.filter(f => !isAlreadyAdded(f));
+  // Dropping a folder's worth of PDFs twice should not build a doubled bundle: they are left out, and the message
+  // says so and offers to add them anyway.
+  const repeats = allowRepeats ? [] : files.filter(isAlreadyAdded);
+  const duplicates = repeats.map(f => f.name);
+  files = files.filter(f => !repeats.includes(f));
+  const addAnyway = repeats.length === 0 ? undefined : {
+    label: repeats.length === 1 ? 'Add anyway' : 'Add them anyway',
+    run: () => routeIncomingFiles(repeats, targetTbody, beforeRow, { allowRepeats: true }),
+  };
   if (files.length === 0 && duplicates.length > 0) {
     showUploadWarningModal({
       code: 'BT-ADD-04',
@@ -115,6 +123,7 @@ export async function processFiles(files, targetTbody, beforeRow = null) {
       message: duplicates.length === 1
         ? `"${duplicates[0]}" is already in the bundle, so it was not added again.`
         : `All ${duplicates.length} of those files are already in the bundle, so they were not added again.`,
+      action: addAnyway,
     });
     return;
   }
@@ -411,7 +420,7 @@ export async function processFiles(files, targetTbody, beforeRow = null) {
     : duplicates.length === 1
       ? `"${duplicates[0]}" was already in the bundle and was not added again.`
       : `${duplicates.length} of the files were already in the bundle and were not added again.`;
-  reportAdded(skipped, totalPagesNow, totalSizeMbNow, dupNote, undefined, notes);
+  reportAdded(skipped, totalPagesNow, totalSizeMbNow, dupNote, undefined, notes, addAnyway);
 }
 
 /**
@@ -419,7 +428,7 @@ export async function processFiles(files, targetTbody, beforeRow = null) {
  * were; one rejection replays its own explanation; several are listed together. If the bundle is also
  * very large, that warning is the modal (it cannot share the element) and names the rejected files.
  */
-export function reportAdded(skipped, totalPagesNow, totalSizeMbNow, dupNote = '', warnFn = showUploadWarningModal, notes = []) {
+export function reportAdded(skipped, totalPagesNow, totalSizeMbNow, dupNote = '', warnFn = showUploadWarningModal, notes = [], action = undefined) {
   // The one place every add ends up, whatever was skipped, so it is also the one place to bring the
   // Review Table's own running total and PD27A note up to date.
   refreshBundleTotals();
@@ -428,12 +437,12 @@ export function reportAdded(skipped, totalPagesNow, totalSizeMbNow, dupNote = ''
   // Notes about files that were added (see processFiles) ride along with the duplicate note.
   if (notes.length) dupNote = [dupNote, ...notes].filter(Boolean).join('\n\n');
   const noteTitle = notes.length ? (notes.length === 1 && !skipped.length ? 'Added, with a note' : 'Added, with notes') : null;
-  if (skipped.length === 0) return maybeWarnLargeBundleOnAdd(totalPagesNow, totalSizeMbNow, dupNote, warnFn, noteTitle, leftOutCode);
+  if (skipped.length === 0) return maybeWarnLargeBundleOnAdd(totalPagesNow, totalSizeMbNow, dupNote, warnFn, noteTitle, leftOutCode, action);
   if (skipped.length === 1 && !isLargeBundle(totalPagesNow, totalSizeMbNow) && !dupNote) { skipped[0].replay(); return true; }
   const lines = skipped.map(s => `"${s.name}": ${s.reason}`);
   if (isLargeBundle(totalPagesNow, totalSizeMbNow)) {
     const note = `${skipped.length} file${skipped.length === 1 ? ' was' : 's were'} not added: ${lines.join('; ')}.`;
-    return maybeWarnLargeBundleOnAdd(totalPagesNow, totalSizeMbNow, [dupNote, note].filter(Boolean).join('\n\n'), warnFn, null, 'BT-ADD-18');
+    return maybeWarnLargeBundleOnAdd(totalPagesNow, totalSizeMbNow, [dupNote, note].filter(Boolean).join('\n\n'), warnFn, null, 'BT-ADD-18', action);
   }
   warnFn({
     code: 'BT-ADD-17',
@@ -441,6 +450,7 @@ export function reportAdded(skipped, totalPagesNow, totalSizeMbNow, dupNote = ''
     message: [skipped.length === 1 ? 'This file could not be added:' : 'These files could not be added:', dupNote].filter(Boolean).join('\n\n'),
     items: lines,
     guide: true,
+    action,
   });
   return true;
 }
@@ -457,7 +467,7 @@ export function reportAdded(skipped, totalPagesNow, totalSizeMbNow, dupNote = ''
  * files were left out (errorCodes.js); the large-bundle warning on its own, and notes about files that were added,
  * only inform, so they carry none.
  */
-export function maybeWarnLargeBundleOnAdd(totalPagesNow, totalSizeMbNow, dupNote = '', warnFn = showUploadWarningModal, noteTitle = null, code = null) {
+export function maybeWarnLargeBundleOnAdd(totalPagesNow, totalSizeMbNow, dupNote = '', warnFn = showUploadWarningModal, noteTitle = null, code = null, action = undefined) {
   if (isLargeBundle(totalPagesNow, totalSizeMbNow)) {
     const parts = [];
     if (totalPagesNow  > LARGE_BUNDLE_PAGES) parts.push(`${totalPagesNow} pages`);
@@ -467,20 +477,21 @@ export function maybeWarnLargeBundleOnAdd(totalPagesNow, totalSizeMbNow, dupNote
       title: 'Very large bundle',
       message: `Your documents total ${parts.join(' and ')}. Court bundles over ${LARGE_BUNDLE_PAGES.toLocaleString('en-GB')} pages or ${LARGE_BUNDLE_MB} MB are rare. Consider splitting the documents into separate volumes (for example "Bundle A" and "Bundle B"). If you proceed, BundleTool may take longer than usual to process.`
         + (dupNote ? `\n\n${dupNote}` : ''),
+      action,
     });
     return true;
   } else if (dupNote) {
-    warnFn({ code, title: noteTitle || 'Already added', message: dupNote });
+    warnFn({ code, title: noteTitle || 'Already added', message: dupNote, action });
     return true;
   }
   return false;
 }
 
 /** Route freshly chosen or dropped files to the right section, with errors surfaced. */
-async function routeIncomingFiles(files, targetTbody = null, beforeRow = null) {
+async function routeIncomingFiles(files, targetTbody = null, beforeRow = null, opts = undefined) {
   if (!files.length) return;
   try {
-    if (targetTbody) await processFiles(files, targetTbody, beforeRow);
+    if (targetTbody) await processFiles(files, targetTbody, beforeRow, opts);
     else if (state.isSectioned) showSectionPicker(files);
     else await processFiles(files);
   } catch (error) {

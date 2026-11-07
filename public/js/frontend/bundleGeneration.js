@@ -3,7 +3,7 @@ import { lazyImport } from '/js/shared/lazy-load.js';
 import { stripUnsuitableChars, stripMultiline, uniqueFilename, isWatermarkText, reconcileWatermark, pageNumberColourToHex, currentDateStyle } from './utils.js';
 import { buildIndexData, makeFileRow } from './fileRows.js';
 import { ensureEmptyPlaceholder, removeEmptyPlaceholder } from './fileRows.js';
-import { showProcessingOverlay, hideProcessingOverlay, showBundleReadyState, showIndexReadyState, openBundlePreview } from './bundleUI.js';
+import { showProcessingOverlay, hideProcessingOverlay, showBundleReadyState, showIndexReadyState, openBundlePreview, openAssembledPreview } from './bundleUI.js';
 import { showErrorModal, showUploadWarningModal, confirmMissingInfo, confirmStructureWarning, confirmUnnamedSections, confirmLargeBundle, isMemoryError, isLoadingError, showPageNotice } from './modals.js';
 import { createSectionTbody, createSection0000HeaderRow } from './sections.js';
 import { setCoversheetSelected } from './coversheet.js';
@@ -19,7 +19,8 @@ import { COVER_FOLLOW, getCoverOverride, setCoverOverride } from './coverOverrid
 import { stopAllReading } from './ocrReading.js';
 import { settleReadingBeforeBuild } from './ocrWait.js';
 import { filesForBundle } from './smallerPhotos.js';
-import { resetJustAssembleAfterBuild } from './justAssemble.js';
+import { JUST_ASSEMBLE_OPTIONS, assembledFilename } from './justAssemble.js';
+import { BUNDLE_STEPS } from './constants.js';
 
 /**
  * A document's page count and any unapplied redaction markers, read once. A reopened bundle's documents
@@ -102,10 +103,10 @@ export function gatherConfigOptions() {
       watermarkOpacity: Number(document.getElementById('config-watermarkOpacity')?.value ?? 28),
       // On unless switched off: a missing control (?? true) is the default, as for ocr.autoDetect below.
       smallerPhotos:   document.getElementById('config-smallerPhotos')?.checked ?? true,
-      // Just assemble: three independent switches, off unless ticked.
-      leaveOutIndex:       document.getElementById('config-leaveOutIndex')?.checked === true,
-      leaveOutPageNumbers: document.getElementById('config-leaveOutPageNumbers')?.checked === true,
-      leaveOutBookmarks:   document.getElementById('config-leaveOutBookmarks')?.checked === true,
+      // Just assemble is its own button (runJustAssemble), never a setting: Create Bundle always keeps all three.
+      leaveOutIndex:       false,
+      leaveOutPageNumbers: false,
+      leaveOutBookmarks:   false,
     },
     cover: {
       courtName:      stripUnsuitableChars(document.getElementById('config-courtName')?.value || ''),
@@ -139,7 +140,7 @@ export function gatherConfigOptions() {
       // Blank is a real, different value (no joining word, just the gap) from the default
       // "-&-", so a missing element (?? not ||) falls back to the default and a genuinely
       // blank box stays blank.
-      partyJoiner: stripUnsuitableChars(document.getElementById('config-partyJoiner')?.value ?? '-&-'),
+      partyJoiner: stripUnsuitableChars(document.getElementById('config-partyJoiner')?.value ?? '-and-'),
     },
     ocr: {
       autoDetect: document.getElementById('config-ocrAutoDetect')?.checked ?? true,
@@ -280,11 +281,6 @@ export async function handleFormSubmit(e, form, opts = {}) {
       openBundlePreview(pdfBytes, bundleFilename);
     } else {
       showBundleReadyState(pdfBytes, bundleFilename);
-      // Just assemble with "Just this once": the bundle is made, so the switches go back to off and stay off.
-      resetJustAssembleAfterBuild(document, {
-        save: () => { window.saveDefaultConfig?.(); markDirty(); },
-        notify: (message) => showPageNotice({ code: null, title: 'Just assemble', message }),
-      });
     }
     markBuildFinished();
     return;
@@ -473,11 +469,6 @@ export function applyExtractedConfig(rawConfig) {
     const el = document.getElementById('config-smallerPhotos');
     if (el) el.checked = extractedConfig.pageOptions?.smallerPhotos !== false;
   }
-  // Just assemble: a bundle or manifest that does not say true (older ones say nothing) reopens with each off.
-  for (const key of ['leaveOutIndex', 'leaveOutPageNumbers', 'leaveOutBookmarks']) {
-    const el = document.getElementById(`config-${key}`);
-    if (el) el.checked = extractedConfig.pageOptions?.[key] === true;
-  }
   if (extractedConfig.index?.sectionPrefix !== undefined)
     document.getElementById('config-sectionPrefix').value = extractedConfig.index.sectionPrefix;
   document.getElementById('config-pageNumberPerSection').checked = extractedConfig.pageNumbering?.pageNumberPerSection === true;
@@ -518,8 +509,8 @@ export function applyExtractedConfig(rawConfig) {
   { const el = document.getElementById('config-caseNumberLabel'); if (el) el.value = cover.caseNumberLabel ?? 'CASE NO:'; }
   // Likewise: a bundle with no stored preparedByLabel was drawn with "Prepared by:".
   { const el = document.getElementById('config-preparedByLabel'); if (el) el.value = cover.preparedByLabel ?? 'Prepared by:'; }
-  // Likewise: a bundle with no stored partyJoiner was drawn with "-&-".
-  { const el = document.getElementById('config-partyJoiner'); if (el) el.value = cover.partyJoiner ?? '-&-'; }
+  // Likewise: a bundle with no stored partyJoiner was drawn with "-and-".
+  { const el = document.getElementById('config-partyJoiner'); if (el) el.value = cover.partyJoiner ?? '-and-'; }
   window.refreshAdvancedState?.();
   const generateCoverEl = document.getElementById('config-generateCover');
   if (generateCoverEl) generateCoverEl.checked = coverSource === 'generated';
@@ -740,6 +731,79 @@ export async function splitBundleInPlace(file, targetTbody = null) {
   }
 }
 
+/**
+ * Just Assemble: the documents in order and nothing else, then the same Save / Preview panel as Preview Index. It
+ * needs no case details, so it asks nothing about them; it waits only for text still being read. Nothing is
+ * remembered afterwards: the three left-out keys go back to off, so the next Create Bundle is a normal one.
+ */
+export async function runJustAssemble() {
+  if (getAllFileRows().length === 0) { pulseStep2(); return; }
+  state.buildStarted = true;
+  if (!await settleReadingBeforeBuild()) return;
+
+  if (!state.processTheBundle) {
+    ({ processTheBundle: state.processTheBundle } = await lazyImport(new URL('../bundletoolMain.js', import.meta.url)));
+  }
+
+  const base = gatherConfigOptions();
+  // No cover (generated or uploaded), no watermark and no blank pages for double-sided printing either: the documents,
+  // in order, and nothing else.
+  state.config.updateOptions({ ...base, pageOptions: { ...base.pageOptions, ...JUST_ASSEMBLE_OPTIONS, generateCover: false, coversheet: false, printableBundle: false, watermark: false, watermarkText: '' } });
+  const assembleIndexData = buildIndexData();
+  if (assembleIndexData.totalFileCount === 0) {
+    showErrorModal({ code: 'BT-ASM-01', title: 'No documents added', message: 'Please add at least one document before assembling.' });
+    return;
+  }
+
+  const BUNDLE_TIMEOUT_MS = 240_000;
+  let cancelled = false;
+  let readyStateShown = false;
+  showProcessingOverlay('Assembling…');
+  document.getElementById('processing-cancel-btn')?.classList.remove('hidden');
+  try {
+    // The engine's own stage names (index entries, page numbers, bookmarks...) are not shown: none of them happens.
+    const onProgress = (label) => { if (!cancelled && !BUNDLE_STEPS.includes(label)) showProcessingOverlay(label); };
+    let pdfBytes = await Promise.race([
+      filesForBundle(state.filesMap, { on: base.pageOptions.smallerPhotos, onProgress })
+        .then((files) => state.processTheBundle(files, assembleIndexData, state.config, onProgress, null)),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('__timeout__')), BUNDLE_TIMEOUT_MS)),
+      new Promise((_, reject) => { state._cancelReject = reject; }),
+    ]);
+    if (!pdfBytes || !(pdfBytes instanceof Uint8Array) || pdfBytes.length === 0) {
+      throw new Error('Assembling returned invalid or empty PDF data');
+    }
+    const bundlePassword = (document.getElementById('config-bundlePassword')?.value ?? '').trim();
+    if (bundlePassword) {
+      showProcessingOverlay('Protecting PDF…');
+      const { encryptPdf } = await lazyImport(new URL('../bundletoolPages.js', import.meta.url));
+      pdfBytes = await encryptPdf(pdfBytes, bundlePassword);
+    }
+    readyStateShown = true;
+    showBundleReadyState(pdfBytes, assembledFilename(document.getElementById('config-bundleTitle')?.value, new Date().toISOString().slice(0, 10)), {
+      readyMessage: 'Assembled!', saveLabel: 'Save PDF', previewLabel: 'Preview PDF', allowSplit: false, previewFn: openAssembledPreview,
+    });
+  } catch (error) {
+    if (error.message === '__cancelled__') { cancelled = true; return; }
+    console.error('[FRONTEND ERROR] Just assemble failed:', error);
+    if (error.message === '__timeout__') {
+      showErrorModal({ code: 'BT-ASM-02', title: 'Assembling timed out', message: 'Assembling took too long. The browser may be running low on memory, or the documents may be very large. Try closing other tabs, or assemble fewer documents at a time.' });
+    } else if (isMemoryError(error)) {
+      showErrorModal({ code: 'BT-ASM-03', title: 'Not enough memory', message: 'Your browser ran out of memory assembling these documents. Try closing other tabs or apps, or assemble fewer documents at a time.' });
+    } else if (isLoadingError(error)) {
+      showErrorModal({ code: 'BT-ASM-04', title: 'Connection error', message: 'Loading error. Please check your internet connection and try again.' });
+    } else {
+      showErrorModal({ code: 'BT-ASM-05', title: 'Assembling failed', message: 'Something went wrong while assembling your documents. If this keeps happening, please send a bug report with the details below.', error });
+    }
+  } finally {
+    state._cancelReject = null;
+    if (!readyStateShown) {
+      document.getElementById('processing-cancel-btn')?.classList.add('hidden');
+      hideProcessingOverlay();
+    }
+    state.config.updateOptions({ pageOptions: { leaveOutIndex: false, leaveOutPageNumbers: false, leaveOutBookmarks: false, generateCover: base.pageOptions.generateCover, coversheet: base.pageOptions.coversheet } });
+  }
+}
+
 export function setup(form, runPreviewIndexFn) {
   form.addEventListener('submit', (e) => handleFormSubmit(e, form));
 
@@ -755,6 +819,8 @@ export function setup(form, runPreviewIndexFn) {
     if (!await confirmMissingInfo()) return;
     runPreviewIndex();
   });
+
+  document.getElementById('just-assemble-btn')?.addEventListener('click', () => runJustAssemble());
 }
 
 /**

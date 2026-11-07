@@ -77,8 +77,8 @@ test('a document with no large compressed streams reports nothing without doing 
 });
 
 // ── findOversizedImagePages: the pre-scan that tells OCR a page's image is over the decode cap
-import { findOversizedImagePages, findOverBudgetImagePages } from '../public/js/bundletoolPdfInspect.js';
-import { OCR_MAX_IMAGE_PIXELS, OCR_MAX_PAGE_IMAGE_PIXELS } from '../public/js/bundletoolOcr.js';
+import { findOversizedImagePages } from '../public/js/bundletoolPdfInspect.js';
+import { OCR_MAX_IMAGE_PIXELS } from '../public/js/bundletoolOcr.js';
 
 /** Adds an image XObject that DECLARES width x height; its stream is one byte, so nothing is decoded. */
 function addImage(d, page, key, width, height) {
@@ -128,69 +128,4 @@ test('an image inside a Form XObject is found, and a form that contains itself d
 test('a document with no images, or whose structure cannot be read, reports nothing and never throws', async () => {
   assert.deepEqual(findOversizedImagePages(await doc(2), 90_000_000), []);
   assert.deepEqual(findOversizedImagePages({ getPages() { throw new Error('broken'); } }, 90_000_000), []);
-});
-
-// ── findOverBudgetImagePages: the per-page total, which the per-image cap above does not bound
-const A3_600_DPI = 7016 * 9921; // 69.6 Mpx: a legitimate scan that must still be read
-
-test('the page budget sits above every legitimate scan measured and below the shapes that cost more memory', () => {
-  // Measured peak RSS (fresh processes): 88 Mpx x1 1.29 GB, 36 Mpx x8 1.45 GB, 64 Mpx x4 1.62 GB, A3 at 600 DPI 1.06 GB.
-  assert.ok(OCR_MAX_PAGE_IMAGE_PIXELS >= 88_000_000, 'an 88 Mpx single image must still be read');
-  assert.ok(OCR_MAX_PAGE_IMAGE_PIXELS >= A3_600_DPI);
-  assert.ok(OCR_MAX_PAGE_IMAGE_PIXELS < 4 * 8000 * 8000, 'four 8000 x 8000 images on one page must be over budget');
-  assert.ok(OCR_MAX_PAGE_IMAGE_PIXELS < 8 * 6000 * 6000, 'eight 6000 x 6000 images on one page must be over budget');
-});
-
-test('several images each under the per-image cap are over budget together', async () => {
-  const d = await doc(3);
-  const [p1, p2, p3] = d.getPages();
-  for (let i = 0; i < 4; i++) addImage(d, p1, `Im${i}`, 8000, 8000);   // 4 x 64 Mpx
-  for (let i = 0; i < 8; i++) addImage(d, p2, `Im${i}`, 6000, 6000);   // 8 x 36 Mpx
-  addImage(d, p3, 'Im1', 9400, 9400);                                    // 88 Mpx: one image, within budget
-  assert.deepEqual(findOversizedImagePages(d, OCR_MAX_IMAGE_PIXELS), [], 'none is over the per-image cap');
-  assert.deepEqual(findOverBudgetImagePages(d, OCR_MAX_PAGE_IMAGE_PIXELS), [1, 2]);
-});
-
-test('A3 at 600 DPI and an 88 Mpx single image are within budget', async () => {
-  const d = await doc(2);
-  const [p1, p2] = d.getPages();
-  addImage(d, p1, 'Im1', 7016, 9921);
-  addImage(d, p2, 'Im1', 9400, 9400);
-  assert.deepEqual(findOverBudgetImagePages(d, OCR_MAX_PAGE_IMAGE_PIXELS), []);
-});
-
-test('the budget is on the total, and exactly at it is allowed', async () => {
-  const d = await doc(1);
-  const p = d.getPages()[0];
-  addImage(d, p, 'A', 5000, 6000);   // 30,000,000
-  addImage(d, p, 'B', 6000, 10000);  // 60,000,000
-  assert.deepEqual(findOverBudgetImagePages(d, 90_000_000), []);
-  assert.deepEqual(findOverBudgetImagePages(d, 89_999_999), [1]);
-});
-
-test('images are counted whatever their filter, inside Form XObjects, with their soft masks, and a shared image once', async () => {
-  const d = await doc(3);
-  const [p1, p2, p3] = d.getPages();
-  // JBIG2, CCITT and JPX declare /Width and /Height like any other image
-  for (const [i, filter] of ['JBIG2Decode', 'CCITTFaxDecode', 'JPXDecode', 'DCTDecode'].entries()) {
-    const ref = d.context.register(d.context.stream(new Uint8Array([0]), { Type: 'XObject', Subtype: 'Image', Width: 8000, Height: 8000, Filter: filter }));
-    const xo = p1.node.normalizedEntries().Resources.lookup(PDFName.of('XObject')) ?? (() => { const o = d.context.obj({}); p1.node.normalizedEntries().Resources.set(PDFName.of('XObject'), o); return o; })();
-    xo.set(PDFName.of(`Im${i}`), ref);
-  }
-  // p2: one 50 Mpx image plus a 50 Mpx soft mask
-  const mask = d.context.register(d.context.stream(new Uint8Array([0]), { Type: 'XObject', Subtype: 'Image', Width: 5000, Height: 10000 }));
-  const masked = d.context.register(d.context.stream(new Uint8Array([0]), { Type: 'XObject', Subtype: 'Image', Width: 5000, Height: 10000, SMask: mask }));
-  p2.node.normalizedEntries().Resources.set(PDFName.of('XObject'), d.context.obj({ Im1: masked }));
-  // p3: four forms that all draw the same 60 Mpx image: decoded once, so within budget
-  const shared = d.context.register(d.context.stream(new Uint8Array([0]), { Type: 'XObject', Subtype: 'Image', Width: 6000, Height: 10000 }));
-  const forms = {};
-  for (let i = 0; i < 4; i++) {
-    forms[`F${i}`] = d.context.register(d.context.stream(new Uint8Array([0]), { Type: 'XObject', Subtype: 'Form', BBox: [0, 0, 10, 10], Resources: d.context.obj({ XObject: d.context.obj({ Im: shared }) }) }));
-  }
-  p3.node.normalizedEntries().Resources.set(PDFName.of('XObject'), d.context.obj(forms));
-  assert.deepEqual(findOverBudgetImagePages(d, OCR_MAX_PAGE_IMAGE_PIXELS), [1, 2]);
-});
-
-test('findOverBudgetImagePages never throws on a document it cannot read', async () => {
-  assert.deepEqual(findOverBudgetImagePages({ getPages() { throw new Error('broken'); } }, 1), []);
 });

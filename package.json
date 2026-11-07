@@ -1,6 +1,6 @@
 {
   "name": "bundletool",
-  "version": "1.1.0",
+  "version": "1.5.0",
   "description": "Court bundle builder: a browser tool and a command line build of the same bundle",
   "type": "module",
   "private": true,

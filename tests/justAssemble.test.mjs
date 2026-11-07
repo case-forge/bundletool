@@ -1,8 +1,9 @@
 /**
- * Just assemble: three independent switches, each off by default (pageOptions.leaveOutIndex,
- * leaveOutPageNumbers, leaveOutBookmarks), and the browser's Just This Once. The option wiring, the
- * numbering rule (no index: the first document page is page 1, a cover unnumbered), real builds through
- * the shipped engine and through the command line, and the settings round trips.
+ * Just assemble: the engine keys pageOptions.leaveOutIndex, leaveOutPageNumbers and leaveOutBookmarks (each off
+ * by default, also the command line's --no-index, --no-page-numbers and --no-bookmarks) and the browser's one
+ * Just Assemble button, which has no settings. The option wiring, the numbering rule (no index: the first
+ * document page is page 1, a cover unnumbered), real builds through the shipped engine and through the command
+ * line, and the button.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -25,7 +26,7 @@ import { describePartPages } from '../public/js/bundletoolSplit.js';
 import { sanitiseConfig, sanitiseNestedConfig, DEFAULTS_KEYS } from '../public/js/frontend/configSanitise.js';
 import { encodeSettingsCode, decodeSettingsCode } from '../public/js/frontend/settingsCode.js';
 import { flattenManifestConfig, nestManifestConfig } from '../public/js/manifestSchema.js';
-import { resetJustAssembleAfterBuild, JUST_ASSEMBLE_IDS, ONCE_ID, BACK_OFF_NOTICE } from '../public/js/frontend/justAssemble.js';
+import { JUST_ASSEMBLE_OPTIONS, assembledFilename } from '../public/js/frontend/justAssemble.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const read = (rel) => fs.readFileSync(path.join(here, '..', rel), 'utf8');
@@ -149,7 +150,7 @@ test('bookmarks: no Index entry with the index left out, and a bookmark page mat
   assert.equal(withIndex[1].title, '[1] A - pg. 2', 'continuous numbering: the physical page, as before');
 });
 
-test('the bundle remembers all three in its embedded config; one made before they existed reopens with them off', async () => {
+test('the bundle remembers all three in its embedded config, and the page does not take them back as settings', async () => {
   const c = new Config();
   c.updateOptions({ pageOptions: { leaveOutIndex: true, leaveOutPageNumbers: true, leaveOutBookmarks: true } });
   const payload = buildBundleIndexPayload([], flattenConfig(c));
@@ -157,10 +158,9 @@ test('the bundle remembers all three in its embedded config; one made before the
   const doc = await PDFDocument.load(await fx.makePdf(2, 'B'));
   setMetadata(doc, [{ sectionID: '0000', entries: [{ tabNumber: 1, title: 'A', date: '', filename: 'a.pdf', pageCount: 2, beginsOnPdfPage: 1, actualPdfStartPageWithToc: 1 }] }], flattenConfig(c));
   const opened = await openBundle(await doc.save());
+  for (const k of KEYS) assert.equal(opened.config.pageOptions[k], true, 'the reopened bundle still reads them (the command line and --unpack use them)');
   const nested = sanitiseNestedConfig(opened.config);
-  for (const k of KEYS) assert.equal(nested.pageOptions[k], true);
-  const older = sanitiseNestedConfig({ pageOptions: { printableBundle: false } });
-  for (const k of KEYS) assert.equal(older.pageOptions[k], undefined, 'absent, so the page leaves the switch off');
+  for (const k of KEYS) assert.equal(nested.pageOptions[k], undefined, 'the page has no switch for them, so it never takes them');
 });
 
 test('the email splitter reads a bundle with its page numbers left out as one with none printed', () => {
@@ -168,20 +168,6 @@ test('the email splitter reads a bundle with its page numbers left out as one wi
   assert.equal(describePartPages(payload, 1, 4, 10).printed, false);
   delete payload.config.pageOptions.leaveOutPageNumbers;
   assert.equal(describePartPages(payload, 1, 4, 10).printed, true);
-});
-
-test('saved settings, share links and QR codes keep all four; older saved settings load with them off', async () => {
-  for (const k of [...KEYS, 'justAssembleOnce']) {
-    assert.ok(DEFAULTS_KEYS.includes(k), k);
-    assert.deepEqual(sanitiseConfig({ [k]: true }, { only: DEFAULTS_KEYS }), { [k]: true });
-    assert.deepEqual(sanitiseConfig({ [k]: 'true' }, { only: DEFAULTS_KEYS }), {});
-  }
-  const all = { leaveOutIndex: true, leaveOutPageNumbers: false, leaveOutBookmarks: true, justAssembleOnce: true };
-  assert.deepEqual(await decodeSettingsCode(await encodeSettingsCode(all)), all);
-  assert.deepEqual(sanitiseConfig({ fontFace: 'serif' }, { only: DEFAULTS_KEYS }), { fontFace: 'serif' }, 'nothing invented for an older setting');
-  const page = read('public/js/bundletoolPage.js');
-  assert.match(page, /FACTORY = \{[\s\S]*leaveOutIndex: false, leaveOutPageNumbers: false, leaveOutBookmarks: false, justAssembleOnce: false/);
-  for (const k of [...KEYS, 'justAssembleOnce']) assert.match(page, new RegExp(`${k}: document\\.getElementById\\('config-${k}'\\)\\?\\.checked === true`));
 });
 
 /** A stand-in for the page's controls: every id answers with one lasting element. */
@@ -197,106 +183,67 @@ function stubPage() {
 }
 const unstub = () => { delete globalThis.document; delete globalThis.window; };
 
-test('autosave, manifest export and import, and a reopened bundle all carry the three switches', async () => {
+// ── The button ──────────────────────────────────────────────────────────────────────────────────────────
+
+test('Just Assemble is not a setting: saved settings, share codes and the autosave carry none of the three', async () => {
+  for (const k of [...KEYS, 'justAssembleOnce']) {
+    assert.ok(!DEFAULTS_KEYS.includes(k), `${k} is not a saved setting`);
+    assert.deepEqual(sanitiseConfig({ [k]: true }, { only: DEFAULTS_KEYS }), {}, `an older saved ${k} is dropped`);
+  }
+  assert.deepEqual(await decodeSettingsCode(await encodeSettingsCode({ fontFace: 'serif' })), { fontFace: 'serif' });
   const el = stubPage();
   try {
-    const { collectFormConfig, applyFormConfig } = await import('../public/js/frontend/autosave.js');
-    const { gatherConfigOptions, applyExtractedConfig } = await import('../public/js/frontend/bundleGeneration.js');
+    const { collectFormConfig } = await import('../public/js/frontend/autosave.js');
     for (const k of [...KEYS, 'justAssembleOnce']) el(`config-${k}`).checked = true;
     const snap = JSON.parse(JSON.stringify(collectFormConfig()));
-    for (const k of [...KEYS, 'justAssembleOnce']) assert.equal(snap[k], true);
-    for (const k of [...KEYS, 'justAssembleOnce']) el(`config-${k}`).checked = false;
-    applyFormConfig(snap);
-    for (const k of [...KEYS, 'justAssembleOnce']) assert.equal(el(`config-${k}`).checked, true, k);
-    // An older snapshot, without them: all off.
-    const older = { ...snap }; for (const k of [...KEYS, 'justAssembleOnce']) delete older[k];
-    applyFormConfig(older);
-    for (const k of [...KEYS, 'justAssembleOnce']) assert.equal(el(`config-${k}`).checked, false, k);
-
-    el('config-leaveOutIndex').checked = true;
-    el('config-leaveOutBookmarks').checked = true;
-    const flat = flattenManifestConfig(gatherConfigOptions());
-    assert.equal(flat['pageOptions.leaveOutIndex'], true);
-    assert.equal(flat['pageOptions.leaveOutPageNumbers'], false);
-    assert.equal(flat['pageOptions.leaveOutBookmarks'], true);
-    assert.equal(flat['pageNumbering.numberingStyle'] !== 'None', true, 'the numbering style is never touched');
-    for (const k of KEYS) el(`config-${k}`).checked = false;
-    applyExtractedConfig(nestManifestConfig(JSON.parse(JSON.stringify(flat))));
-    assert.deepEqual(KEYS.map((k) => el(`config-${k}`).checked), [true, false, true]);
-    applyExtractedConfig({ pageOptions: {} });
-    assert.deepEqual(KEYS.map((k) => el(`config-${k}`).checked), [false, false, false], 'an older bundle: all off');
+    for (const k of [...KEYS, 'justAssembleOnce']) assert.ok(!(k in snap), `${k} is not autosaved`);
   } finally { unstub(); }
 });
 
-// ── Just This Once ──────────────────────────────────────────────────────────────────────────────────────
-
-function fakeSwitches(on, once) {
-  const els = Object.fromEntries([...JUST_ASSEMBLE_IDS, ONCE_ID].map((id) => [id, { checked: id === ONCE_ID ? once : on }]));
-  return { els, doc: { getElementById: (id) => els[id] ?? null } };
-}
-
-test('Just This Once: after a bundle is made, all four go back to off, are saved and a notice says so', () => {
-  const { els, doc } = fakeSwitches(true, true);
-  let saved = 0; let said = '';
-  assert.equal(resetJustAssembleAfterBuild(doc, { save: () => { saved++; }, notify: (m) => { said = m; } }), true);
-  assert.ok(Object.values(els).every((e) => e.checked === false));
-  assert.equal(saved, 1);
-  assert.equal(said, BACK_OFF_NOTICE);
-  assert.equal(BACK_OFF_NOTICE, 'Just assemble is back off, so the next bundle is normal.');
-});
-
-test('Just This Once off: the switches stay on after a bundle, and nothing is saved or said', () => {
-  const { els, doc } = fakeSwitches(true, false);
-  let calls = 0;
-  assert.equal(resetJustAssembleAfterBuild(doc, { save: () => { calls++; }, notify: () => { calls++; } }), false);
-  assert.ok(JUST_ASSEMBLE_IDS.every((id) => els[id].checked === true));
-  assert.equal(calls, 0);
-});
-
-test('Just This Once is reset only on the bundle-ready path: not by a failed or cancelled build, Preview Index or the bundle preview', () => {
-  const code = read('public/js/frontend/bundleGeneration.js');
-  assert.equal(code.match(/resetJustAssembleAfterBuild\(/g).length, 1, 'one call');
-  const at = code.indexOf('resetJustAssembleAfterBuild(document');
-  const readyAt = code.lastIndexOf('showBundleReadyState(pdfBytes, bundleFilename);', at);
-  const previewAt = code.lastIndexOf('openBundlePreview(pdfBytes, bundleFilename);', at);
-  const catchAt = code.indexOf('} catch (error) {', at);
-  assert.ok(readyAt > previewAt && readyAt < at, 'after "Bundle ready!", in the else branch, not the bundle preview');
-  assert.ok(catchAt > at && !code.slice(at, catchAt).includes('catch'), 'before the catch: a failed or cancelled build never reaches it');
-  assert.ok(!code.slice(code.indexOf('export async function runPreviewIndex'), code.indexOf('function cleanOverride')).includes('resetJustAssemble'), 'not Preview Index');
-  assert.match(code.slice(at, catchAt), /window\.saveDefaultConfig\?\.\(\); markDirty\(\);/, 'the off state is saved, so a reload keeps it');
-});
-
-test('after a reset, a reload brings back the off state (saved settings and the autosave snapshot both say off)', async () => {
+test('Create Bundle and Preview Index never leave anything out, whatever an old page or bundle said', async () => {
   const el = stubPage();
   try {
-    const { collectFormConfig, applyFormConfig } = await import('../public/js/frontend/autosave.js');
-    for (const id of [...JUST_ASSEMBLE_IDS, ONCE_ID]) el(id).checked = true;
-    let snap = null;
-    resetJustAssembleAfterBuild(globalThis.document, { save: () => { snap = JSON.parse(JSON.stringify(collectFormConfig())); } });
-    // "Reload": the page starts with whatever, then the saved snapshot is applied.
-    for (const id of [...JUST_ASSEMBLE_IDS, ONCE_ID]) el(id).checked = true;
-    applyFormConfig(snap);
-    for (const id of [...JUST_ASSEMBLE_IDS, ONCE_ID]) assert.equal(el(id).checked, false, id);
-    assert.deepEqual(sanitiseConfig(snap, { only: DEFAULTS_KEYS }).justAssembleOnce, false);
+    const { gatherConfigOptions, applyExtractedConfig } = await import('../public/js/frontend/bundleGeneration.js');
+    for (const k of KEYS) el(`config-${k}`).checked = true;
+    const flat = flattenManifestConfig(gatherConfigOptions());
+    for (const k of KEYS) assert.equal(flat[`pageOptions.${k}`], false, k);
+    assert.equal(flat['pageNumbering.numberingStyle'] !== 'None', true, 'the numbering style is never touched');
+    // A bundle made with them on reopens as a normal one: there is no switch to carry them.
+    applyExtractedConfig({ pageOptions: { leaveOutIndex: true, leaveOutPageNumbers: true, leaveOutBookmarks: true } });
+    for (const k of KEYS) assert.equal(flattenManifestConfig(gatherConfigOptions())[`pageOptions.${k}`], false, k);
   } finally { unstub(); }
 });
 
-test('Advanced Settings has a Just Assemble panel with the four switches, each off, each with its own icon, before Index Options', () => {
+test('the button: one Just Assemble beside Create Bundle and Preview Index, and no panel or switch in Advanced Settings', () => {
   const html = read('layouts/partials/bundletool.html');
-  const panel = html.slice(html.indexOf('Just Assemble</h4>'), html.indexOf('<!-- Index Options -->'));
-  assert.ok(panel.length > 0 && html.indexOf('Just Assemble</h4>') < html.indexOf('Index Options</h3>'));
-  const icons = [];
-  for (const [id, label] of [['leaveOutIndex', 'Leave Out Index'], ['leaveOutPageNumbers', 'Leave Out Page Numbers'], ['leaveOutBookmarks', 'Leave Out Bookmarks'], ['justAssembleOnce', 'Just This Once']]) {
-    const input = panel.match(new RegExp(`<input[^>]*id="config-${id}"[^>]*>`))?.[0];
-    assert.ok(input, id);
-    assert.doesNotMatch(input, /\bchecked\b/, `${id} is off by default`);
-    assert.match(input, new RegExp(`aria-label="${label}"`));
-    const before = panel.slice(0, panel.indexOf(input));
-    icons.push(before.slice(before.lastIndexOf('"name" "') + 8).split('"')[0]);
-  }
-  assert.equal(new Set(icons).size, 4, 'four different icons');
-  assert.match(panel, /exactly your pages/);
-  assert.doesNotMatch(panel, /disabled/, 'nothing is greyed out');
+  const step4 = html.slice(html.indexOf('id="step-4-choice"'), html.indexOf('<!-- Step 5: Advanced Settings -->'));
+  assert.ok(step4.indexOf('id="create-bundle-btn"') < step4.indexOf('id="preview-index-btn"') && step4.indexOf('id="preview-index-btn"') < step4.indexOf('id="just-assemble-btn"'));
+  const btn = step4.match(/<button[^>]*id="just-assemble-btn"[^>]*>/)[0];
+  assert.match(btn, /btn-needs-docs/, 'inactive until there are documents, like the other two');
+  assert.match(step4, /Just Assemble\s*<\/button>/);
+  assert.doesNotMatch(html, /config-leaveOut|config-justAssembleOnce|Just This Once|Just Assemble<\/h4>/);
+  const gen = read('public/js/frontend/bundleGeneration.js');
+  assert.match(gen, /getElementById\('just-assemble-btn'\)\?\.addEventListener\('click', \(\) => runJustAssemble\(\)\)/);
+});
+
+test('a Just Assemble run turns all three on, shows the same Save and Preview panel, and puts the three back off', () => {
+  assert.deepEqual({ ...JUST_ASSEMBLE_OPTIONS }, { leaveOutIndex: true, leaveOutPageNumbers: true, leaveOutBookmarks: true });
+  const gen = read('public/js/frontend/bundleGeneration.js');
+  const run = gen.slice(gen.indexOf('export async function runJustAssemble'), gen.indexOf('export function setup'));
+  assert.match(run, /\.\.\.JUST_ASSEMBLE_OPTIONS/);
+  assert.match(run, /generateCover: false, coversheet: false, printableBundle: false, watermark: false, watermarkText: ''/, 'no cover, watermark or blank pages added');
+  assert.match(run, /assembleIndexData, state\.config, onProgress, null\)/, 'no coversheet file is handed to the build');
+  assert.match(run, /showBundleReadyState\(pdfBytes, assembledFilename\(/);
+  assert.match(run, /finally \{[\s\S]*leaveOutIndex: false, leaveOutPageNumbers: false, leaveOutBookmarks: false/);
+  assert.ok(!/confirmMissingInfo|confirmStructureWarning|confirmUnnamedSections/.test(run), 'no case-detail questions: nothing is drawn from them');
+  assert.ok(!/saveFinishedBundle|markBuildStarted/.test(run), 'it is not a bundle, so it is not kept as the last bundle');
+});
+
+test('an assembled PDF is named for the bundle title when there is one, and the date', () => {
+  assert.equal(assembledFilename('Hearing on 4 Nov', '2026-11-01'), 'Hearing on 4 Nov-assembled-2026-11-01.pdf');
+  assert.equal(assembledFilename('', '2026-11-01'), 'assembled-2026-11-01.pdf');
+  assert.equal(assembledFilename('A/B: C.D', '2026-11-01'), 'A-B- C-D-assembled-2026-11-01.pdf');
+  assert.ok(assembledFilename('x'.repeat(400), '2026-11-01').length <= 251);
 });
 
 // ── Real builds ─────────────────────────────────────────────────────────────────────────────────────────
