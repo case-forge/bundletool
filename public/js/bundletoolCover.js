@@ -88,15 +88,14 @@
  *                              lines. With the case number on the court's line the court is aligned inside the
  *                              column left of the case number (see courtAndCase()).
  *   `cover.partyAlign`         left, centre or right, for the stacked design's party names (and its
- *                              partyJoiner, "-&-" by default). The two-column design keeps applicants left
+ *                              partyJoiner, "-and-" by default). The two-column design keeps applicants left
  *                              and respondents right, so it ignores this one.
  *   `cover.titleLines`         'single' (default) or 'double': one rule above and below the title, or two thin
  *                              rules each. See TITLE_RULE_TEXT_GAP for how the text is centred between them.
  *
  * Three more settings are freely overridable prefixes or joining words, not toggles, on the same footing
  * as the party labels: `cover.caseNumberLabel` ("CASE NO:" by default), `cover.preparedByLabel`
- * ("Prepared by:" by default) and `cover.partyJoiner` ("-&-" by default, following the judiciary.uk
- * directions templates: "-&-" is the standard civil and family joiner, "-V-" a common alternative;
+ * ("Prepared by:" by default) and `cover.partyJoiner` ("-and-" by default; "-vs-", "-&-" and "-V-" are the other presets, and any wording is allowed;
  * criminal matters use "R v [Defendant]" instead of a BETWEEN heading, which this tool never draws). All
  * three tell "key absent" (the stored default) apart from "key present and blank" (no prefix, no label or
  * no joining word at all): see where layoutCover() reads them.
@@ -116,6 +115,7 @@ import { PDFDocument, rgb, getFontkit } from './bundletoolPdfLib.js';
 import { getFontSettings } from './bundletoolFontSettings.js';
 import { normaliseFontKey } from './bundletoolConfig.js';
 import { pageDimensions } from './bundletoolPageSize.js';
+import { ruleDesign, strokeLayout, drawStroke, RULE_SEP } from './bundletoolRules.js';
 
 /** A4, the default. layoutCover() resolves the ACTUAL size from
  *  `pageOptions.pageSize` and shadows these, so the layout maths below reads
@@ -306,6 +306,11 @@ export function layoutCover(cv, fonts, gapScale, page = null) {
     });
   };
 
+  /** One stroke of a title rule design, centred on `at`, margin to margin. */
+  const strokeAt = (stroke, at) => {
+    if (page) drawStroke(page, stroke, at, MARGIN, PAGE_WIDTH - MARGIN, BLACK);
+  };
+
   /** The height of the capitals at `size`, from the font's own metrics when it has them. */
   const capHeightOf = (font, size) => {
     const f = font.embedder?.font;
@@ -319,19 +324,25 @@ export function layoutCover(cv, fonts, gapScale, page = null) {
    * (see TITLE_RULE_TEXT_GAP); that gap is not scaled with the other gaps, so the two can never differ.
    */
   const titleBlock = () => {
-    const double = cv['cover.titleLines'] === 'double';
-    const thickness = double ? DOUBLE_RULE_WIDTH : RULE_WIDTH;
-    const step = thickness + DOUBLE_RULE_SEP;
+    const design = ruleDesign(cv['cover.titleLines']);
+    const strokes = design.strokes;
+    const first = strokes[0];
+    const last = strokes[strokes.length - 1];
+    const { centres } = strokeLayout(design);
     const lines = wrapText(title, bold, TITLE_FONT_SIZE, usable);
-    rule(y, thickness);
-    let inner = y;
-    if (double) { inner = y - step; rule(inner, thickness); }
-    y = inner - thickness / 2 - TITLE_RULE_TEXT_GAP - capHeightOf(bold, TITLE_FONT_SIZE);
+    // The upper rules, outermost first from the current y; the text sits TITLE_RULE_TEXT_GAP below the inner edge.
+    strokes.forEach((st, i) => strokeAt(st, y - centres[i]));
+    y = y - centres[centres.length - 1] - last.w / 2 - TITLE_RULE_TEXT_GAP - capHeightOf(bold, TITLE_FONT_SIZE);
     drawLines(lines, { size: TITLE_FONT_SIZE, align: 'centre', lineGap: TITLE_LINE_GAP });
-    inner = y - TITLE_RULE_TEXT_GAP - thickness / 2;
-    rule(inner, thickness);
-    y = inner;
-    if (double) { y = inner - step; rule(y, thickness); }
+    // The lower rules are the upper ones mirrored: the innermost first, TITLE_RULE_TEXT_GAP below the baseline.
+    const mirrored = [...strokes].reverse();
+    let centre = y - TITLE_RULE_TEXT_GAP - mirrored[0].w / 2;
+    mirrored.forEach((st, i) => {
+      if (i > 0) centre -= mirrored[i - 1].w / 2 + RULE_SEP + st.w / 2;
+      strokeAt(st, centre);
+    });
+    y = centre;
+    void first;
   };
 
   /**
@@ -394,7 +405,7 @@ export function layoutCover(cv, fonts, gapScale, page = null) {
   // it). Drawn alone on its own line at the classic design's full margin-to-margin width, never
   // concatenated with another value, so 40 characters (the same clamp preparedByLabel uses)
   // leaves generous headroom well inside the page even at the widest character.
-  const partyJoiner = (cv['cover.partyJoiner'] === undefined ? '-&-' : String(cv['cover.partyJoiner']).trim()).slice(0, 40);
+  const partyJoiner = (cv['cover.partyJoiner'] === undefined ? '-and-' : String(cv['cover.partyJoiner']).trim()).slice(0, 40);
   const title = coverTitle(cv);
 
   const ordinal = (n) => `${n}${['TH', 'ST', 'ND', 'RD'][(n % 100 >= 11 && n % 100 <= 13) || n % 10 > 3 ? 0 : n % 10]}`;
@@ -527,7 +538,7 @@ export function layoutCover(cv, fonts, gapScale, page = null) {
     gap(i < matterOfLines.length - 1 ? 18 : 40);
   }
 
-  // The parties beneath a "BETWEEN:" heading, joined by partyJoiner ("-&-" by default) when
+  // The parties beneath a "BETWEEN:" heading, joined by partyJoiner ("-and-" by default) when
   // both are present. Each side is independently optional: a solicitor may only know one side yet.
   if (applicants.length || respondents.length) {
     draw('BETWEEN:', { align: 'left' });

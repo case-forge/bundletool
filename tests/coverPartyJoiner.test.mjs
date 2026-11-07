@@ -42,19 +42,19 @@ function run(cv, { face = 'serif', scale = 1 } = {}) {
 }
 const BASE = { 'cover.courtName': 'IN THE FAMILY COURT AT LONDON', 'heading.claimNumber': 'ZC26C00123', 'cover.applicantName': 'A SMITH', 'cover.respondentName': 'B JONES', 'cover.layout': 'classic' };
 
-test('an absent cover.partyJoiner renders byte-for-byte the same as the stored default: "-&-" exactly, no other draw call changes', () => {
+test('an absent cover.partyJoiner renders byte-for-byte the same as the stored default: "-and-" exactly, no other draw call changes', () => {
   const before = run(BASE);
-  const after = run({ ...BASE, 'cover.partyJoiner': '-&-' });
+  const after = run({ ...BASE, 'cover.partyJoiner': '-and-' });
   assert.deepEqual(before.texts, after.texts, 'an absent key and the explicit stored default draw identically');
   assert.deepEqual(before.lines, after.lines);
-  assert.ok(before.texts.some((t) => t.text === '-&-'), 'the default joiner is drawn');
+  assert.ok(before.texts.some((t) => t.text === '-and-'), 'the default joiner is drawn');
 });
 
 test('an explicit empty joiner draws just the gap: both parties still appear, with no leftover word between them', () => {
   const { texts } = run({ ...BASE, 'cover.partyJoiner': '' });
   assert.ok(texts.some((t) => t.text === 'A SMITH'), 'the applicant is drawn');
   assert.ok(texts.some((t) => t.text === 'B JONES'), 'the respondent is drawn');
-  assert.ok(!texts.some((t) => t.text === '-&-'), 'no leftover default word');
+  assert.ok(!texts.some((t) => t.text === '-and-'), 'no leftover default word');
   assert.ok(!texts.some((t) => t.text.trim() === ''), 'no blank text call either: the gap is spacing, not an empty draw');
 });
 

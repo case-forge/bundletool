@@ -231,6 +231,16 @@ export function openBundlePreview(pdfBytes, filename, opts = {}) {
  * @param {Uint8Array} pdfBytes
  * @param {string} filename
  */
+/** The preview of a Just Assemble PDF: the documents and nothing else, so no email split (it needs a bundle's index). */
+export function openAssembledPreview(pdfBytes, filename) {
+  openBundlePreview(pdfBytes, filename, {
+    title: 'Assembled PDF',
+    saveLabel: 'Save PDF',
+    noViewerMessage: 'This browser cannot display PDF previews (most phones cannot). Your PDF was still assembled. Use Save PDF below to download and open it.',
+    allowSplit: false,
+  });
+}
+
 export function openIndexPreview(pdfBytes, filename) {
   openBundlePreview(pdfBytes, filename, {
     title: 'Index preview',
@@ -301,10 +311,10 @@ export function showBundleReadyState(pdfBytes, filename, opts = {}) {
           ${icon('download', 'w-4 h-4')}
           ${saveLabel}
         </button>
-        <button id="overlay-preview-btn" class="w-full px-4 py-2.5 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-300 text-sm font-medium rounded-lg transition">
+        <button id="overlay-preview-btn" class="bt-btn-flush w-full px-4 py-2.5 text-sm font-medium">
           ${previewLabel}
         </button>
-        ${allowSplit ? `<button id="overlay-split-btn" class="w-full px-4 py-2.5 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-300 text-sm font-medium rounded-lg transition">
+        ${allowSplit ? `<button id="overlay-split-btn" class="bt-btn-flush w-full px-4 py-2.5 text-sm font-medium">
           Split for email…
         </button>` : ''}`;
       track.after(btns);

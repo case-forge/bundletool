@@ -81,11 +81,7 @@
  *   engine are closed, and pass 2 opens the file with pdf-lib, draws each
  *   page's text layer and saves. pdf.js's copy and pdf-lib's are never
  *   alive together, and pdf-lib's parse and output never sit beside the OCR
- *   engine. One earlier, short use of pdf-lib is the one exception: before pdf.js opens
- *   the file, overBudgetPages() parses it once to sum each page's declared image pixels (the page
- *   budget, OCR_MAX_PAGE_IMAGE_PIXELS), because pdf.js cannot give a page's image sizes without
- *   decoding them. That parse is dropped before pdf.js opens, so it is never beside pdf.js or the
- *   engine either; its cost is one extra parse of the file's structure, not a held copy. Pages are read in the same order, with the same per-page
+ *   engine. Pages are read in the same order, with the same per-page
  *   failures, and the same text lands on the same pages. A file pdf-lib
  *   cannot open is still reported as 'failed'; it is found after the pages
  *   have been read rather than before, which only matters for a file that
@@ -108,8 +104,7 @@
  */
 import { StandardFonts } from '../public/js/bundletoolPdfLib.js';
 import { loadPdf } from '../public/js/bundletoolPdfLoad.js';
-import { findOverBudgetImagePages } from '../public/js/bundletoolPdfInspect.js';
-import { needsOcr, replaceOcrLayer, OCR_RASTER_DPI, OCR_MAX_IMAGE_PIXELS, OCR_MAX_PAGE_IMAGE_PIXELS, OCR_MIN_CHARS } from '../public/js/bundletoolOcr.js';
+import { needsOcr, replaceOcrLayer, OCR_RASTER_DPI, OCR_MAX_IMAGE_PIXELS, OCR_MIN_CHARS } from '../public/js/bundletoolOcr.js';
 import { readUpright, displayTurn, straightenRgba, turnRgba } from '../public/js/bundletoolDeskew.js';
 import { visibleText, withoutPrintedText } from '../public/js/bundletoolOcrPrinted.js';
 import { reorientPage, reorientSettings, reorientRecord, recordReorient } from '../public/js/bundletoolOcrReorient.js';
@@ -382,22 +377,6 @@ export async function ocrDocument(bytes, { force = false, onPage, reorient, _loa
 }
 
 /**
- * The pages whose images together declare more than OCR_MAX_PAGE_IMAGE_PIXELS, read from the PDF's own dictionaries
- * with pdf-lib before pdf.js decodes anything. The parse is dropped before pdf.js opens the file, so the two are
- * not alive together (see "TWO PASSES" in this file's header). A file pdf-lib cannot open reports none here: pass 2
- * fails it as it always has.
- * @returns {Promise<Set<number>>} 1-based page numbers
- */
-async function overBudgetPages(bytes) {
-  try {
-    const { doc } = await loadPdf(bytes);
-    return new Set(findOverBudgetImagePages(doc, OCR_MAX_PAGE_IMAGE_PIXELS));
-  } catch {
-    return new Set();
-  }
-}
-
-/**
  * Pass 1: finds the pages that need OCR and recognises each one with pdf.js and the OCR engine. pdf-lib is not
  * loaded here. Keeps only each page's recognised words (a small array), never its raster.
  *
@@ -418,7 +397,6 @@ async function recognisePages(pdfjsLib, bytes, { force, onPage, loadRuntime }, o
   let realCreateCanvas = null;
   const canvasFactory = makeCanvasFactory(() => realCreateCanvas);
 
-  const overBudget = await overBudgetPages(bytes);
   open.pdfjsTask = pdfjsLib.getDocument({ data: bytes.slice(), isEvalSupported: false, enableXfa: false, canvasFactory, maxImageSize: OCR_MAX_IMAGE_PIXELS, verbosity: 1 });
   const pdfjsDoc = await open.pdfjsTask.promise;
   const targets = [];
@@ -448,11 +426,6 @@ async function recognisePages(pdfjsLib, bytes, { force, onPage, loadRuntime }, o
   const failures = [];
   let done = 0;
   for (const pageNumber of targets) {
-    // Over the page's image budget: failed before pdf.js decodes any image on it, so none of that memory is used.
-    if (overBudget.has(pageNumber)) {
-      failures.push({ page: pageNumber, detail: 'the images on this page are too large to read safely' });
-      continue;
-    }
     let image;
     let sawOversizedImage;
     try {

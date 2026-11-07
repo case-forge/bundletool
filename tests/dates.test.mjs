@@ -252,3 +252,13 @@ test('an impossible slash date or written date in a filename is no date either',
   }
   assert.equal((await parseDateFromFilename('Letter 29 February 2028', chrono)).date, '2028-02-29', 'a real leap day is still read');
 });
+
+test('a two-digit year-first date is read year-first only when day-first would be an old document', async () => {
+  const now = new Date(Date.UTC(2026, 10, 6));
+  const read = async (name) => (await parseDateFromFilename(name, chrono, 'UK', now)).date;
+  assert.equal(await read('Case Summary 26.11.10'), '2026-11-10');  // not 26 November 2010
+  assert.equal(await read('Chronology 26.6.6'), '2026-06-06');      // the firm's no-leading-zero form
+  assert.equal(await read('Brief 10.11.26'), '2026-11-10');         // day-first, 2026
+  assert.equal(await read('Old order 12.03.19'), '2019-03-12');     // a 2019 document stays day-first
+  assert.equal(await read('Statement 01.02.03'), '2003-02-01');     // nothing plausible: day-first as before
+});

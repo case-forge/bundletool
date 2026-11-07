@@ -25,7 +25,7 @@ export async function loadNodeCodec({ importCanvas = () => import('@napi-rs/canv
   const draw = (decoded, width, height) => {
     const c = createCanvas(width, height);
     const ctx = c.getContext('2d');
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#fdfbf7';
     ctx.fillRect(0, 0, width, height);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';

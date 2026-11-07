@@ -147,7 +147,7 @@ export function validateManifestShape(manifest) {
 // Unknown keys inside `config` are not errors (the config groups grow and shrink); the CLI warns about them.
 export const MANIFEST_KEYS = ['schemaVersion', '_comment', 'config', 'sections', 'coversheet'];
 export const SECTION_KEYS = ['sectionID', 'sectionLabel', 'sectionName', 'files'];
-export const FILE_KEYS = ['filename', 'title', 'date', 'pageCount', 'rotate', 'forceOcr'];
+export const FILE_KEYS = ['filename', 'title', 'date', 'pageCount', 'rotate', 'forceOcr', 'removePages'];
 
 /** @returns {string[]} one message per unknown key, each naming where it is. Call after validateManifestShape. */
 export function unknownKeyProblems(manifest) {

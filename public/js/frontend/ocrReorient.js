@@ -128,6 +128,51 @@ export function forgetRemovedPage(filename, pageNum) {
   for (const key of ['notStraightened', 'putBack']) record[key] = (record[key] ?? []).filter((n) => n !== pageNum).map(move);
 }
 
+const RECORD_ENTRY_KEYS = ['turned', 'straightened', 'sideways'];   // [page, ...] lists
+const RECORD_PAGE_KEYS = ['notStraightened', 'putBack'];             // page-number lists
+
+/**
+ * Keeps the record in step when a document is cut after a page: the pages past the cut leave `filename`'s record and
+ * become the record of the new document, counted from its own first page.
+ *
+ * @param {string} filename  the document that keeps the pages up to the cut
+ * @param {string} newFilename  the document that takes the rest
+ * @param {number} afterPage  1-based, the last page `filename` keeps
+ */
+export function splitOcrRecord(filename, newFilename, afterPage) {
+  const record = state.frontendInputData[filename]?.ocrPages;
+  if (!record || !state.frontendInputData[newFilename]) return;
+  const rest = {};
+  for (const key of RECORD_ENTRY_KEYS) {
+    const all = record[key] ?? [];
+    record[key] = all.filter(([n]) => n <= afterPage);
+    rest[key] = all.filter(([n]) => n > afterPage).map(([n, ...more]) => [n - afterPage, ...more]);
+  }
+  for (const key of RECORD_PAGE_KEYS) {
+    const all = record[key] ?? [];
+    record[key] = all.filter((n) => n <= afterPage);
+    rest[key] = all.filter((n) => n > afterPage).map((n) => n - afterPage);
+  }
+  state.frontendInputData[newFilename].ocrPages = rest;
+}
+
+/**
+ * Keeps the record in step when `secondName` is joined on after `filename`: its entries move down by the first
+ * document's page count and join the first's.
+ *
+ * @param {string} filename  the document that stays
+ * @param {string} secondName  the document joined on after it
+ * @param {number} offset  the first document's page count before the join
+ */
+export function joinOcrRecords(filename, secondName, offset) {
+  const first = state.frontendInputData[filename];
+  const second = state.frontendInputData[secondName]?.ocrPages;
+  if (!first || !second) return;
+  const record = first.ocrPages ?? (first.ocrPages = {});
+  for (const key of RECORD_ENTRY_KEYS) record[key] = [...(record[key] ?? []), ...(second[key] ?? []).map(([n, ...more]) => [n + offset, ...more])];
+  for (const key of RECORD_PAGE_KEYS) record[key] = [...(record[key] ?? []), ...(second[key] ?? []).map((n) => n + offset)];
+}
+
 /** The OCR badge's tooltip when reading changed nothing about how the document looks. */
 export const OCR_BADGE_TITLE = 'This document\'s text is selectable and searchable (OCR applied).';
 

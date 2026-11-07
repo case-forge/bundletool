@@ -59,15 +59,18 @@ test('Prepared By Label: any other wording shows as Other, so an existing custom
   assert.equal(preparedByLabelPresetFor('prepared by:'), 'other', 'case sensitive, not the same preset with different capitalisation');
 });
 
-test('Party Joiner: each preset maps back to itself, and the stored default "-&-" is itself a preset, not a special case', () => {
+test('Party Joiner: each preset maps back to itself, and the stored default "-and-" is itself a preset, not a special case', () => {
   for (const p of PARTY_JOINERS) {
     assert.equal(partyJoinerPresetFor(p.label), p.key, p.key);
   }
   assert.equal(partyJoinerPresetFor(' -V- '), 'v', 'surrounding whitespace is trimmed');
 });
 
-test('Party Joiner: the old "-and-" and "-v-" wording still lands on the same presets', () => {
+test('Party Joiner: the four presets are -and- (default), -vs-, -&- and -V-, and the old "-v-" still lands on -V-', () => {
+  assert.deepEqual(PARTY_JOINERS.map((p) => p.label), ['-and-', '-vs-', '-&-', '-V-']);
   assert.equal(partyJoinerPresetFor('-and-'), 'default');
+  assert.equal(partyJoinerPresetFor('-vs-'), 'vs');
+  assert.equal(partyJoinerPresetFor('-&-'), 'amp');
   assert.equal(partyJoinerPresetFor(' -v- '), 'v');
 });
 

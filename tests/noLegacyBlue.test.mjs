@@ -64,5 +64,5 @@ test('the accent tokens exist for every palette and theme', () => {
     assert.match(css, new RegExp(`${token}:`), `${token} is defined`);
   }
   assert.match(css, /\[data-theme=dark\]\s*\{[^}]*--bt-ink:/, 'dark takes the lighter ink');
-  assert.match(css, /\[data-palette=classic\]\[data-theme=dark\]\s*\{\s*--bt-ink:\s*#6ea6d6/, 'Classic dark keeps its legible light blue');
+  assert.match(css, /\[data-palette=classic\]\[data-theme=dark\]\s*\{\s*--bt-ink:\s*#8ec5ff/, 'Classic dark keeps its legible light blue (the palette Info blue)');
 });

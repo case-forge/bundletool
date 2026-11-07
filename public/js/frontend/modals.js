@@ -275,7 +275,22 @@ export async function unlockWithPrompt(filename, bytes) {
  * @param {{code: string|null, title?: string, message?: string, items?: string[], hint?: string, guide?: boolean}} notice
  *   code: from errorCodes.js when something was refused or left out, null when the notice only informs
  */
-export function showUploadWarningModal({ code, title, message, items, hint, guide } = {}) {
+let warningAction = null;
+
+/** Runs what the open warning offered instead of dismissing it (Add anyway), and closes the warning. */
+export function runWarningAction() {
+  const run = warningAction;
+  warningAction = null;
+  document.getElementById('upload-warning-modal')?.classList.add('hidden');
+  run?.();
+}
+
+/**
+ * The warning that something was left out or needs knowing. `action` ({label, run}) adds a button beside the
+ * dismissal for a thing the person may want to do about it, such as "Add anyway" for a repeat file; the dismissal then
+ * reads "Leave it out" and every other warning keeps its single "Got it".
+ */
+export function showUploadWarningModal({ code, title, message, items, hint, guide, action } = {}) {
   const modal   = document.getElementById('upload-warning-modal');
   const titleEl = document.getElementById('upload-warning-modal-title');
   const msgEl   = document.getElementById('upload-warning-modal-msg');
@@ -306,6 +321,15 @@ export function showUploadWarningModal({ code, title, message, items, hint, guid
     hintEl.textContent = hint || '';
     hintEl.classList.toggle('hidden', !hint);
   }
+  warningAction = action?.run ?? null;
+  const actionEl = document.getElementById('upload-warning-modal-action');
+  if (actionEl) {
+    actionEl.textContent = action?.label ?? '';
+    actionEl.classList.toggle('hidden', !action);
+    actionEl.onclick = action ? runWarningAction : null;   // the page script is a classic script and cannot import this file
+  }
+  const closeEl = document.getElementById('upload-warning-modal-close');
+  if (closeEl) closeEl.textContent = action ? 'Leave it out' : 'Got it';
   // A link to the Guide's list of accepted files, for a file that was the wrong kind.
   document.getElementById('upload-warning-modal-guide')?.classList.toggle('hidden', !guide);
   modal?.classList.remove('hidden');

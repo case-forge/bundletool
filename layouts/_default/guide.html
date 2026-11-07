@@ -164,8 +164,8 @@
 			</p>
 			<p class="mb-3 text-sm leading-6">
 				A scanned page with no text of its own is read when it is added, so its text can be searched
-				and selected. If that check gets a page wrong, <strong>Redo OCR</strong> in the same window
-				reads every page again; a turn not yet written is written first. When the page shown looks
+				and selected. If that check gets a page wrong, <strong>OCR</strong> (Redo OCR) in the same window
+				reads every page again; a turn not yet written is written first. While it reads, the button says <strong>Stop</strong>: pressing it stops the reading and leaves the document as it was. When the page shown looks
 				blank, a note under it says so; so does a page that reading found on its side or upside down,
 				while it is shown that way and Turn sideways scanned pages upright is off. That is all a note
 				does: nothing is ever removed or turned because of it.
@@ -177,19 +177,32 @@
 				and pages, a line such as "Reading text: 2 of 5 documents, about 40 s left" counts down. The time
 				comes from how long pages have actually taken on your device so far, so it appears once the first
 				page is read. <strong>Skip</strong> on a row stops reading that document alone and moves on to the
-				next: the document stays as it is, without searchable text, and Redo OCR in its window can still
+				next: the document stays as it is, without searchable text, and OCR in its window can still
 				read it later.
 			</p>
 			<p class="mb-3 text-sm leading-6">
 				A page the OCR settings changed says so too: "Turned upright by the setting" (turn it back with
 				Turn left or Turn right if you prefer it as it was), or "Straightened by 2.4 degrees" with
-				<strong>Put back as scanned</strong>, which returns that page alone to exactly how it was scanned,
+				<strong>Undo straightening</strong>, which returns that page alone to exactly how it was scanned,
 				its searchable text with it. A page put back stays as scanned when the document is read again.
 			</p>
 			<p class="mb-3 text-sm leading-6">
-				<strong>Remove page</strong> takes the page shown out of the document once you confirm it;
-				until then, Cancel, Escape or the close cross leave the document as it was. A document always
+				<strong>Remove page</strong> (the Remove button) takes the page shown out of the document once you confirm it;
+				until then, Keep it or closing the window leaves the document as it was. A document always
 				keeps at least one page, and the page count and the bundle's total follow straight away.
+			</p>
+			<p class="mb-3 text-sm leading-6" id="split-merge">
+				<strong>Split</strong> cuts the document after the page shown: that page and the ones before it stay,
+				and the rest become a new document in the row straight under it, named for the pages it holds and
+				with the same title and date to change as you need. To make three parts, split twice.
+				<strong>Merge</strong> does the opposite: it adds the document directly below this one onto the end of it,
+				and that document's row goes, with its title and date, so Merge asks first; Keep it or closing the window leaves
+				everything as it was. Splitting and then merging puts a document back as it was, so Split asks nothing. Both
+				cut and join whole documents by page range and do nothing else to the pages.
+			</p>
+			<p class="mb-3 text-sm leading-6">
+				A document you add a second time is left out and the message says so. <strong>Add anyway</strong> in that
+				message adds it again, as a document of its own.
 			</p>
 			<p class="mb-3 text-sm leading-6">
 				<strong>Download</strong>, at the top of the table beside the button that clears it, gives back
@@ -223,15 +236,12 @@
 
 			<h2 id="just-assemble" class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Just assemble</h2>
 			<p class="mb-3 text-sm leading-6">
-				To put documents together with nothing added, use <strong>Just Assemble</strong> in Advanced Settings.
-				It has three switches, each off until you turn it on: <strong>Leave Out Index</strong>,
-				<strong>Leave Out Page Numbers</strong> and <strong>Leave Out Bookmarks</strong>. Turn on all three and
-				the PDF is exactly your pages, in order. For example, to make six photos of a statement into one
-				six-page PDF, add the six photos, turn on the three switches and press Create Bundle. Each switch
-				also works on its own. With the index left out, the first document page is page 1; a cover, if
-				there is one, is not numbered. Your index and page number settings are kept for when you turn
-				the switches off again. Turn on <strong>Just This Once</strong> as well and the switches go back
-				off by themselves once the next bundle is made, so the bundle after it is a normal one.
+				To put documents together with nothing added, press <strong>Just Assemble</strong>, beside Preview Index in
+				Create Bundle. It has no settings: you get exactly your documents, in order, with no index, no page numbers
+				and no bookmarks. For example, to make six photos of a statement into one six-page PDF, add the six photos
+				and press Just Assemble. It adds no cover sheet, watermark or blank page either, and it does not need the case
+				details. When it is done you can save the PDF or preview it, as with Preview Index. It does not
+				change anything else: Create Bundle makes a full bundle as before.
 			</p>
 
 			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Emailing a bundle</h2>
@@ -289,8 +299,7 @@
 
 			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Advanced Settings</h2>
 			<p class="mb-3 text-sm leading-6">
-				Advanced Settings, below Create Bundle, is arranged in panels. Just Assemble holds the switches that leave
-				out the index, the page numbers and the bookmarks (see Just assemble above). Index Options holds the index font and
+				Advanced Settings, below Create Bundle, is arranged in panels. Index Options holds the index font and
 				text size, date format, outline style, heading, section word and table borders. Coversheet holds the
 				party labels and the cover layout: stacked or two columns, whether the case number sits on the court's line or its own, whether each party's label goes under the name or beside it, where the case number sits when it has its own line, where the court and subheading sit, where the names sit on a stacked cover, and whether the rules above and below the title are single or double. The default cover is the compact one: the case number on the court's line and each label on its name's line. The Case Reference field takes up to 60 characters, enough for two joined case numbers. What is printed before the number is its own setting too, "CASE NO:" by default, or "CLAIM NO:", "ORDER NO:" or "COURT REF:", chosen the same way the party labels are. What is printed before who prepared the bundle works the same way: "Prepared by:" by default, or "Compiled by:" or "On behalf of:". The word joining the two parties on a stacked cover is a setting too: "-&-" by default, or "-V-". Confidentiality &amp; Security holds the bundle password and the
 				watermark. Page Setup holds the page size, double-sided printing and Smaller Photos. Split for Email holds whether that dialog opens split by size or by section. Page Numbering holds the numbering style

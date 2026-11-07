@@ -84,12 +84,6 @@ export const SETTING_SPEC = Object.freeze({
   ocrTurnUpright: bool,
   ocrStraighten: bool,
   smallerPhotos: bool,
-  // Just assemble: three independent switches, all off when a saved setting does not carry them.
-  leaveOutIndex: bool,
-  leaveOutPageNumbers: bool,
-  leaveOutBookmarks: bool,
-  // Browser only: the three apply to the next bundle only (frontend/justAssemble.js).
-  justAssembleOnce: bool,
   pageNumberPerSection: bool,
   footerPrefix: text(MAX_LINE, false),
   headingText: text(MAX_LINE, false),
@@ -130,7 +124,7 @@ export const DEFAULTS_KEYS = Object.freeze([
   'coverCaseLine', 'coverLabelPlacement', 'coverPartyAlign', 'coverCaseAlign', 'coverHeadingAlign', 'coverTitleLines',
   'caseNumberLabel', 'preparedByLabel', 'partyJoiner',
   'pageNumberColour', 'plateColour', 'plateOpacity', 'footerOffset', 'showTableBorders', 'printableBundle', 'ocrAutoDetect',
-  'ocrTurnUpright', 'ocrStraighten', 'smallerPhotos', 'leaveOutIndex', 'leaveOutPageNumbers', 'leaveOutBookmarks', 'justAssembleOnce', 'pageNumberPerSection', 'splitBy', 'footerPrefix', 'headingText', 'courtName', 'matterOf', 'partyLabel1', 'partyLabel2',
+  'ocrTurnUpright', 'ocrStraighten', 'smallerPhotos', 'pageNumberPerSection', 'splitBy', 'footerPrefix', 'headingText', 'courtName', 'matterOf', 'partyLabel1', 'partyLabel2',
 ]);
 
 /**
@@ -175,7 +169,6 @@ const NESTED = {
   pageOptions: {
     printableBundle: 'printableBundle', watermarkText: 'watermarkText', watermarkColour: 'watermarkColour',
     watermarkOpacity: 'watermarkOpacity', pageSize: 'pageSize', smallerPhotos: 'smallerPhotos',
-    leaveOutIndex: 'leaveOutIndex', leaveOutPageNumbers: 'leaveOutPageNumbers', leaveOutBookmarks: 'leaveOutBookmarks',
   },
   cover: {
     courtName: 'courtName', matterOf: 'matterOf', applicantName: 'applicantName', respondentName: 'respondentName',

@@ -22,8 +22,9 @@ function realCalendarDate(year, month, day) {
  *   date (both numbers 12 or under, so either could be the day or the month). A number over 12 is
  *   never ambiguous either way and is unaffected by this. Default 'UK' (day-first), matching
  *   Config's own default, so a caller that omits this reads filenames day-first.
+ * @param {Date} [now] - the clock the two-digit-year check measures plausibility against (tests pass one)
  */
-export async function parseDateFromFilename(filename, chrono, dateInputOrder = 'UK') {
+export async function parseDateFromFilename(filename, chrono, dateInputOrder = 'UK', now = new Date()) {
   let matchedDate = null;
   let filenameWithoutDate = filename;
 
@@ -43,6 +44,23 @@ export async function parseDateFromFilename(filename, chrono, dateInputOrder = '
     if (isoDate) {
       filenameWithoutDate = filenameWithoutDate.replace(fullMatch, '').replace(/^[\s-_]+|[\s-_]+$/g, '');
       return { date: isoDate, name: filenameWithoutDate };
+    }
+  }
+
+  // A two-digit year-first date ("26.11.10" is 10 November 2026) is also a valid day-first one (26 November
+  // 2010), and the day-first reading is what chrono would give it. Year-first is chosen only when it names a
+  // year within a year of now and the day-first reading would be a document more than three years old; every
+  // other two-digit date stays day-first ("10.11.26" is 10 November 2026, "12.03.19" is 12 March 2019).
+  const shortYearFirst = filename.match(/(?<!\d)(\d{2})[-._](\d{1,2})[-._](\d{1,2})(?!\d)/);
+  if (shortYearFirst) {
+    const [fullMatch, yy, mm, dd] = shortYearFirst;
+    const thisYear = now.getUTCFullYear();
+    const yearFirst = realCalendarDate(2000 + Number(yy), mm.padStart(2, '0'), dd.padStart(2, '0'));
+    const dayFirstYear = dd.length === 2 ? 2000 + Number(dd) : null;
+    const dayFirstOld = dayFirstYear === null || dayFirstYear < thisYear - 3;
+    if (yearFirst && Math.abs(2000 + Number(yy) - thisYear) <= 1 && dayFirstOld) {
+      filenameWithoutDate = filenameWithoutDate.replace(fullMatch, '').replace(/^[\s-_]+|[\s-_]+$/g, '');
+      return { date: yearFirst, name: filenameWithoutDate };
     }
   }
 

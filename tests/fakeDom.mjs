@@ -95,6 +95,16 @@ export class FakeElement {
     const kids = this.parentElement?.children ?? [];
     return kids[kids.indexOf(this) - 1] ?? null;
   }
+  get nextElementSibling() {
+    const kids = this.parentElement?.children ?? [];
+    return kids[kids.indexOf(this) + 1] ?? null;
+  }
+  after(...nodes) {
+    const parent = this.parentElement;
+    if (!parent) return;
+    let ref = this.nextElementSibling;
+    for (const node of nodes) parent.insertBefore(node, ref);
+  }
   insertBefore(child, ref) {
     if (!ref) return this.appendChild(child);
     child.remove();

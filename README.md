@@ -83,17 +83,23 @@ The site must be served from the root of its own host (it imports shared files b
 
 ## Changes since 1.0.0
 
-Version 1.1.0 collects everything changed since the first public snapshot.
+Version 1.5.0 collects everything changed since the first public snapshot.
 
-- **OCR.** A page's images are held to a total pixel budget, not only a per-image cap, so a page of many large images no longer runs a browser out of memory (issue #99). "Force OCR" is now "Redo OCR": it reads every page of one document again and replaces its hidden text layer, and its tooltip says so.
+- **Title lines.** The lines above and below the cover title come in nine designs, chosen from a dropdown that draws each one: single, double, triple, thick-thin, thin-thick, dotted, dashed, perforated and wave (`cover.titleLines`).
+- **Dates in names.** A two-digit year-first date such as `26.11.10` reads as 10 November 2026 when day-first would make the document more than three years old.
+- **Unpack and page removal.** `--unpack bundle.pdf out-dir` turns a bundle made by BundleTool back into its documents and a manifest that rebuilds it, without the blank pages print mode added. A file in a manifest takes `removePages`, a list of page numbers to leave out. A bundle now stores the cover's layout and wording (joiner, labels, alignment, case number line), so a reopened or unpacked bundle redraws the same cover.
+- **Party joiner.** The cover's joiner choices are `-and-` (the default), `-vs-`, `-&-` and `-V-`.
+- **Section numbers.** A manifest that leaves out `sectionID` numbers sections from 0001, so the first section keeps its heading in the index.
+- **OCR.** A single image over the cap is still left unread, but images are no longer summed per page: the sum counted every page of a file that shared one resource dictionary (an e-signed statement, for one) against the whole file, and refused OCR on pages that were fine. "Force OCR" is now "Redo OCR": it reads every page of one document again and replaces its hidden text layer, and its tooltip says so.
+- **Split and Merge.** The document window's row is now OCR, Remove, Split and Merge. Split cuts a document after the page shown into two, the second straight under the first; Merge adds the document below onto the end. While OCR reads, its button is Stop. A turn is written when the window closes (there is no Turn document or Cancel), and the window opens on Turn page every time. The preview is larger. A document added a second time is left out with an **Add anyway** button on the message.
 - **Document window.** Page, turn and zoom sit on one row. Preview pictures zoom and pinch, and zooming no longer widens the window. There is an icon toolbar, Remove page, Turn page, and Turn all pages (formerly "Turn whole document").
-- **Cover.** The cover's selects offer presets only. The party joiner choices are `-&-` (the default) and `-V-`; a setting saved as `-and-` or `-v-` maps to them. The gap round the joiner is even.
+- **Cover.** The cover's selects offer presets only. The party joiner choices are `-and-` (the default), `-vs-`, `-&-` and `-V-`; a setting saved as `-v-` maps to `-V-`. The gap round the joiner is even.
 - **Settings.** Settings never grey out, and Reset also puts the cover's layout choices back.
 - **Recovery.** The restored-session notice has Delete all beside Dismiss; it asks for a second click before it deletes anything.
 - **Phones.** Step titles stay on one line, so Share and Reset no longer push Settings onto a second row. There is more room under the "documents and pages" line, and in light mode each document row is a box that stands out from the page.
 - **Tooltips.** Turn, Share, Reset and Download say what they do.
 - **Updates.** A new version applies itself when the page has only just opened or the tab is in the background; otherwise a Reload button is offered, and it works. The reload notice names the file that failed to load.
-- **Just assemble.** Three switches, each off by default: leave out the index page, the page numbers, the bookmarks (`pageOptions.leaveOutIndex`, `leaveOutPageNumbers`, `leaveOutBookmarks`; on the command line also `--no-index`, `--no-page-numbers`, `--no-bookmarks`). All three give exactly the input pages, for example photos merged into one PDF. With no index the first document page is page 1 and a cover is unnumbered. In the browser, Just This Once turns them back off after the next bundle. A bookmark's page under roman or unnumbered front matter now matches the printed footer.
+- **Just assemble.** Three switches, each off by default: leave out the index page, the page numbers, the bookmarks (`pageOptions.leaveOutIndex`, `leaveOutPageNumbers`, `leaveOutBookmarks`; on the command line also `--no-index`, `--no-page-numbers`, `--no-bookmarks`). All three give exactly the input pages, for example photos merged into one PDF. With no index the first document page is page 1 and a cover is unnumbered. In the browser it is one button, Just Assemble, beside Preview Index: it leaves all three out and has no settings. A bookmark's page under roman or unnumbered front matter now matches the printed footer.
 - **Source.** `pageView.js` is now `documentPager.js`, a name that content blockers do not refuse.
 
 ## Command line
@@ -104,7 +110,7 @@ A plain `npm install` installs `@napi-rs/canvas` and `tesseract-wasm` (OCR's own
 
 A page is rasterised for OCR at up to 25 million pixels (comfortably covering A3 at 300 DPI), scaled down to fit when a page's own size would exceed that, and given `ocr_failed` rather than rasterised at all if even the scaled-down resolution would fall below 72 DPI. This ceiling is well under the 100-million-pixel limit the browser's photo-embedding path uses: the CLI runs unattended, often in a container with fixed memory of its own, so the bound is sized for that rather than for one browser tab.
 
-Separately, `maxImageSize` (90 million pixels, passed straight to pdf.js) caps a single embedded image, which pdf.js decodes before any of the raster cap's own code runs. A page can be a normal size while carrying one enormous image: without the cap, a 97 KB PDF holding one 10000x10000 image takes 1.73 GB peak RSS and 2.3s inside the OCR call. 90 million pixels comfortably clears a real A3 page at 600 DPI (about 69.6 million pixels) while staying under that attack shape. When pdf.js drops an image over the limit, the CLI sees it directly: `getDocument({ ..., verbosity: 1 })` makes pdf.js log the drop, and the CLI watches for that log during each page's render to give that page a real `ocr_failed` ("an image on this page is too large to read safely") instead of a silent empty success. That cap judges each image alone, so it is not a memory bound: several images under it on one page cost as much as the one it stops (measured peak RSS in fresh processes: one 88-million-pixel image 1.29 GB, eight 36-million-pixel images 1.45 GB, four 64-million-pixel images 1.62 GB). So the page's images are also added together: before pdf.js decodes anything, the declared width x height of every image on a page (Form XObjects and soft masks included, whatever the filter, an image drawn twice once) is summed from the PDF's own dictionaries with pdf-lib, and a page over 90 million pixels in total is left unread (`OCR_MAX_PAGE_IMAGE_PIXELS`): `ocr_failed` for that page on the command line ("the images on this page are too large to read safely"), and listed in `skippedPages` in the browser. A3 at 600 DPI and an 88-million-pixel single image are still read.
+Separately, `maxImageSize` (90 million pixels, passed straight to pdf.js) caps a single embedded image, which pdf.js decodes before any of the raster cap's own code runs. A page can be a normal size while carrying one enormous image: without the cap, a 97 KB PDF holding one 10000x10000 image takes 1.73 GB peak RSS and 2.3s inside the OCR call. 90 million pixels comfortably clears a real A3 page at 600 DPI (about 69.6 million pixels) while staying under that attack shape. When pdf.js drops an image over the limit, the CLI sees it directly: `getDocument({ ..., verbosity: 1 })` makes pdf.js log the drop, and the CLI watches for that log during each page's render to give that page a real `ocr_failed` ("an image on this page is too large to read safely") instead of a silent empty success. That cap judges each image alone, so it is not a memory bound: several images under it on one page cost as much as the one it stops (measured peak RSS in fresh processes: one 88-million-pixel image 1.29 GB, eight 36-million-pixel images 1.45 GB, four 64-million-pixel images 1.62 GB).
 
 This caps ONE image at a time, not a page's total: four separate images, each under the cap, can still add up to more than the single-image case above (four 8000x8000 images on one page peak at 1.62 GB together). Nothing sums the declared size of every image on a page (including nested Form XObjects) before rendering, so this cap alone does not bound a page with several large images.
 
@@ -160,7 +166,7 @@ Installed from the package it is the `bundletool` command (`bin` in `package.jso
 | `cover.caseNumberAlign` | `left`, `centre` or `right` (default `right`) for the case number when it has a line of its own |
 | `cover.headingAlign` | `left` (default), `centre` or `right` for the court and the "In the matter of" lines; beside the case number the court keeps to the space left of it |
 | `cover.partyLabelPlacement` | `inline` (default) puts each label on the name's line at the far side, `below` puts it under the name |
-| `cover.titleLines` | `single` (default) or `double`: one rule above and one below the title, or two thin rules each |
+| `cover.titleLines` | `single` (default), `double`, `triple`, `thick-thin`, `thin-thick`, `dotted`, `dashed`, `perforated` or `wave`: the design of the lines above and below the title |
 | `cover.partyAlign` | `left`, `centre` or `right` for the names of the stacked design (the two-column design ignores it) |
 | `cover.claimNumber`, `cover.bundleTitle`, `cover.author` | Cover-only overrides of the heading values; `null` follows the heading |
 | `pageNumbering.numberingStyle`, `pageNumbering.alignment`, `pageNumbering.pageNumberPerSection` | Page number style, position, and restarting per section |
@@ -227,24 +233,24 @@ Every setting, with its allowed values and default (also `bundletool --help sett
 | `cover.partyAlign` | one of left, centre, right | `"centre"` | Where the party names sit in the classic design. |
 | `cover.caseNumberAlign` | one of left, centre, right | `"right"` | Where the case number sits when it has its own line. |
 | `cover.headingAlign` | one of left, centre, right | `"left"` | Where the court and subheading lines sit. |
-| `cover.titleLines` | text | `"single"` | How many rules sit above and below the bundle title on the cover: single, or double (two thin rules a small distance apart). Either way the text is equidistant from the nearest rule. |
+| `cover.titleLines` | text | `"single"` | The design of the lines above and below the bundle title on the cover: single, double, triple (thin, thick, thin), thick-thin, thin-thick, dotted, dashed, perforated or wave. Whatever the design, the text is equidistant from the nearest line. |
 | `cover.caseNumberLabel` | text | `"CASE NO:"` | The prefix printed before the case number, "CASE NO:" by default. Set to "CLAIM NO:", "ORDER NO:", any other wording, or "" for no prefix at all. |
 | `cover.preparedByLabel` | text | `"Prepared by:"` | The label printed before who prepared the bundle, "Prepared by:" by default. Set to "Compiled by:", "On behalf of:", any other wording, or "" for no label at all. Kept to 40 characters: unlike the case number label, this line never wraps. |
-| `cover.partyJoiner` | text | `"-&-"` | The word joining the two parties on the classic design, "-&-" by default. Set to "-V-", any other wording, or "" for no joining word at all, just the gap. Kept to 40 characters. |
+| `cover.partyJoiner` | text | `"-and-"` | The word joining the two parties on the classic design, "-and-" by default. Set to "-vs-", "-&-", "-V-", any other wording, or "" for no joining word at all, just the gap. Kept to 40 characters. |
 | `ocr.autoDetect` | true or false | `true` | Not for manifests: this is the browser's own auto-OCR toggle. The command line's equivalent is ocr.mode. |
 | `ocr.mode` | one of auto, off | `"auto"` | auto (the default) OCRs a page only if its own text layer is too short to search, the same check and threshold the browser uses; off skips the check for every file (a file's own "forceOcr" still overrides off for that one file). Needs @napi-rs/canvas and tesseract-wasm on this machine; if either is not available, the bundle still builds, just without a text layer for the pages that needed OCR (ocr_unavailable). |
 | `ocr.turnUpright` | true or false | `false` | true turns a scanned page OCR reads on its side or upside down to show upright, by setting its /Rotate (lossless; the text layer turns with it). Only pages OCR reads that have no text of their own, and only when the engine and the page's lines agree which way up it is. Off by default. |
 | `ocr.straighten` | true or false | `false` | true turns a scanned page OCR finds tilted (up to 10 degrees) level, by wrapping its content in a rotation about the page's centre: the scan is not redrawn, the page keeps its size and its outer corners are trimmed. The text layer is drawn level over it. A page with links, form fields or comments is left as scanned (ocr_not_straightened). Only pages OCR reads that have no text of their own. Off by default. |
 <!-- /cli-docs:settings -->
 
-Each section's `sectionID` is optional (numbered by position when left out) and, when given, is four digits.
+Each section's `sectionID` is optional (numbered by position from 0001 when left out; a first section with no label or name takes 0000, the headerless zeroth section) and, when given, is four digits.
 
 With `--json`, stdout holds exactly one JSON object, on success and on failure, and nothing else: the engine's own progress lines are silenced and its warnings are collected into `warnings`. Without it, progress is written for people and a failure is one line on stderr.
 
 ```json
-{"ok":true,"tool":"bundletool","cliVersion":"1.1.0","schemaVersion":1,"output":"/path/out.pdf","bytes":455380,
+{"ok":true,"tool":"bundletool","cliVersion":"1.3.0","schemaVersion":1,"output":"/path/out.pdf","bytes":455380,
  "files":7,"sections":4,"coverSource":"none","pages":{"total":15,"cover":0,"index":1,"source":14},"warnings":[]}
-{"ok":false,"tool":"bundletool","cliVersion":"1.1.0","error":{"code":"file_not_found","message":"...","details":{"file":"a.pdf"}},"warnings":[]}
+{"ok":false,"tool":"bundletool","cliVersion":"1.3.0","error":{"code":"file_not_found","message":"...","details":{"file":"a.pdf"}},"warnings":[]}
 ```
 
 `error.code` is a stable lower case string:
@@ -267,6 +273,7 @@ With `--json`, stdout holds exactly one JSON object, on success and on failure, 
 | `docs_dir_not_found` | 3 | The documents directory does not exist. |
 | `output_dir_missing` | 3 | The folder the output file would go in does not exist. |
 | `output_overwrites_input` | 3 | The output path is one of the source documents. |
+| `not_a_bundle` | 3 | The PDF given to --unpack carries no BundleTool index. |
 | `output_exists` | 3 | The output file already exists; pass --force to overwrite it. |
 | `invalid_filename` | 3 | A filename is not a plain file name: it has a folder in front of it, or an odd character. |
 | `file_not_found` | 3 | A file the manifest names is not in the documents directory. |
@@ -294,6 +301,7 @@ Warnings are `{code, message}` in `warnings`:
 | `unknown_config_key` | A config key this version does not know was ignored; the message names the nearest known keys. |
 | `engine_warning` | The PDF engine warned about something (for example a document it repaired). |
 | `over_pd27a_page_limit` | The bundle is over 350 pages. Family Procedure Rules Practice Direction 27A limits an e-bundle to that by default; the build still finishes. |
+| `blank_pages_removed` | Unpack removed the "intentionally left blank" page that print mode added to some documents; print mode stays on in the manifest, so a rebuild adds them again. |
 | `ocr_failed` | OCR raised a real error, on a specific page (names the file and page) or while setting up for the whole document (names the file, no page); the affected page or document has no searchable text layer, the build still finishes. |
 | `ocr_not_straightened` | ocr.straighten is on and a tilted scanned page has links, form fields or comments, which do not move with the page's content, so it was left tilted as scanned (names the file and page); its text layer is still added. |
 | `ocr_unavailable` | OCR was needed (or forced) but the engine cannot load on this machine (@napi-rs/canvas or tesseract-wasm missing, or no prebuilt binary for this platform); the build still finishes, without a text layer for the pages that needed it. |
@@ -371,6 +379,11 @@ The command line does not use these codes. It has its own fixed exit codes (0 do
 | `BT-INDEX-02` | Building the index preview took too long and was stopped. |
 | `BT-INDEX-03` | A part of BundleTool could not be loaded while building the index preview (a connection problem). |
 | `BT-INDEX-04` | Building the index preview failed for another reason. |
+| `BT-ASM-01` | Just Assemble was pressed with no documents in the Review Table. |
+| `BT-ASM-02` | Assembling took too long and was stopped. |
+| `BT-ASM-03` | The browser ran out of memory while assembling. |
+| `BT-ASM-04` | A part of BundleTool could not be loaded while assembling (a connection problem). |
+| `BT-ASM-05` | Assembling failed for another reason. |
 | `BT-OPEN-01` | A PDF opened for editing holds no BundleTool data, so it is not a BundleTool bundle. |
 | `BT-OPEN-02` | A bundle opened for editing is password-protected. |
 | `BT-OPEN-03` | A bundle opened for editing could not be read as a PDF. |
@@ -391,9 +404,11 @@ The command line does not use these codes. It has its own fixed exit codes (0 do
 | `BT-VIEW-01` | The document window could not read the document it was opened for. |
 | `BT-VIEW-02` | A turn waiting in the document window could not be written before Redo OCR. |
 | `BT-VIEW-03` | The document window could not remove a page. |
-| `BT-VIEW-04` | Turn document could not write the turn into the document. |
+| `BT-VIEW-04` | Closing the document window could not write the turn into the document. |
 | `BT-VIEW-05` | Put back as scanned could not undo the straightening of a page. |
 | `BT-VIEW-06` | The document window could not draw the page (turning and reading still work). |
+| `BT-VIEW-07` | The document window could not split the document. |
+| `BT-VIEW-08` | The document window could not merge the document below into this one. |
 | `BT-OCR-01` | The image data on some pages is too large to read, so those pages have no searchable text. |
 | `BT-OCR-02` | Redo OCR could not read the text in a document, which was left as it was. |
 | `BT-DL-01` | The Download button could not gather the documents. |

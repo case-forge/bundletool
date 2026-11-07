@@ -19,8 +19,8 @@
 import { StandardFonts } from '../bundletoolPdfLib.js';
 import { lazyImport } from '/js/shared/lazy-load.js';
 import { loadPdf } from '../bundletoolPdfLoad.js';
-import { needsOcr, replaceOcrLayer, OCR_RASTER_DPI, OCR_MAX_IMAGE_PIXELS, OCR_MAX_PAGE_IMAGE_PIXELS, OCR_MIN_CHARS } from '../bundletoolOcr.js';
-import { findOversizedImagePages, findOverBudgetImagePages } from '../bundletoolPdfInspect.js';
+import { needsOcr, replaceOcrLayer, OCR_RASTER_DPI, OCR_MAX_IMAGE_PIXELS, OCR_MIN_CHARS } from '../bundletoolOcr.js';
+import { findOversizedImagePages } from '../bundletoolPdfInspect.js';
 import { ocrSession } from '../bundletoolOcrEngine.js';
 import { readUpright, displayTurn } from '../bundletoolDeskew.js';
 import { visibleText, withoutPrintedText } from '../bundletoolOcrPrinted.js';
@@ -181,8 +181,7 @@ function whenStopped(signal) {
  *   nothing needed OCR. `bytes` is null when pages needed it but none could be done (the caller leaves
  *   the file exactly as it was rather than resave an unchanged document). `skippedPages` are the 1-based
  *   pages left unread because an embedded image is over OCR_MAX_IMAGE_PIXELS (pdf.js drops such an image
- *   with no signal the page can observe) or the page's images together are over OCR_MAX_PAGE_IMAGE_PIXELS (the
- *   memory they cost); both are found up front from the images' declared sizes.
+ *   with no signal the page can observe) ; found up front from the images' declared sizes.
  *   `reoriented`, present once pages have been read, says which pages were turned or straightened, which were left
  *   tilted for their annotations, and which were read on their side with turning off.
  */
@@ -207,12 +206,8 @@ export async function ocrDocument(bytes, { force = false, targets: given, signal
   const font = await pdfLibDoc.embedFont(StandardFonts.Helvetica);
   const pdfLibPages = pdfLibDoc.getPages();
 
-  // An image over the per-image cap, or images that together are over the page's budget: either way the page is
-  // left alone before pdf.js decodes anything on it.
-  const tooLarge = new Set([
-    ...findOversizedImagePages(pdfLibDoc, OCR_MAX_IMAGE_PIXELS),
-    ...findOverBudgetImagePages(pdfLibDoc, OCR_MAX_PAGE_IMAGE_PIXELS),
-  ]);
+  // An image over the per-image cap: the page is left alone before pdf.js decodes anything on it.
+  const tooLarge = new Set(findOversizedImagePages(pdfLibDoc, OCR_MAX_IMAGE_PIXELS));
   const skippedPages = targets.filter((n) => tooLarge.has(n));
   const toRead = targets.filter((n) => !tooLarge.has(n));
   if (toRead.length === 0) {

@@ -207,18 +207,3 @@ export function findOversizedImagePages(doc, maxPixels) {
   pageImagePixels(doc).forEach((p, i) => { if (p.largest > maxPixels) pages.push(i + 1); });
   return pages;
 }
-
-/**
- * The 1-based numbers of the pages whose images, ADDED TOGETHER, declare more than `budget` pixels. The per-image
- * cap judges each image alone, so several images each under it cost as much memory as one over it; this is the
- * bound on the page as a whole, and it is read before pdf.js decodes anything.
- *
- * @param {import('./bundletoolPdfLib.js').PDFDocument} doc
- * @param {number} budget
- * @returns {number[]}
- */
-export function findOverBudgetImagePages(doc, budget) {
-  const pages = [];
-  pageImagePixels(doc).forEach((p, i) => { if (p.total > budget) pages.push(i + 1); });
-  return pages;
-}

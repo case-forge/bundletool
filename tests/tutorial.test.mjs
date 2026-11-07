@@ -26,7 +26,7 @@ test('every step\'s target is on the page', () => {
 test('the Review Table step speaks of the four row buttons, the document window and Download', () => {
   const step = STEPS.find((s) => s.element === 'file-table');
   const body = text(step);
-  for (const words of ['four buttons', 'the eye', 'type a page number', 'Turn document', 'Redo OCR', 'looks blank', 'Download']) {
+  for (const words of ['four buttons', 'the eye', 'type a page number', 'close the window', 'Redo OCR', 'looks blank', 'Download']) {
     assert.ok(body.includes(words), `mentions ${words}`);
   }
   assert.equal(step.showPlaceholderRows, true);

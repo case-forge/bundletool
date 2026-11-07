@@ -34,16 +34,17 @@ test('the button is there, and off for a one-page document', async () => {
   assert.equal($('rotate-remove').disabled, true, 'a document keeps its last page');
   $('rotate-remove').click();
   assert.equal($('rotate-remove-confirm').classList.contains('hidden'), true, 'nothing is asked');
-  $('rotate-cancel').click();
+  $('rotate-close').click();
   await open('three.pdf', 3);
   assert.equal($('rotate-remove').disabled, false);
-  $('rotate-cancel').click();
+  $('rotate-close').click();
 });
 
-test('it asks first; Keep it, Cancel, the close cross and Escape all leave the file untouched', async () => {
+test('it asks first; Keep it, the close cross and Escape all leave the file untouched', async () => {
   const page = fs.readFileSync(new URL('../public/js/bundletoolPage.js', import.meta.url), 'utf8');
   const escapeTarget = /'rotate-modal':\s*'([a-z-]+)'/.exec(page)?.[1];
-  for (const way of ['rotate-remove-keep', 'rotate-cancel', 'rotate-close', escapeTarget]) {
+  assert.equal(escapeTarget, 'rotate-close', 'Escape presses the close cross, which is one of the ways below');
+  for (const way of ['rotate-remove-keep', 'rotate-close']) {
     const { name, file } = await open(`ask-${way}.pdf`, 3);
     $('rotate-next').click();
     $('rotate-remove').click();
@@ -55,7 +56,7 @@ test('it asks first; Keep it, Cancel, the close cross and Escape all leave the f
     assert.equal(state.filesMap.get(name), file, `${way} keeps the very same file`);
     assert.equal(state.frontendInputData[name].pagesChanged, undefined);
     if (way !== 'rotate-remove-keep') assert.equal(modal.classList.contains('hidden'), true);
-    else $('rotate-cancel').click();
+    else $('rotate-close').click();
   }
 });
 
@@ -71,16 +72,14 @@ test('while it asks, the question is the only thing on offer: one remove button,
   assert.equal($('rotate-prev').disabled, false, 'page 2 of 3 can go back');
   assert.equal($('rotate-next').disabled, false, 'page 2 of 3 can go on');
   assert.equal($('rotate-page-input').disabled, false);
-  $('rotate-cancel').click();
+  $('rotate-close').click();
 
   const css = fs.readFileSync(new URL('../assets/css/bundletool.css', import.meta.url), 'utf8');
   const hidden = /([^{}]+)\{\s*display:\s*none;\s*\}/g;
   const hiddenWhileAsking = [...css.matchAll(hidden)].map((m) => m[1]).filter((s) => s.includes('.bt-rotate-asking')).join(',');
-  for (const part of ['.bt-rotate-controls', '.bt-rotate-scope', '.bt-rotate-footer', '#rotate-ocr-note']) {
+  for (const part of ['.bt-rotate-controls', '.bt-rotate-scope', '#rotate-ocr-note']) {
     assert.ok(hiddenWhileAsking.includes(`.bt-rotate-asking ${part}`), `${part} is hidden while the window asks`);
   }
-  const html = fs.readFileSync(new URL('../layouts/partials/bundletool.html', import.meta.url), 'utf8');
-  assert.match(html, /class="bt-rotate-footer[^"]*"[^>]*>\s*<button id="rotate-cancel"/, 'the window footer carries the class the rule hides');
 });
 
 test('confirmed, the page goes: the window says so, shows the page that took its place, and the row, total and autosave follow', async () => {
@@ -102,7 +101,7 @@ test('confirmed, the page goes: the window says so, shows the page that took its
   assert.match(doc.getElementById('bundle-totals').textContent, /\b\d+ pages?\b/);
   assert.equal(state.frontendInputData[name].pagesChanged, true, 'one of the documents BundleTool changed');
   await until(() => saves.length > savesBefore, 'an autosave');
-  $('rotate-cancel').click();
+  $('rotate-close').click();
   assert.equal(await pagesOf(name), 3, 'Cancel afterwards does not bring the page back');
 });
 
@@ -117,18 +116,20 @@ test('removing the last page shows the new last page, and the button goes off at
   await tick();
   assert.equal($('rotate-remove').disabled, true);
   assert.equal(await pagesOf(name), 1);
-  $('rotate-cancel').click();
+  $('rotate-close').click();
 });
 
 test('a turn waiting to be confirmed is written before the page is removed, and the question says so', async () => {
   const { name } = await open('turn-then-remove.pdf', 3);
+  $('rotate-scope-document').checked = true;
+  $('rotate-scope-document').dispatchEvent({ type: 'change', target: $('rotate-scope-document'), preventDefault() {}, stopPropagation() {} });
   $('rotate-right').click();
   $('rotate-remove').click();
   assert.match($('rotate-remove-question').textContent, /The turn is written into the document first\./);
   $('rotate-remove-yes').click();
   await until(() => $('rotate-message').textContent === 'Page 1 removed.', 'the status line');
   assert.deepEqual(await anglesOf(state.filesMap.get(name)), [90, 90]);
-  $('rotate-cancel').click();
+  $('rotate-close').click();
 });
 
 test('the Guide and the tour describe it', () => {

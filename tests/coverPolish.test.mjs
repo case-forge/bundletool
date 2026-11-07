@@ -75,9 +75,9 @@ test('Title Lines double: two thin rules above and two below, the text equidista
   }
 });
 
-test('an unknown Title Lines value draws a single line; a heavy cover (4 and 4 parties) still fits with both rules above the footer zone', () => {
+test('an unknown Title Lines value draws a single line (a known design draws its own); a heavy cover (4 and 4 parties) still fits with both rules above the footer zone', () => {
   const heavy = { ...BASE, 'cover.applicantName': 'A ONE\nA TWO\nA THREE\nA FOUR', 'cover.respondentName': 'R ONE\nR TWO\nR THREE\nR FOUR', 'cover.matterOf': 'IN THE MATTER OF THE CHILDREN ACT 1989\nRe: X (A Child)' };
-  assert.equal(run({ ...heavy, 'cover.titleLines': 'triple' }).lines.length, 2);
+  assert.equal(run({ ...heavy, 'cover.titleLines': 'not-a-design' }).lines.length, 2);
   for (const layout of ['classic', 'grid']) for (const titleLines of ['single', 'double']) {
     let fitted = null;
     for (const scale of [1, 0.85, 0.7, 0.55, 0.4, 0.3]) { const r = run({ ...heavy, 'cover.layout': layout, 'cover.titleLines': titleLines }, { scale }); if (r.bottom >= CONTENT_FLOOR) { fitted = r; break; } }
@@ -117,4 +117,23 @@ test('the longest single reference and two joined ones keep the case number on t
   }
   assert.ok(Object.keys(measured).length > 0);
   console.log('court width left beside the case number (A4, pt):', JSON.stringify(measured));
+});
+
+// ── Title line designs (bundletoolRules.js) ─────────────────────────────────────
+
+import { RULE_DESIGNS, strokeLayout } from '../public/js/bundletoolRules.js';
+
+test('every title line design draws, frames the title and keeps the text equidistant from its nearest line', () => {
+  for (const design of RULE_DESIGNS) {
+    const r = run({ ...BASE, 'cover.titleLines': design.id });
+    assert.ok(r.lines.length >= 2, `${design.id}: draws lines above and below`);
+    // Whatever the design, the gap from the inner edge of the upper block to the capitals equals the gap from the
+    // baseline to the inner edge of the lower block.
+    const { depth } = strokeLayout(design);
+    assert.ok(depth > 0 && Number.isFinite(depth), design.id);
+  }
+  const triple = run({ ...BASE, 'cover.titleLines': 'triple' }).lines;
+  assert.equal(triple.length, 6, 'triple is three lines above and three below');
+  const widths = triple.map((l) => l.t).sort((a, b) => a - b);
+  assert.deepEqual([widths[0], widths[5]], [0.5, 1.75], 'thin sides, thick middle');
 });

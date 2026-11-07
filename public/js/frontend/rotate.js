@@ -6,8 +6,10 @@
  * previous and next, a page number to type, and the Left and Right arrow keys while the window has focus. Only the
  * page shown is drawn, and a page's render is freed when another page takes its place. The drawing and paging are
  * documentPager.js, shared with the preview's pictures on a browser with no PDF viewer. From here the document can be
- * turned left or right and the turn confirmed with "Turn document", and its text read again with Redo OCR. Nothing is
- * written until one of those says so: Cancel, Escape and the close cross leave the file exactly as it was.
+ * turned left or right, and its text read again with Redo OCR. A turn is only drawn while the window is open and is written
+ * once, when the window closes (the close cross or Escape) or before Redo OCR, Remove page, Split or
+ * Merge start. A turn undone before then writes nothing. The turn buttons start on the page shown each time the window
+ * opens, never on the whole document.
  *
  * A line under the picture says what is worth knowing about the page shown, such as "This page looks blank" or "This
  * page looks sideways". It is information only: nothing is removed or changed because of a note (PAGE_NOTE_CHECKS).
@@ -25,6 +27,13 @@
  * count, the bundle total and the autosave follow the stored bytes; Cancel, Escape and the close cross before the
  * confirmation leave the file untouched.
  *
+ * "Split" cuts the document after the page shown and puts the rest into a new document straight under it, and "Merge"
+ * adds the document straight below onto the end of this one (splitMerge.js). Each is a plain page-range cut or join over
+ * whole documents, never page editing. Split is done at once (Merge puts it back); Merge asks first, as Remove page does,
+ * because the document below leaves the bundle with its title and date.
+ *
+ * While Redo OCR reads, its button becomes Stop: pressing it stops the reading and leaves the document as it was.
+ *
  * Loaded on first use (fileRows.js imports it lazily), so the page carries neither this nor pdf.js until somebody
  * opens a document.
  */
@@ -39,6 +48,8 @@ import {
   sidewaysPageNote, turnedPageNote, straightenedPageNote, straightenedEntries, recordPutBack, forgetRemovedPage,
 } from './ocrReorient.js';
 import { lazyImport } from '/js/shared/lazy-load.js';
+import { documentBelow, splitDocument, mergeWithBelow } from './splitMerge.js';
+import { stopReading } from './ocrReading.js';
 
 /**
  * The open window: { filename, opener, forceOcr, view, busy, turn, pageTurns, scope }. `view` is the documentPager.js view
@@ -131,19 +142,9 @@ function setScope(scope) {
   s.view.draw();
 }
 
-/** "Turn document", or "Turn page" and "Turn pages" when only single pages are turned. */
-function applyLabel(s) {
-  const pages = [...s.pageTurns.values()].filter(Boolean).length;
-  if (s.turn !== 0 || pages === 0) return 'Turn document';
-  return pages === 1 ? 'Turn page' : 'Turn pages';
-}
-
-/** The confirm button, the note beside Redo OCR and the spoken status follow the turn waiting to be confirmed. */
+/** The note beside Redo OCR and the spoken status follow the turn waiting to be written. */
 function showTurn(s) {
-  const pending = hasPendingTurn(s);
-  $('rotate-apply').disabled = s.busy || !pending;
-  $('rotate-apply').textContent = applyLabel(s);
-  $('rotate-ocr-note').classList.toggle('hidden', !pending);
+  $('rotate-ocr-note').classList.toggle('hidden', !hasPendingTurn(s));
   const status = $('rotate-status');
   if (status) status.textContent = turnStatus(s);
 }
@@ -237,7 +238,9 @@ async function showPageNotes(s, token, canvas, rotation) {
 /** While Redo OCR or another write runs, the buttons that would start another are off. */
 function setBusy(s, busy) {
   s.busy = busy;
-  for (const id of ['rotate-left', 'rotate-right', 'rotate-ocr']) $(id).disabled = busy;
+  for (const id of ['rotate-left', 'rotate-right']) $(id).disabled = busy;
+  // While Redo OCR reads, its button is Stop, and is the one thing that stays on.
+  $('rotate-ocr').disabled = busy && !s.reading;
   showRemove(s);
   showTurn(s);
   showPutBack(s);
@@ -279,9 +282,26 @@ function say(s, text) {
   if (session === s) $('rotate-message').textContent = text;
 }
 
+/** The OCR button is "Redo OCR" at rest and "Stop" while it reads: the same button, with its own icon and name. */
+function showOcrButton(reading) {
+  const button = $('rotate-ocr');
+  button.querySelector('.bt-ocr-icon')?.classList.toggle('hidden', reading);
+  button.querySelector('.bt-stop-icon')?.classList.toggle('hidden', !reading);
+  $('rotate-ocr-label').textContent = reading ? 'Stop' : 'OCR';
+  button.setAttribute('aria-label', reading ? 'Stop reading' : 'Redo OCR');
+  button.title = reading ? 'Stop reading this document. It is left as it was' : 'Redo OCR: read every page of this document again and replace its searchable text';
+}
+
 async function runForceOcr() {
   const s = session;
-  if (!s || s.busy) return;
+  if (!s) return;
+  if (s.reading) {
+    // Stop: the same stop as Skip on the row. Nothing is written until a reading finishes, so the document is as it was.
+    s.stopped = true;
+    stopReading(s.filename);
+    return;
+  }
+  if (s.busy) return;
   setBusy(s, true);
   try {
     if (hasPendingTurn(s)) {
@@ -294,11 +314,19 @@ async function runForceOcr() {
         return;
       }
     }
+    s.reading = true;
+    s.stopped = false;
+    showOcrButton(true);
+    setBusy(s, true);
     const written = await s.forceOcr(s.filename, $('rotate-ocr'), { onProgress: (text) => say(s, text) });
-    say(s, written ? 'Text read: it can now be selected and searched.' : '');
+    say(s, written ? 'Text read: it can now be selected and searched.' : s.stopped ? 'Stopped. The document was left as it was.' : '');
     if (written) await reloadFromStore(s);
   } finally {
-    if (session === s) setBusy(s, false);
+    s.reading = false;
+    if (session === s) {
+      showOcrButton(false);
+      setBusy(s, false);
+    }
   }
 }
 
@@ -346,9 +374,15 @@ async function putBackShownPage() {
 
 // ─── Removing the page shown ────────────────────────────────────────────────────
 
-/** Remove page is off while something is written, and when the document has only one page. */
+/**
+ * Remove page is off while something is written, and when the document has only one page. Split is off there too, and
+ * on the last page (the cut goes after the page shown, so nothing would be left for the new document). Merge is off
+ * when no document is directly below this one.
+ */
 function showRemove(s) {
   $('rotate-remove').disabled = s.busy || s.view.pageCount <= 1;
+  $('rotate-split').disabled = s.busy || s.view.pageNum >= s.view.pageCount;
+  $('rotate-merge').disabled = s.busy || !documentBelow(s.filename);
 }
 
 /** Closes the question and gives the window its own buttons and paging back. */
@@ -364,19 +398,37 @@ function hideRemoveQuestion() {
 }
 
 /**
- * Asks first: nothing is removed until the person says so. While the question is up it is the only thing on offer:
- * the turn, OCR and remove buttons and the window's own Cancel and Turn document are hidden, and paging is off, so
- * the question cannot drift to another page.
+ * Asks first: nothing is removed, cut or joined until the person says so. While the question is up it is the only thing
+ * on offer: the turn, OCR, remove, split and merge buttons and the window's own Cancel and Turn document are hidden,
+ * and paging is off, so the question cannot drift to another page. `s.asked` is what the yes button does.
  */
-function askRemove() {
-  const s = session;
-  if (!s || s.busy || s.view.pageCount <= 1) return;
+function ask(s, { question, yes, danger, run }) {
   const turnFirst = hasPendingTurn(s) ? ' The turn is written into the document first.' : '';
-  $('rotate-remove-question').textContent = `Remove page ${s.view.pageNum} of ${s.view.pageCount} from this document?${turnFirst}`;
+  $('rotate-remove-question').textContent = question + turnFirst;
+  const button = $('rotate-remove-yes');
+  button.textContent = yes;
+  button.classList.toggle('bt-btn--danger', danger);
+  button.classList.toggle('bt-btn--primary', !danger);
+  s.asked = run;
   $('rotate-remove-confirm').classList.remove('hidden');
   $('rotate-modal').classList.add('bt-rotate-asking');
   for (const id of ['rotate-prev', 'rotate-next', 'rotate-page-input']) $(id).disabled = true;
   $('rotate-remove-keep').focus({ preventScroll: true });
+}
+
+function askRemove() {
+  const s = session;
+  if (!s || s.busy || s.view.pageCount <= 1) return;
+  ask(s, { question: `Remove page ${s.view.pageNum} of ${s.view.pageCount} from this document?`, yes: 'Remove page', danger: true, run: removeShownPage });
+}
+
+function askMerge() {
+  const s = session;
+  const below = s && documentBelow(s.filename);
+  if (!s || s.busy || !below) return;
+  const pages = state.frontendInputData[below]?.pageCount;
+  const joined = pages ? ` (${pages} ${pages === 1 ? 'page' : 'pages'})` : '';
+  ask(s, { question: `Add "${below}"${joined} onto the end of this document? They become one document, and the one below leaves the bundle.`, yes: 'Merge', danger: false, run: mergeBelow });
 }
 
 /** The row's page count and its redaction badge, from what the stored file now holds. */
@@ -426,6 +478,43 @@ async function removeShownPage() {
   }
 }
 
+async function splitShownDocument() {
+  const s = session;
+  if (!s || s.busy || s.view.pageNum >= s.view.pageCount) return;
+  const pageNum = s.view.pageNum;
+  setBusy(s, true);
+  try {
+    await writePendingTurn(s);
+    const done = await splitDocument(s.filename, pageNum);
+    if (!done || session !== s) return;
+    say(s, `Split after page ${pageNum}. The rest is now "${done.newFilename}", just below.`);
+    s.view.pageNum = Math.min(pageNum, done.kept);
+    await reloadFromStore(s);
+  } catch (error) {
+    showErrorModal({ code: 'BT-VIEW-07', title: 'Could not split the document', message: `"${s.filename}" could not be split after page ${pageNum} and was left as it was.`, error });
+  } finally {
+    if (session === s) setBusy(s, false);
+  }
+}
+
+async function mergeBelow() {
+  const s = session;
+  if (!s || s.busy || !documentBelow(s.filename)) return;
+  hideRemoveQuestion();
+  setBusy(s, true);
+  try {
+    await writePendingTurn(s);
+    const done = await mergeWithBelow(s.filename);
+    if (!done || session !== s) return;
+    say(s, `"${done.below}" is now part of this document, which has ${done.pageCount} pages.`);
+    await reloadFromStore(s);
+  } catch (error) {
+    showErrorModal({ code: 'BT-VIEW-08', title: 'Could not merge the documents', message: `"${s.filename}" could not have the document below it added and was left as it was.`, error });
+  } finally {
+    if (session === s) setBusy(s, false);
+  }
+}
+
 function close() {
   const s = session;
   session = null;
@@ -437,7 +526,17 @@ function close() {
   s?.opener?.focus?.({ preventScroll: true });
 }
 
-/** "Turn document": the turn goes into the stored file and the window closes, as a confirmed choice does. */
+/**
+ * Every way of closing the window (the close cross, Escape): a turn still waiting is written, then the
+ * window closes. A turn undone before then has nothing to write, and a window that is busy has already written it.
+ */
+function finish() {
+  const s = session;
+  if (s && !s.busy && hasPendingTurn(s)) apply();
+  else close();
+}
+
+/** Writes the turn waiting into the stored file and closes the window, with the page saying what it is doing. */
 async function apply() {
   const s = session;
   if (!s || s.busy || !hasPendingTurn(s)) return;
@@ -478,13 +577,13 @@ function wire() {
     $(id).addEventListener('change', (e) => { if (e.target.checked) setScope(e.target.value); });
   }
 
-  $('rotate-apply').addEventListener('click', apply);
-  $('rotate-cancel').addEventListener('click', close);
-  $('rotate-close').addEventListener('click', close);
+  $('rotate-close').addEventListener('click', finish);
   $('rotate-ocr').addEventListener('click', runForceOcr);
   $('rotate-remove').addEventListener('click', askRemove);
   $('rotate-remove-keep').addEventListener('click', () => { hideRemoveQuestion(); $('rotate-remove').focus({ preventScroll: true }); });
-  $('rotate-remove-yes').addEventListener('click', removeShownPage);
+  $('rotate-split').addEventListener('click', splitShownDocument);
+  $('rotate-merge').addEventListener('click', askMerge);
+  $('rotate-remove-yes').addEventListener('click', () => { const run = session?.asked; if (run) run(); });
   $('rotate-putback')?.addEventListener('click', putBackShownPage);
 }
 
@@ -505,18 +604,19 @@ export async function openDocumentWindow(filename, opener, { forceOcr = runOcrFo
     showErrorModal({ code: 'BT-VIEW-01', title: 'Could not open this document', message: `"${filename}" could not be read.`, error });
     return;
   }
-  if (session) close();
+  if (session) finish();
   const pageCount = Math.max(1, state.frontendInputData[filename]?.pageCount || 1);
   const s = {
     filename, opener, forceOcr, view: null, busy: false,
     turn: 0,
-    pageTurns: new Map(), scope: 'document',
+    pageTurns: new Map(), scope: 'page',
   };
   s.view = makeView(s, bytes, pageCount);
   session = s;
   $('rotate-file').textContent = filename;
-  $('rotate-scope-document').checked = true;
+  $('rotate-scope-page').checked = true;
   $('rotate-message').textContent = '';
+  showOcrButton(false);   // a window closed while reading left it saying Stop
   setBusy(s, false);
   s.view.showPager();
   s.view.showZoom();

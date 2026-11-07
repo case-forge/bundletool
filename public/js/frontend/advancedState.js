@@ -73,11 +73,13 @@ export function preparedByLabelPresetFor(label) {
 // "-&-" is the stored default, and blank is a real, different choice (no joining word, just
 // the gap between the two party stacks), never folded into it. "-V-" is the one supported alternative,
 // researched against real UK court convention (see bundletoolCover.js): the
-// formal BETWEEN heading is a civil and family convention, and "-&-" is its standard joiner,
-// but "-V-" is a real substitute seen on civil and commercial bundle front sheets.
-// `legacy` is the wording these two presets had before, so a setting saved then still lands on its preset.
+// formal BETWEEN heading is a civil and family convention, and "-and-" is its standard joiner;
+// "-vs-", "-&-" and "-V-" are the alternatives offered.
+// `legacy` is the wording a preset had before, so a setting saved then still lands on its preset.
 export const PARTY_JOINERS = [
-  { key: 'default', label: '-&-', legacy: '-and-' },
+  { key: 'default', label: '-and-' },
+  { key: 'vs',      label: '-vs-' },
+  { key: 'amp',     label: '-&-' },
   { key: 'v',       label: '-V-', legacy: '-v-' },
 ];
 

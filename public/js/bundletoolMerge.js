@@ -148,3 +148,20 @@ function runWorkerOp(message, transferables) {
     });
   });
 }
+
+/**
+ * Joins two documents into one, the first's pages and then the second's. Each is cleaned as it is copied in, the same
+ * as when a bundle is built (copyDocumentPages), so the joined document carries nothing a bundle would not.
+ *
+ * @param {Uint8Array|ArrayBuffer} firstBytes
+ * @param {Uint8Array|ArrayBuffer} secondBytes
+ * @returns {Promise<Uint8Array>}
+ */
+export async function joinPdfs(firstBytes, secondBytes) {
+  const dst = await PDFDocument.create();
+  for (const bytes of [firstBytes, secondBytes]) {
+    const { doc: src } = await loadPdf(bytes);
+    await copyDocumentPages(dst, src);
+  }
+  return dst.save();
+}

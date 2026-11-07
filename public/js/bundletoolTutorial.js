@@ -67,11 +67,12 @@ export const STEPS = [
         'Each row has four buttons: remove, up, down, and the eye, which opens the document.',
         'Page through it, or type a page number.',
         'Zoom with the magnifier buttons, or pinch the page on a phone.',
-        'Turn a sideways scan with the two turn buttons at the left, then Turn document.',
+        'Turn a sideways scan with the two turn buttons at the left; the turn is written when you close the window.',
         'Turn page turns just the page shown; Turn all pages turns them all.',
         'A scanned page is read automatically so its text can be searched; Redo OCR reads it again if that went wrong.',
         'A note says when a page looks blank.',
         'Remove page takes out the page shown, once you confirm it.',
+        'Split cuts the document after the page shown and puts the rest in a new document just below; Merge adds the document below onto the end of this one. While OCR reads, its button is Stop.',
       ].join(' '),
       'Download, at the top of the table, gives back a section, the changed documents or all of them, in one zip.',
     ],
@@ -81,7 +82,7 @@ export const STEPS = [
   {
     element: 'step-4-choice',
     title: 'Step 4: Create Bundle',
-    body: '"Create Bundle" builds the complete PDF with an index, page numbers and bookmarks; "Preview Index" shows just the contents page first. If sections, a coversheet or case details are missing, you are asked once and can continue.',
+    body: '"Create Bundle" builds the complete PDF with an index, page numbers and bookmarks; "Preview Index" shows just the contents page first; "Just Assemble" joins your documents in order with nothing added, no index, page numbers or bookmarks. If sections, a coversheet or case details are missing, you are asked once and can continue.',
   },
   {
     // The next three steps open the header menu and spotlight one item each.

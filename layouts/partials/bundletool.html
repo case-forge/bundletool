@@ -248,10 +248,10 @@
       <p id="bundle-pd27a-note" class="bt-caption px-6 pt-2" hidden></p>
 
       <div id="file-table-empty" class="px-6 py-10 text-center text-gray-500 dark:text-slate-400">
-        <!-- Stacks glyph: the same icon as BundleTool's own
+        <!-- Briefcase glyph: the same icon as BundleTool's own
              tile in the app-switcher drawer, so the two "start/add work here"
              spots share one glyph. -->
-        {{ partial "shared/icon.html" (dict "name" "stacks" "class" "w-8 h-8 mx-auto mb-2 text-gray-600 dark:text-slate-400") }}
+        {{ partial "shared/icon.html" (dict "name" "briefcase_business" "class" "w-8 h-8 mx-auto mb-2 text-gray-600 dark:text-slate-400") }}
         <p class="text-lg font-bold">Drag here to get started</p>
       </div>
 
@@ -316,7 +316,7 @@
       </div>
 
       <div id="step-4-body" class="p-3">
-       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:max-w-[672px] mx-auto">
+       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mx-auto">
         <div class="bt-empty-col">
           <button
             type="submit"
@@ -336,6 +336,18 @@
           >
             {{ partial "shared/icon.html" (dict "name" "toc" "class" "w-4 h-4 mr-2 shrink-0") }}
             Preview Index
+          </button>
+        </div>
+        <div class="bt-empty-col">
+          <!-- Just assemble: the documents in order and nothing else (no index, page numbers or bookmarks), with no
+               settings. Ends in the same Save / Preview panel as Preview Index (frontend/justAssemble.js). -->
+          <button
+            id="just-assemble-btn"
+            type="button"
+            class="btn-needs-docs docs-inactive bt-btn bt-btn--tertiary bt-btn--block"
+          >
+            {{ partial "shared/icon.html" (dict "name" "stacks" "class" "w-4 h-4 mr-2 shrink-0") }}
+            Just Assemble
           </button>
         </div>
        </div>
@@ -374,66 +386,6 @@
 
       <div id="advanced-settings-body" class="hidden">
       <div class="p-3 space-y-3">
-
-        <!-- Just Assemble: three independent switches, each off by default (pageOptions.leaveOutIndex,
-             leaveOutPageNumbers, leaveOutBookmarks; the same keys on the command line). Nothing else is
-             disabled or hidden while they are on: the index and page-number settings keep their values for
-             when they are turned off. Just This Once (browser only) puts all four back to off after the next
-             bundle is made (frontend/justAssemble.js). -->
-        <div class="cf-panel">
-          <h4 class="bt-panel-title mb-2">Just Assemble</h4>
-          <p class="bt-hint mb-2">Put documents together with nothing added. Turn on all three to get exactly your pages, for example six photos of a statement as one six-page PDF. The index and page number settings below apply when these are off.</p>
-          <div class="bt-grid-3">
-            <div>
-              <p class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "playlist_remove" "class" "bt-icon-tiny") }}
-                Leave Out Index
-              </p>
-              <label class="bt-toggle-wrap">
-                <input type="checkbox" id="config-leaveOutIndex" class="sr-only peer" aria-label="Leave Out Index">
-                <div class="bt-toggle-pill bg-gray-200 dark:bg-slate-500 peer after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
-                <span aria-hidden="true" class="bt-toggle-label text-xs text-gray-500 dark:text-slate-400 transition after:content-['Off'] peer-checked:after:content-['On']"></span>
-              </label>
-              <p class="bt-hint mt-1">No index page. The first document page is page 1 (after the cover, if there is one, which is not numbered).</p>
-            </div>
-            <div>
-              <p class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "numbers" "class" "bt-icon-tiny") }}
-                Leave Out Page Numbers
-              </p>
-              <label class="bt-toggle-wrap">
-                <input type="checkbox" id="config-leaveOutPageNumbers" class="sr-only peer" aria-label="Leave Out Page Numbers">
-                <div class="bt-toggle-pill bg-gray-200 dark:bg-slate-500 peer after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
-                <span aria-hidden="true" class="bt-toggle-label text-xs text-gray-500 dark:text-slate-400 transition after:content-['Off'] peer-checked:after:content-['On']"></span>
-              </label>
-              <p class="bt-hint mt-1">No page number on any page. Your numbering style is kept for when this is off.</p>
-            </div>
-            <div>
-              <p class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "bookmark_remove" "class" "bt-icon-tiny") }}
-                Leave Out Bookmarks
-              </p>
-              <label class="bt-toggle-wrap">
-                <input type="checkbox" id="config-leaveOutBookmarks" class="sr-only peer" aria-label="Leave Out Bookmarks">
-                <div class="bt-toggle-pill bg-gray-200 dark:bg-slate-500 peer after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
-                <span aria-hidden="true" class="bt-toggle-label text-xs text-gray-500 dark:text-slate-400 transition after:content-['Off'] peer-checked:after:content-['On']"></span>
-              </label>
-              <p class="bt-hint mt-1">No bookmarks in the PDF.</p>
-            </div>
-            <div>
-              <p class="flex items-center bt-label mb-1">
-                {{ partial "shared/icon.html" (dict "name" "counter_1" "class" "bt-icon-tiny") }}
-                Just This Once
-              </p>
-              <label class="bt-toggle-wrap">
-                <input type="checkbox" id="config-justAssembleOnce" class="sr-only peer" aria-label="Just This Once">
-                <div class="bt-toggle-pill bg-gray-200 dark:bg-slate-500 peer after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
-                <span aria-hidden="true" class="bt-toggle-label text-xs text-gray-500 dark:text-slate-400 transition after:content-['Off'] peer-checked:after:content-['On']"></span>
-              </label>
-              <p class="bt-hint mt-1">Turns these back off after the next bundle is made, so the one after is normal.</p>
-            </div>
-          </div>
-        </div>
 
         <!-- Index Options -->
         <div class="cf-panel">
@@ -651,10 +603,12 @@
                 Party Joiner
               </label>
               <select id="config-partyJoinerPreset" class="w-full px-2 py-1 bt-input">
-                <option value="default" selected>-&-</option>
+                <option value="default" selected>-and-</option>
+                <option value="vs">-vs-</option>
+                <option value="amp">-&amp;-</option>
                 <option value="v">-V-</option>
               </select>
-              <input type="hidden" id="config-partyJoiner" value="-&-" />
+              <input type="hidden" id="config-partyJoiner" value="-and-" />
               <p class="bt-hint mt-1">The word joining the two parties on the stacked design</p>
             </div>
             <div>
@@ -737,12 +691,15 @@
                 {{ partial "shared/icon.html" (dict "name" "equal" "class" "bt-icon-tiny") }}
                 Title Lines
               </p>
-              <div class="bt-segmented">
-                <button type="button" data-group="coverTitleLines" data-value="single" class="btn-group btn-group-active">Single</button>
-                <button type="button" data-group="coverTitleLines" data-value="double" class="btn-group">Double</button>
+              <div id="rule-picker" class="bt-rulepicker">
+                <button type="button" class="bt-input bt-rulepicker-trigger" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="bt-rulepicker-sample"></span>
+                  {{ partial "shared/icon.html" (dict "name" "keyboard_arrow_down" "class" "bt-icon-chevron") }}
+                </button>
+                <div class="bt-rulepicker-list" role="listbox" aria-label="Title lines" hidden></div>
               </div>
               <input type="hidden" id="config-coverTitleLines" value="single">
-              <p class="bt-hint mt-1">The rules above and below the bundle title, on both designs: one line each, or two thin lines each</p>
+              <p class="bt-hint mt-1">The lines above and below the bundle title, on both designs. Pick a line to see it drawn</p>
             </div>
           </div>
         </div>
@@ -797,7 +754,7 @@
                 Watermark Colour and Strength
               </p>
               <div class="flex items-center gap-2">
-                <input type="color" id="config-watermarkColour" value="#999999" class="bt-color-swatch" aria-label="Watermark colour" aria-describedby="watermark-strength-hint" />
+                <input type="color" id="config-watermarkColour" value="#9aa0ab" class="bt-color-swatch" aria-label="Watermark colour" aria-describedby="watermark-strength-hint" />
                 <input type="range" id="config-watermarkOpacity" min="0" max="100" step="5" value="28" class="flex-1 bt-accent" aria-label="Watermark strength" aria-describedby="watermark-strength-hint" />
                 <span id="config-watermarkOpacity-label" class="bt-hint w-9 text-right">28%</span>
               </div>
@@ -1025,11 +982,11 @@
               </p>
               <div class="flex items-center gap-2 mb-1">
                 <label for="config-pageNumberColour" class="bt-hint w-9">Text</label>
-                <input type="color" id="config-pageNumberColour" value="#000000" class="bt-color-swatch" aria-label="Page number colour" />
+                <input type="color" id="config-pageNumberColour" value="#0e1014" class="bt-color-swatch" aria-label="Page number colour" />
               </div>
               <div class="flex items-center gap-2">
                 <label for="config-plateColour" class="bt-hint w-9">Box</label>
-                <input type="color" id="config-plateColour" value="#f4f4f4" class="bt-color-swatch" aria-label="Page number box colour" />
+                <input type="color" id="config-plateColour" value="#fdfbf7" class="bt-color-swatch" aria-label="Page number box colour" />
                 <input type="range" id="config-plateOpacity" min="0" max="100" step="5" value="100" class="flex-1 bt-accent" aria-label="Page number box opacity" />
                 <span id="config-plateOpacity-label" class="bt-hint w-9 text-right">100%</span>
               </div>
@@ -1217,7 +1174,7 @@
     <div id="email-split-results" class="hidden">
       <div id="email-split-results-list" class="space-y-2 mb-3"></div>
       <div class="bt-modal-actions">
-        <button id="email-split-again" type="button" class="px-4 py-2 bt-btn-neutral bt-btn-neutral--muted">
+        <button id="email-split-again" type="button" class="px-4 py-2 bt-btn-flush">
           Change settings
         </button>
         <button id="email-split-download-all" type="button" class="bt-btn--success px-4 py-2 text-sm font-medium rounded-lg transition">
@@ -1436,7 +1393,7 @@
 </div>
 
 <div id="rotate-modal" class="hidden flex items-center justify-center bt-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="rotate-modal-title">
-  <div class="bt-modal-panel p-4 max-w-md w-full mx-4 flex flex-col max-h-[92vh]">
+  <div class="bt-modal-panel p-4 max-w-xl w-full mx-4 flex flex-col max-h-[92vh]">
     <div class="flex items-center justify-between mb-1 shrink-0">
       <h3 id="rotate-modal-title" class="bt-subtitle">Preview document</h3>
       <button id="rotate-close" type="button" class="bt-icon-muted transition" aria-label="Close">
@@ -1452,9 +1409,9 @@
     <p id="rotate-page-note" class="hidden bt-hint mt-2 shrink-0 text-center" role="status" aria-live="polite"></p>
     <!-- On a page Straighten tilted scanned pages turned level: undoes that, for this page alone (rotate.js). -->
     <div id="rotate-putback-row" class="hidden bt-rotate-controls shrink-0">
-      <button id="rotate-putback" type="button" class="bt-btn-neutral bt-rotate-btn" title="Undo the straightening of the page shown">
-        {{ partial "shared/icon.html" (dict "name" "history" "class" "bt-icon") }}
-        <span>Put back as scanned</span>
+      <button id="rotate-putback" type="button" class="bt-btn-neutral bt-rotate-btn" title="Undo the straightening of the page shown: put it back as it was scanned">
+        {{ partial "shared/icon.html" (dict "name" "file_scan" "class" "bt-icon") }}
+        <span>Undo straightening</span>
       </button>
     </div>
     <!-- One row: turn left and right on the left (icons only; what they turn is the choice below), the page in the
@@ -1493,33 +1450,39 @@
     <p id="rotate-status" class="sr-only" role="status" aria-live="polite"></p>
     <!-- What the turn buttons turn: the page shown, or every page. -->
     <div class="bt-rotate-scope shrink-0" role="radiogroup" aria-label="What the turn buttons turn">
-      <label class="bt-caption"><input type="radio" name="rotate-scope" id="rotate-scope-page" value="page" class="bt-accent" /> Turn page</label>
-      <label class="bt-caption"><input type="radio" name="rotate-scope" id="rotate-scope-document" value="document" class="bt-accent" checked /> Turn all pages</label>
+      <label class="bt-caption"><input type="radio" name="rotate-scope" id="rotate-scope-page" value="page" class="bt-accent" checked /> Turn page</label>
+      <label class="bt-caption"><input type="radio" name="rotate-scope" id="rotate-scope-document" value="document" class="bt-accent" /> Turn all pages</label>
     </div>
 
     <div class="bt-rotate-controls shrink-0">
-      <button id="rotate-ocr" type="button" class="bt-btn-neutral bt-rotate-btn" title="Read every page of this document again and replace its searchable text">
-        {{ partial "shared/icon.html" (dict "name" "description" "class" "bt-icon") }}
-        <span>Redo OCR</span>
+      <button id="rotate-ocr" type="button" class="bt-btn-neutral bt-rotate-btn" title="Redo OCR: read every page of this document again and replace its searchable text" aria-label="Redo OCR">
+        {{ partial "shared/icon.html" (dict "name" "file_scan" "class" "bt-icon bt-ocr-icon") }}
+        {{ partial "shared/icon.html" (dict "name" "stop" "class" "bt-icon bt-stop-icon hidden") }}
+        <span id="rotate-ocr-label">OCR</span>
       </button>
-      <button id="rotate-remove" type="button" class="bt-btn-neutral bt-rotate-btn" title="Remove the page shown from this document">
-        {{ partial "shared/icon.html" (dict "name" "delete" "class" "bt-icon") }}
-        <span>Remove page</span>
+      <button id="rotate-remove" type="button" class="bt-btn-neutral bt-rotate-btn" title="Remove page: take the page shown out of this document" aria-label="Remove page">
+        {{ partial "shared/icon.html" (dict "name" "shredder" "class" "bt-icon") }}
+        <span>Remove</span>
+      </button>
+      <button id="rotate-split" type="button" class="bt-btn-neutral bt-rotate-btn" title="Split: cut this document after the page shown. The rest becomes a new document just below it" aria-label="Split document after this page">
+        {{ partial "shared/icon.html" (dict "name" "split" "class" "bt-icon") }}
+        <span>Split</span>
+      </button>
+      <button id="rotate-merge" type="button" class="bt-btn-neutral bt-rotate-btn" title="Merge: add the document just below this one onto the end of it" aria-label="Merge with the document below">
+        {{ partial "shared/icon.html" (dict "name" "merge" "class" "bt-icon") }}
+        <span>Merge</span>
       </button>
     </div>
-    <p id="rotate-ocr-note" class="hidden bt-hint mt-2 shrink-0 text-center">Redo OCR writes the turn into the document first.</p>
+    <p id="rotate-ocr-note" class="hidden bt-hint mt-2 shrink-0 text-center">Redo OCR writes the turn into the document first. Closing the window writes it too.</p>
     <p id="rotate-message" class="bt-hint mt-2 shrink-0 text-center" role="status" aria-live="polite"></p>
-    <!-- Asked before a page is removed. Cancel, Escape and the close cross leave the file as it was. -->
+    <!-- Asked before a page is removed, a document split or one merged in (the ids keep the name they had when this
+         only asked about Remove). Keep it leaves the file as it was; Escape and the close cross close the window. -->
     <div id="rotate-remove-confirm" class="hidden bt-rotate-confirm shrink-0" role="group" aria-labelledby="rotate-remove-question">
       <p id="rotate-remove-question" class="bt-caption"></p>
       <div class="flex gap-3 justify-center mt-2">
         <button id="rotate-remove-keep" type="button" class="px-4 py-2 bt-btn-flush">Keep it</button>
         <button id="rotate-remove-yes" type="button" class="bt-btn-modal bt-btn--danger">Remove page</button>
       </div>
-    </div>
-    <div class="bt-rotate-footer flex gap-3 justify-end mt-3 shrink-0">
-      <button id="rotate-cancel" type="button" class="px-4 py-2 bt-btn-flush">Cancel</button>
-      <button id="rotate-apply" type="button" class="bt-btn-modal bt-btn--primary">Turn document</button>
     </div>
   </div>
 </div>
@@ -1584,7 +1547,7 @@
       </div>
     </div>
     <div class="flex gap-3 justify-end mt-3 shrink-0">
-      <button id="bundle-preview-split" type="button" class="px-4 py-2 bt-btn-neutral">
+      <button id="bundle-preview-split" type="button" class="px-4 py-2 bt-btn-flush">
         Split for email
       </button>
       <button id="bundle-preview-save" type="button" class="bt-btn-modal bt-btn--primary">
@@ -1603,10 +1566,10 @@
       <button id="bundle-detected-open" type="button" class="bt-btn-modal bt-btn--primary bt-btn-modal--block">
         Open it for editing
       </button>
-      <button id="bundle-detected-split" type="button" class="w-full px-4 bt-btn-neutral bt-btn--tall">
+      <button id="bundle-detected-split" type="button" class="w-full px-4 bt-btn-flush bt-btn--tall">
         Add its documents here
       </button>
-      <button id="bundle-detected-asis" type="button" class="w-full px-4 bt-btn-neutral bt-btn--tall">
+      <button id="bundle-detected-asis" type="button" class="w-full px-4 bt-btn-flush bt-btn--tall">
         Add it as one document
       </button>
       <button id="bundle-detected-skip" type="button" class="bt-btn-link w-full px-4 py-2 text-sm font-medium">
@@ -1616,7 +1579,7 @@
   </div>
 </div>
 
-<!-- Upload warning modal (informational, single dismiss button) -->
+<!-- Upload warning modal (informational, one dismiss button and, when the message offers it, one action) -->
 <div id="upload-warning-modal" class="hidden flex items-center justify-center bt-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="upload-warning-modal-title">
   <div class="bt-modal-panel p-6 max-w-sm w-full mx-4">
     <h3 id="upload-warning-modal-title" class="bt-modal-title mb-2">Large upload</h3>
@@ -1627,7 +1590,10 @@
       <p id="upload-warning-modal-guide" class="hidden text-sm"><a href="{{ "bundletool/guide/" | relURL }}#accepted-files" target="_blank" rel="noopener" class="underline">See the accepted files in the Guide</a></p>
       <p id="upload-warning-modal-code" class="hidden bt-hint bt-error-code"></p>
     </div>
-    <div class="flex justify-end">
+    <div class="flex justify-end gap-3">
+      <!-- Only when the message offers something to do instead (Add anyway on a repeat file); modals.js shows it.
+           Plain, not a filled button: the highlighted choice is Leave it out, so a repeat is never the easy click. -->
+      <button id="upload-warning-modal-action" type="button" class="hidden px-4 py-2 bt-btn-flush"></button>
       <button id="upload-warning-modal-close" type="button" class="bt-btn-modal bt-btn--primary">
         Got it
       </button>
@@ -1692,7 +1658,7 @@
       <button id="ocr-wait-cancel" type="button" class="px-4 py-2 bt-btn-flush">
         Cancel
       </button>
-      <button id="ocr-wait-skip" type="button" class="px-4 py-2 bt-btn-neutral">
+      <button id="ocr-wait-skip" type="button" class="px-4 py-2 bt-btn-flush">
         Skip this document
       </button>
       <button id="ocr-wait-wait" type="button" class="bt-btn-modal bt-btn--primary">
@@ -1761,7 +1727,7 @@
         <button id="delete-section-keep-btn" type="button" class="bt-btn-modal bt-btn--primary bt-btn-modal--block">
           Remove section, keep documents
         </button>
-        <button id="delete-section-move-btn" type="button" class="w-full px-4 bt-btn-neutral bt-btn-neutral--muted bt-btn--tall">
+        <button id="delete-section-move-btn" type="button" class="w-full px-4 bt-btn-flush bt-btn--tall">
           Move files to another section…
         </button>
         <button id="delete-section-remove-btn" type="button" class="bt-btn--danger w-full px-4 py-2.5 text-sm font-medium rounded-lg transition">
@@ -1866,13 +1832,13 @@
       <textarea id="error-modal-details" class="w-full text-xs font-mono bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded p-2 resize-none focus:outline-none" rows="6" readonly></textarea>
     </div>
     <div class="flex gap-3 justify-end flex-wrap">
-      <button id="error-modal-copy-btn" type="button" class="hidden px-4 py-2 bt-btn-neutral">
-        Copy details
-      </button>
       <a id="error-modal-report-link" href="https://caseforge.uk/contact/" target="_blank" rel="noopener noreferrer" class="hidden bt-btn-modal bt-btn--primary text-center">
         Report this bug
       </a>
-      <button id="error-modal-close" type="button" class="bt-btn-modal bt-btn-neutral">
+      <button id="error-modal-copy-btn" type="button" class="hidden bt-btn-modal bt-btn-flush">
+        Copy details
+      </button>
+      <button id="error-modal-close" type="button" class="bt-btn-modal bt-btn-flush">
         Close
       </button>
     </div>

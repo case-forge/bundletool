@@ -11,6 +11,7 @@
  */
 
 import { validPageSizes } from './bundletoolPageSize.js';
+import { RULE_IDS } from './bundletoolRules.js';
 export { validPageSizes };
 
 export const validFonts = [
@@ -244,8 +245,8 @@ export const validCoverCaseLines = ["court", "own"];
 export const validCoverLabelPlacements = ["below", "inline"];
 /** How the stacked cover design aligns the party names. */
 export const validCoverPartyAligns = ["left", "centre", "right"];
-/** The rules above and below the cover title: one each, or two thin ones each. */
-export const validCoverTitleLines = ["single", "double"];
+/** The designs of the rules above and below the cover title (bundletoolRules.js): single, double, triple, thick-thin, thin-thick, dotted, dashed, perforated, wave. */
+export const validCoverTitleLines = RULE_IDS;
 
 export const validSectionPrefixes = [
   "",
@@ -406,12 +407,12 @@ class Config {
         // other wording, or "" for no label at all.
         preparedByLabel: "Prepared by:",
         // The word joining the two parties in the stacked design's "BETWEEN:" block, freely
-        // overridable the same way. "-&-" is the standard civil and family joiner (a High
+        // overridable the same way. "-and-" is the standard civil and family joiner (a High
         // Court directions template on judiciary.uk reads "BETWEEN: [Claimant] Claimant -and-
         // [Defendant] Defendant"); criminal matters use "R v [Defendant]" rather than a BETWEEN
-        // heading, and this tool only draws BETWEEN. "-&-" is the default; set "-V-", any
-        // other wording, or "" to draw no joiner at all, just the gap.
-        partyJoiner: "-&-",
+        // heading, and this tool only draws BETWEEN. "-and-" is the default; set "-vs-", "-&-",
+        // "-V-", any other wording, or "" to draw no joiner at all, just the gap.
+        partyJoiner: "-and-",
       },
       ocr: {
         // On by default: a scanned page is checked (a character count against its own real text
