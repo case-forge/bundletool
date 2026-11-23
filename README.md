@@ -83,8 +83,11 @@ The site must be served from the root of its own host (it imports shared files b
 
 ## Changes since 1.0.0
 
-Version 1.5.0 collects everything changed since the first public snapshot.
+Version 1.6.0 collects everything changed since the first public snapshot.
 
+- **Look.** The typeface is Inter Tight, self-hosted in weights 400 and 600. Classic is a colour skin on the same rules as Modern and uses Tailwind's colours throughout. The title card has the same surface as every other box, in light and dark. Every corner is one of three shapes: a rounded rectangle for anything pressed and every field, an oval for badges and switches, a larger rounded rectangle for cards and dialogs.
+- **Advanced Settings.** Share and Reset appear together, as soon as anything differs from a fresh page, and every control in the panel is the same height.
+- **Touch.** The footer links have a larger touch area on a touch screen.
 - **Title lines.** The lines above and below the cover title come in nine designs, chosen from a dropdown that draws each one: single, double, triple, thick-thin, thin-thick, dotted, dashed, perforated and wave (`cover.titleLines`).
 - **Dates in names.** A two-digit year-first date such as `26.11.10` reads as 10 November 2026 when day-first would make the document more than three years old.
 - **Unpack and page removal.** `--unpack bundle.pdf out-dir` turns a bundle made by BundleTool back into its documents and a manifest that rebuilds it, without the blank pages print mode added. A file in a manifest takes `removePages`, a list of page numbers to leave out. A bundle now stores the cover's layout and wording (joiner, labels, alignment, case number line), so a reopened or unpacked bundle redraws the same cover.
