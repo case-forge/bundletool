@@ -31,6 +31,7 @@
 		     individually with no-cache. They come before BundleTool's own sheet so a rule there
 		     can adjust them. */ -}}
 		{{- if hugo.IsServer -}}
+		<link rel="preload" href="{{ "fonts/inter-tight/inter-tight-latin-400-normal.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
 		<link rel="stylesheet" href="{{ "css/shared/header.css" | relURL }}" />
 		<link rel="stylesheet" href="{{ "css/drawer.css" | relURL }}" />
 		<link rel="stylesheet" href="{{ "css/shared/back-to-top.css" | relURL }}" />
@@ -72,7 +73,7 @@
 		{{- /* The Guide does not install the whole tool for a reader; it is stored once the tool is opened. */}}
 		{{ partial "offline/register.html" (dict "tool" "bundletool" "installs" (ne .Layout "guide")) }}
 	</head>
-	<body class="bg-stone-100 dark:bg-slate-950 text-gray-900 dark:text-slate-100">
+	<body class="bt-fill-inactive bt-ink-strong">
 		{{ block "main" . }}{{ end }}
 
 	</body>

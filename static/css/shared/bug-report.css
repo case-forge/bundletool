@@ -6,17 +6,17 @@
   max-width: min(360px, calc(100vw - 32px));
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 12px 14px; border-radius: var(--radius-sm, 10px);
-  background: var(--card, #1c1f27); color: var(--text, #f0ebe3);
-  box-shadow: var(--shadow, 0 20px 44px rgba(14, 16, 20, .45));
+  background: var(--card); color: var(--text);
+  box-shadow: var(--shadow);
   font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 #cf-bug-toast a, #cf-bug-toast button {
-  font: inherit; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 6px 12px; text-decoration: none;
+  font: inherit; font-weight: 600; cursor: pointer; border-radius: var(--radius-sm); padding: 6px 12px; text-decoration: none;
 }
-#cf-bug-toast a { background: var(--orange, #ff6900); color: #fdfbf7; border: 0; }
-#cf-bug-toast button { background: transparent; color: var(--text-dim, rgba(240, 235, 227, .7)); border: 0; }
+#cf-bug-toast a { background: var(--orange); color: var(--on-fill); border: 0; }
+#cf-bug-toast button { background: transparent; color: var(--text-dim); border: 0; }
 /* The error code after the message: small, and easy to select whole for a report. */
-#cf-bug-toast .cf-bug-code { font-size: 11px; color: var(--text-dim, rgba(240, 235, 227, .7)); user-select: all; white-space: nowrap; }
+#cf-bug-toast .cf-bug-code { font-size: 11px; color: var(--text-dim); user-select: all; white-space: nowrap; }
 
 /* The "A new version is ready. Reload to use it." toast (static/js/shared/sw-register.js), shown when an offline
    service worker has a newer version waiting. Same look as the bug toast; kept here for the same reason. */
@@ -25,16 +25,16 @@
   max-width: min(360px, calc(100vw - 32px));
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 12px 14px; border-radius: var(--radius-sm, 10px);
-  background: var(--card, #1c1f27); color: var(--text, #f0ebe3);
-  box-shadow: var(--shadow, 0 20px 44px rgba(14, 16, 20, .45));
+  background: var(--card); color: var(--text);
+  box-shadow: var(--shadow);
   font: var(--fs-label, 14.4px)/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 #cf-update-toast button {
-  font: inherit; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 6px 12px;
-  background: transparent; color: var(--text-dim, rgba(240, 235, 227, .7)); border: 0;
+  font: inherit; font-weight: 600; cursor: pointer; border-radius: var(--radius-sm); padding: 6px 12px;
+  background: transparent; color: var(--text-dim); border: 0;
 }
 #cf-update-toast > span { flex: 1 1 100%; }
-#cf-update-toast .cf-update-toast-go { background: var(--orange-fill, var(--orange, #ff6900)); color: #fdfbf7; margin-left: auto; }
+#cf-update-toast .cf-update-toast-go { background: var(--orange-fill, var(--orange)); color: var(--on-fill); margin-left: auto; }
 
 /* When both toasts are up, the update toast sits above the bug toast instead of on top of it. */
 body:has(#cf-bug-toast) #cf-update-toast { bottom: 104px; }

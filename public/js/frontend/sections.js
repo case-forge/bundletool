@@ -87,7 +87,7 @@ export function createSectionTbody(rawSectionID, label, name) {
   const taken = new Set(Array.from(document.querySelectorAll('.section-tbody')).map(el => el.dataset.sectionId));
   const sectionID = cleanSectionId(rawSectionID, taken, state.nextSectionNum);
   const tbody = document.createElement('tbody');
-  tbody.className = 'section-tbody bg-white dark:bg-slate-700 divide-y divide-gray-200 dark:divide-slate-700';
+  tbody.className = 'section-tbody bt-fill-panel divide-y bt-rule';
   tbody.id = `tbody-section-${sectionID}`;
   tbody.dataset.sectionId = sectionID;
   tbody.draggable = true; // always draggable, like file rows
@@ -177,7 +177,7 @@ function buildSectionPickerList(excludeTbody) {
     const display = (label && name) ? `${label}: ${name}` : (name || label || '(unnamed)');
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'w-full text-left px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-600 bt-hover-line bt-hover-tint transition text-sm text-gray-800 dark:text-slate-200';
+    btn.className = 'w-full text-left px-3 py-2 rounded-lg border bt-edge-faint bt-hover-line bt-hover-tint transition text-sm bt-ink-title';
     btn.textContent = display;
     btn.addEventListener('click', () => {
       document.getElementById('delete-section-modal')?.classList.add('hidden');
@@ -274,7 +274,7 @@ export function showSectionPicker(files) {
     const display = (label && name) ? `${label}: ${name}` : (name || label || '(unnamed)');
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'w-full text-left px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-600 bt-hover-line bt-hover-tint transition text-sm font-medium bt-ink';
+    btn.className = 'w-full text-left px-3 py-2 rounded-lg border bt-edge-faint bt-hover-line bt-hover-tint transition text-sm font-medium bt-ink';
     btn.textContent = display;
     btn.addEventListener('click', async () => {
       popover.classList.add('hidden');

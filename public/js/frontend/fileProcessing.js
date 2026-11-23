@@ -527,7 +527,7 @@ export function setup() {
     dragDepth = 0;
     overlay?.classList.add('hidden');
     overlay?.classList.remove('over-target');
-    dropZone?.classList.remove('ring-2', 'ring-accent-400');
+    dropZone?.classList.remove('ring-2', 'bt-ring-accent');
     clearDropIndicator();
   };
 
@@ -535,13 +535,13 @@ export function setup() {
     if (!isOsFileDrag(e)) return;
     dragDepth++;
     overlay?.classList.remove('hidden');
-    if (dropZone?.contains(e.target)) dropZone.classList.add('ring-2', 'ring-accent-400');
+    if (dropZone?.contains(e.target)) dropZone.classList.add('ring-2', 'bt-ring-accent');
   });
   document.addEventListener('dragleave', (e) => {
     if (!isOsFileDrag(e)) return;
     dragDepth = Math.max(0, dragDepth - 1);
     if (dragDepth === 0) clearDropUI();
-    else if (dropZone && !dropZone.contains(e.relatedTarget)) dropZone.classList.remove('ring-2', 'ring-accent-400');
+    else if (dropZone && !dropZone.contains(e.relatedTarget)) dropZone.classList.remove('ring-2', 'bt-ring-accent');
   });
   // While files are dragged over the table, a thin line shows where they will go (above or below the
   // row under the pointer), or a dashed outline marks the section they will join. The page-wide

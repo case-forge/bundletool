@@ -5,7 +5,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "test": "node --import ./tests/register-hooks.mjs --test tests/*.test.mjs",
+    "test": "node scripts/run-tests.mjs",
     "build:vendor": "node scripts/build-vendor.mjs",
     "build:cli": "node scripts/build-cli.mjs",
     "build": "hugo --gc && OFFLINE_TOOLS=bundletool node scripts/build-offline.mjs dist",

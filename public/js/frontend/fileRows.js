@@ -20,7 +20,7 @@ export function ensureEmptyPlaceholder(tbody) {
   if (tbody.querySelector('.empty-section-placeholder')) return;
   const tr = document.createElement('tr');
   tr.className = 'empty-section-placeholder';
-  tr.innerHTML = `<td colspan="5" class="px-4 py-4 text-center text-sm text-gray-400 italic select-none">[empty: drag documents here]</td>`;
+  tr.innerHTML = `<td colspan="5" class="px-4 py-4 text-center text-sm bt-ink-placeholder italic select-none">[empty: drag documents here]</td>`;
   tr.addEventListener('dragover', (e) => { if (state.draggedRow) { e.preventDefault(); e.stopPropagation(); } });
   tr.addEventListener('drop', (e) => {
     if (!state.draggedRow) return;
@@ -78,16 +78,16 @@ export function makeFileRow(filename, data) {
   // separate handle; the up/down buttons are the pointer and keyboard alternative
   row.dataset.filename = filename;
   // Hover colour comes from BundleTool's stylesheet (with its dark
-  // counterpart), not a Tailwind utility here: hover:bg-gray-50 has no dark
+  // counterpart), not a Tailwind utility here: bt-hover-fill-pale has no dark
   // variant and would flash a light background into a dark table.
   row.classList.add('file-row', 'transition');
   row.innerHTML = `
     <td class="px-4 py-3 text-sm filename-cell" data-label="File"></td>
     <td class="px-4 py-3 title-cell" data-label="Title">
-      <textarea aria-label="Document title" class="title-input w-full px-2 py-1 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 border border-gray-300 dark:border-slate-600 rounded text-sm bt-focus-ring" data-filename="" rows="1" maxlength="500"></textarea>
+      <textarea aria-label="Document title" class="title-input w-full px-2 py-1 bt-fill-raised bt-ink-strong border bt-edge-soft rounded text-sm bt-focus-ring" data-filename="" rows="1" maxlength="500"></textarea>
     </td>
     <td class="px-4 py-3 date-cell" data-label="Date">
-      <input type="date" aria-label="Document date" class="date-input w-full px-2 py-1 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 border border-gray-300 dark:border-slate-600 rounded text-sm bt-focus-ring" data-filename="" />
+      <input type="date" aria-label="Document date" class="date-input w-full px-2 py-1 bt-fill-raised bt-ink-strong border bt-edge-soft rounded text-sm bt-focus-ring" data-filename="" />
     </td>
     <td class="px-2 py-3 text-sm text-center pages-cell" data-label="Pages"></td>
     <td class="px-4 py-3 flex gap-2 actions-cell" data-label="">
@@ -106,7 +106,7 @@ export function makeFileRow(filename, data) {
   if (data.recovered) {
     row.classList.add('recovered-row');
     const badge = document.createElement('span');
-    badge.className = 'ml-1 inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 align-middle';
+    badge.className = 'ml-1 inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bt-fill-warn-badge bt-ink-warn align-middle';
     badge.title = data.recoveryNote || 'Recovered from a damaged file. Check it against the original';
     badge.textContent = 'recovered';
     row.querySelector('.filename-cell').appendChild(badge);
@@ -272,6 +272,28 @@ export function buildIndexData() {
 
 // ─── File-table delegated event handlers ─────────────────────────────────────
 
+/**
+ * Empties the Review Table and this tab's saved working copies. Used by Clear all documents (after its confirm) and by
+ * the restored-session notice's Delete all, which the person has already been asked about twice.
+ */
+export function clearReviewTable() {
+  markTableCleared();   // so the last save is not restored on the next load
+  // ...and this tab's saved working copies go too: they hold full copies of the documents, and
+  // "clear" on a shared computer has to mean cleared. Other tabs' copies and finished bundles are
+  // kept; "Delete all saved copies" (Rewind, Bundles) removes everything.
+  deleteThisTabsSnapshots().catch((err) => console.warn('[clear all] could not delete the saved copies:', err?.message));
+  stopAllReading();
+  state.filesMap.clear();
+  Object.keys(state.frontendInputData).forEach(key => delete state.frontendInputData[key]);
+  document.querySelectorAll('.section-tbody:not(#tbody-section-0000)').forEach(el => el.remove());
+  const section0000 = document.getElementById('tbody-section-0000');
+  if (section0000) section0000.innerHTML = '';
+  state.isSectioned    = false;
+  state.nextSectionNum = 1;
+  document.getElementById('file-table')?.classList.remove('sectioned');
+  refreshBundleTotals();
+}
+
 export function setup() {
   document.getElementById('file-table')?.addEventListener('input', (e) => {
     const target = e.target;
@@ -397,21 +419,7 @@ export function setup() {
       document.getElementById('clear-all-modal')?.classList.remove('hidden');
     }).then(confirmed => {
       if (!confirmed) return;
-      markTableCleared();   // so the last save is not restored on the next load
-      // ...and this tab's saved working copies go too: they hold full copies of the documents, and
-      // "clear" on a shared computer has to mean cleared. Other tabs' copies and finished bundles are
-      // kept; "Delete all saved copies" (Rewind, Bundles) removes everything.
-      deleteThisTabsSnapshots().catch((err) => console.warn('[clear all] could not delete the saved copies:', err?.message));
-      stopAllReading();
-      state.filesMap.clear();
-      Object.keys(state.frontendInputData).forEach(key => delete state.frontendInputData[key]);
-      document.querySelectorAll('.section-tbody:not(#tbody-section-0000)').forEach(el => el.remove());
-      const section0000 = document.getElementById('tbody-section-0000');
-      if (section0000) section0000.innerHTML = '';
-      state.isSectioned    = false;
-      state.nextSectionNum = 1;
-      document.getElementById('file-table')?.classList.remove('sectioned');
-      refreshBundleTotals();
+      clearReviewTable();
     });
   });
 }

@@ -8,4 +8,9 @@
   (dict "id" "autosave-restore-btn" "label" "Rewind" "title" "Rewind to an earlier save" "icon" "history")
   (dict "id" "finished-bundles-btn" "label" "Bundles" "title" "Bundles this browser has finished" "icon" "download")
   (dict "id" "tutorial-open-btn" "label" "Help" "title" "Run the tutorial" "icon" "help") -}}
-{{ partial "shared/header.html" (dict "page" . "current" "bundletool" "markSize" 44 "hideSettings" true "hideApps" true "tools" $tools "bundled" (not hugo.IsServer)) }}
+{{- /* The three tools are bound by BundleTool's own script, which the Guide page does not load: on the Guide the menu
+     would show Rewind, Bundles and Help that do nothing. The Guide's menu lists all three apps instead, BundleTool
+     included. */ -}}
+{{- $current := "bundletool" }}
+{{- if eq .Layout "guide" }}{{ $tools = slice }}{{ $current = "" }}{{ end }}
+{{ partial "shared/header.html" (dict "page" . "current" $current "markSize" 44 "hideSettings" true "hideApps" true "tools" $tools "bundled" (not hugo.IsServer)) }}

@@ -255,21 +255,21 @@
     // Confirms first, as Review Table's own Clear All does.
     const modal = document.getElementById('advanced-reset-modal');
     if (!modal) return;
+    // The words typed onto the cover (court, matter, party labels) are case data. Reset puts them back too, because
+    // Share carries them and the two buttons answer the same question; the confirmation says so when they are set.
+    const coverWords = Object.keys(settingsDiff()).some((k) => COVER_TEXT_KEYS.includes(k));
+    document.getElementById('advanced-reset-cover-note')?.classList.toggle('hidden', !coverWords);
     const confirmed = await new Promise((resolve) => {
       window._advancedResetResolve = resolve;
       modal.classList.remove('hidden');
     });
     if (!confirmed) return;
-    // Drives the FACTORY table above rather than a second inline copy of the
-    // same values. The cover fields are deliberately untouched: whether a
-    // cover has been designed is per-bundle state, and its fields are case
-    // data: losing a designed coversheet to a button labelled "Reset" is
-    // not a fair trade. With autosave-on-change, Reset persists what it did.
-    applyDefaults(RESET_TO);
+    // Drives the FACTORY table above rather than a second inline copy of the same values.
+    applyDefaults(FACTORY);
     refreshPlateOpacityLabel();
+    window.refreshAdvancedState?.();
     saveDefaultConfig();
-    // No "Done" flash needed: Reset/Share hiding again
-    // once settingsDiff() is empty is signal enough on its own.
+    // No "Done" flash needed: Reset/Share hiding again once settingsDiff() is empty is signal enough on its own.
   });
 
   // STORAGE KEY: DO NOT RENAME (see bundletoolTheme.js). This holds each
@@ -327,29 +327,30 @@
    * Factory settings, in one place.
    *
    * Both Reset and the settings-code encoder read this, so "is this value a
-   * default?" has one answer in the file.
+   * default?" has one answer in the file. It must equal what the page shows on a fresh load (tests/
+   * settingsFactoryMatchesPage.test.mjs): any key that differs makes Share and Reset appear before anything was changed.
    */
   const FACTORY = {
     fontFace: 'serif', dateStyle: 'DD Mon. YYYY', dateInputOrder: 'UK', outlineItemStyle: 'plain',
     indexBookmarkLabel: '', footerFont: 'helvetica', numberingStyle: 'PageX',
-    footerPrefix: '', plateColour: '#f4f4f4', plateOpacity: 100,
+    footerPrefix: '', plateColour: '#fdfbf7', plateOpacity: 100,
     footerLink: 'index', pageSize: 'a4',
     headingText: '', frontMatterNumbering: 'continuous', footerOffset: 0,
-    alignment: 'centre', pageNumberColour: '#000000',
+    alignment: 'centre', pageNumberColour: '#0e1014',
     indexFontSize: 'medium', footerFontSize: 'medium',
     sectionPrefix: 'Section', showTableBorders: true, printableBundle: false, ocrAutoDetect: true,
     ocrTurnUpright: false, ocrStraighten: false, smallerPhotos: true,
     pageNumberPerSection: false, splitBy: 'size',
     courtName: '', matterOf: '', partyLabel1: '', partyLabel2: '', caseNumberLabel: 'CASE NO:', preparedByLabel: 'Prepared by:', partyJoiner: '-and-', coverLayout: 'classic',
-    coverCaseLine: 'court', coverLabelPlacement: 'below', coverPartyAlign: 'centre',
-    coverCaseAlign: 'right', coverHeadingAlign: 'left',
+    coverCaseLine: 'court', coverLabelPlacement: 'inline', coverPartyAlign: 'centre',
+    coverCaseAlign: 'right', coverHeadingAlign: 'left', coverTitleLines: 'single',
   };
   // The Coversheet panel's text and layout belong to the matter in hand, not to the Advanced Settings that
   // Reset and a settings link describe. Blanking them would wipe the court name, the "In the matter of" line
   // and the party labels (and save the blanks as the new defaults), so they are only ever SET, never reset.
-  const COVER_KEYS = ['courtName', 'matterOf', 'partyLabel1', 'partyLabel2', 'caseNumberLabel', 'preparedByLabel', 'partyJoiner', 'coverLayout', 'coverCaseLine', 'coverLabelPlacement', 'coverPartyAlign', 'coverCaseAlign', 'coverHeadingAlign'];
-  // What Reset leaves alone: the words a person typed onto the cover (court, matter, party names). The cover's layout and
-  // wording choices are settings like any other and are reset with them.
+  const COVER_KEYS = ['courtName', 'matterOf', 'partyLabel1', 'partyLabel2', 'caseNumberLabel', 'preparedByLabel', 'partyJoiner', 'coverLayout', 'coverCaseLine', 'coverLabelPlacement', 'coverPartyAlign', 'coverCaseAlign', 'coverHeadingAlign', 'coverTitleLines'];
+  // The words a person typed onto the cover (court, matter, party labels). A settings LINK never blanks them on the
+  // recipient's page (applySettingsCode); Reset does, after saying so.
   const COVER_TEXT_KEYS = ['courtName', 'matterOf', 'partyLabel1', 'partyLabel2'];
   const RESET_TO = Object.fromEntries(Object.entries(FACTORY).filter(([k]) => !COVER_TEXT_KEYS.includes(k)));
 
@@ -402,10 +403,11 @@
       partyJoiner: document.getElementById('config-partyJoiner')?.value ?? '-and-',
       coverLayout: document.getElementById('config-coverLayout')?.value || 'classic',
       coverCaseLine: document.getElementById('config-coverCaseLine')?.value || 'court',
-      coverLabelPlacement: document.getElementById('config-coverLabelPlacement')?.value || 'below',
+      coverLabelPlacement: document.getElementById('config-coverLabelPlacement')?.value || 'inline',
       coverPartyAlign: document.getElementById('config-coverPartyAlign')?.value || 'centre',
       coverCaseAlign: document.getElementById('config-coverCaseAlign')?.value || 'right',
       coverHeadingAlign: document.getElementById('config-coverHeadingAlign')?.value || 'left',
+      coverTitleLines: document.getElementById('config-coverTitleLines')?.value || 'single',
     };
   }
 
@@ -499,6 +501,7 @@
     if (d.coverPartyAlign) resetGroup('coverPartyAlign', d.coverPartyAlign);
     if (d.coverCaseAlign) resetGroup('coverCaseAlign', d.coverCaseAlign);
     if (d.coverHeadingAlign) resetGroup('coverHeadingAlign', d.coverHeadingAlign);
+    if (d.coverTitleLines) resetGroup('coverTitleLines', d.coverTitleLines);
     // Values set from code fire no events, so bring the derived controls (party pair, dimmed
     // settings) into step with what was just applied.
     window.refreshAdvancedState?.();
@@ -564,16 +567,14 @@
     return SETTINGS_LIB.encodeSettingsCode(settingsDiff());
   }
 
-  /** Reveals Share/Reset in the Advanced Settings header only once something
-   *  actually differs from factory: there is nothing to share or reset otherwise. */
+  /** Reveals Share and Reset in the Advanced Settings header together, once anything differs from factory: one
+   *  predicate for both, so Share never shows without Reset. Reset puts back everything Share would carry. */
   function refreshAdvancedActionButtons() {
-    const diffKeys = Object.keys(settingsDiff());
-    const shareBtn = document.getElementById('share-advanced-btn');
-    const resetBtn = document.getElementById('reset-advanced-btn');
-    if (shareBtn) shareBtn.hidden = diffKeys.length === 0;
-    // Reset leaves the words typed onto the cover alone, so it is offered only when something it would
-    // actually change differs.
-    if (resetBtn) resetBtn.hidden = !diffKeys.some((k) => !COVER_TEXT_KEYS.includes(k));
+    const changed = Object.keys(settingsDiff()).length > 0;
+    for (const id of ['share-advanced-btn', 'reset-advanced-btn']) {
+      const btn = document.getElementById(id);
+      if (btn) btn.hidden = !changed;
+    }
   }
 
   /** Applies a settings code: factory first, then what the code carries. Returns how many settings
@@ -652,7 +653,7 @@
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.content = palette === 'classic'
       ? (mode === 'dark' ? '#020617' : '#f5f5f4')
-      : (mode === 'dark' ? '#0e1014' : '#f0ebe1');
+      : (mode === 'dark' ? '#0b0f17' : '#f0ebe1');
   }
   document.querySelectorAll('[data-group="palette"]').forEach(btn => {
     btn.addEventListener('click', () => applyPalette(btn.dataset.value));

@@ -14,7 +14,7 @@
 
 # The root page only sends people to the tool; nothing else loads there.
 /
-  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests
 
 # Scripts, styles and libraries shared by every page are referenced by a fixed name, not a
 # content hash, so a long cache would keep serving an old copy after a deploy (the stale

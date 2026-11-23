@@ -2,17 +2,17 @@
 {{ partial "bundletool/header.html" . }}
 
 	<main id="main-content" class="min-h-screen">
-		<div class="bt-guide max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-gray-800 dark:text-slate-200">
-			<h1 class="text-2xl font-bold mb-1 text-gray-900 dark:text-slate-100">How to create a bundle</h1>
-			<p class="text-xs text-gray-500 dark:text-slate-400 mb-3">Last updated: {{ partial "shared/updated-date.html" . }}</p>
-			<p class="mb-6 text-sm text-gray-600 dark:text-slate-400">
+		<div class="bt-guide max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bt-ink-title">
+			<h1 class="text-2xl font-bold mb-1 bt-ink-strong">How to create a bundle</h1>
+			<p class="text-xs bt-ink-quiet mb-3">Last updated: {{ partial "shared/updated-date.html" . }}</p>
+			<p class="mb-6 text-sm bt-ink-soft">
 				BundleTool turns your files into a court-ready bundle with an optional coversheet, an automatic
 				index, consistent page numbering, bookmarks and internal links. Everything happens on your own
 				device: no file is uploaded anywhere, and once the page has loaded it keeps working offline.
 				For a guided walk around the page itself, choose Help in the menu (the grid of dots in the header).
 			</p>
 
-			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Prepare your documents</h2>
+			<h2 class="text-lg font-semibold mt-6 mb-2 bt-ink-strong">Prepare your documents</h2>
 			<p class="mb-3 text-sm leading-6">
 				Have your documents ready as PDFs, Word documents or photos of exhibits (see Accepted files below), ideally in one folder.
 				Naming files with their dates saves time later: BundleTool reads dates like
@@ -30,7 +30,7 @@
 				BundleTool never refuses to build a larger bundle; it only says so.
 			</p>
 
-			<h2 id="accepted-files" class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Accepted files</h2>
+			<h2 id="accepted-files" class="text-lg font-semibold mt-6 mb-2 bt-ink-strong">Accepted files</h2>
 			<p class="mb-3 text-sm leading-6">
 				BundleTool takes PDFs, Word documents and photos, both as documents and as your own
 				coversheet. Everything is converted on your device and nothing is uploaded.
@@ -53,7 +53,7 @@
 				photo, so turning the setting off works for photos already added. A PDF you add is never changed.
 			</p>
 
-			<h2 id="whats-inside-a-pdf" class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">What happens to notes, forms and links in your PDFs</h2>
+			<h2 id="whats-inside-a-pdf" class="text-lg font-semibold mt-6 mb-2 bt-ink-strong">What happens to notes, forms and links in your PDFs</h2>
 			<p class="mb-3 text-sm leading-6">
 				Highlights, comments, stamps and drawn notes stay visible in the bundle. A form that has been
 				filled in is flattened, so what was typed stays on the page and cannot be edited, and two documents
@@ -78,7 +78,7 @@
 				or leave it in if you understand the risk.
 			</p>
 
-			<h2 id="if-a-file-will-not-add" class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">If a file will not add</h2>
+			<h2 id="if-a-file-will-not-add" class="text-lg font-semibold mt-6 mb-2 bt-ink-strong">If a file will not add</h2>
 			<p class="mb-3 text-sm leading-6">
 				BundleTool looks at what is inside a file, not at its name. A photo saved as <span class="font-mono text-xs">scan.pdf</span>
 				is added as a photo, and a PDF saved as <span class="font-mono text-xs">scan.jpg</span> is added as a PDF, with a note
@@ -107,14 +107,14 @@
 				Above 1,000 pages or 75 MB BundleTool warns that a bundle is unusually large, but still builds it.
 			</p>
 
-			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Step 1: Basic Information</h2>
+			<h2 class="text-lg font-semibold mt-6 mb-2 bt-ink-strong">Step 1: Basic Information</h2>
 			<p class="mb-3 text-sm leading-6">
 				Enter the court reference, bundle title (for example "Trial Bundle"), the parties and who prepared
 				it. A <strong>watermark</strong> and a <strong>bundle password</strong> (if the finished PDF
 				should require one to open) live in Advanced Settings, under Confidentiality &amp; Security.
 			</p>
 
-			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Step 2: Select Documents</h2>
+			<h2 class="text-lg font-semibold mt-6 mb-2 bt-ink-strong">Step 2: Select Documents</h2>
 			<p class="mb-3 text-sm leading-6">
 				Click <strong>Add Documents</strong>, or drop files anywhere on the page. Photos of exhibits
 				become PDF pages automatically, and Word documents are converted to
@@ -143,7 +143,7 @@
 				reopen the finished bundle.
 			</p>
 
-			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Step 3: Review Table</h2>
+			<h2 class="text-lg font-semibold mt-6 mb-2 bt-ink-strong">Step 3: Review Table</h2>
 			<p class="mb-3 text-sm leading-6">
 				Check the titles and dates BundleTool suggested, and click any of them to edit. Drag rows or
 				sections to reorder them, or use the up/down arrows beside each one, so dragging is never
@@ -219,7 +219,7 @@
 				front of the statement it introduces the same way you would reorder any other row.
 			</p>
 
-			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Step 4: Create Bundle</h2>
+			<h2 class="text-lg font-semibold mt-6 mb-2 bt-ink-strong">Step 4: Create Bundle</h2>
 			<p class="mb-3 text-sm leading-6">
 				<strong>Create Bundle</strong> builds the finished PDF: coversheet, hyperlinked index,
 				page numbers, bookmarks and printable right-hand page starts. If sections, a coversheet or case
@@ -234,7 +234,7 @@
 				browser under <strong>Bundles</strong> in the menu, so you can re-download one without rebuilding it.
 			</p>
 
-			<h2 id="just-assemble" class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Just assemble</h2>
+			<h2 id="just-assemble" class="text-lg font-semibold mt-6 mb-2 bt-ink-strong">Just assemble</h2>
 			<p class="mb-3 text-sm leading-6">
 				To put documents together with nothing added, press <strong>Just Assemble</strong>, beside Preview Index in
 				Create Bundle. It has no settings: you get exactly your documents, in order, with no index, no page numbers
@@ -244,7 +244,7 @@
 				change anything else: Create Bundle makes a full bundle as before.
 			</p>
 
-			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Emailing a bundle</h2>
+			<h2 class="text-lg font-semibold mt-6 mb-2 bt-ink-strong">Emailing a bundle</h2>
 			<p class="mb-3 text-sm leading-6">
 				Email services cap the whole message at about 25,000,000 bytes, and attachments grow by
 				roughly 37% in transit, so about 18 MB of PDF is the most that reliably fits. When a bundle is
@@ -276,7 +276,7 @@
 				Settings, Split for Email, and the dialog will open that way; you can still switch it there.
 			</p>
 
-			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Autosave and rewind</h2>
+			<h2 class="text-lg font-semibold mt-6 mb-2 bt-ink-strong">Autosave and rewind</h2>
 			<p class="mb-3 text-sm leading-6">
 				Your work saves to this browser automatically once you have added documents, and what you have
 				typed survives a refresh of the tab. <strong>Rewind</strong> in the menu goes back to an earlier
@@ -285,7 +285,7 @@
 				open them, or to split their documents into the current table.
 			</p>
 
-			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Exporting and reusing a bundle's structure</h2>
+			<h2 class="text-lg font-semibold mt-6 mb-2 bt-ink-strong">Exporting and reusing a bundle's structure</h2>
 			<p class="mb-3 text-sm leading-6">
 				Next to <strong>Add Section</strong>, <strong>export</strong> saves everything except the
 				documents themselves (section names, document titles and dates, and all your settings) as a
@@ -297,7 +297,7 @@
 				and a house style) ready to reuse. A manifest carries structure only, never a password.
 			</p>
 
-			<h2 class="text-lg font-semibold mt-6 mb-2 text-gray-900 dark:text-slate-100">Advanced Settings</h2>
+			<h2 class="text-lg font-semibold mt-6 mb-2 bt-ink-strong">Advanced Settings</h2>
 			<p class="mb-3 text-sm leading-6">
 				Advanced Settings, below Create Bundle, is arranged in panels. Index Options holds the index font and
 				text size, date format, outline style, heading, section word and table borders. Coversheet holds the
@@ -327,7 +327,7 @@
 				code carry settings only, never documents.
 			</p>
 
-			<a href="{{ "bundletool/" | relURL }}" class="bt-guide-back inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-lg text-white text-sm font-semibold no-underline transition">
+			<a href="{{ "bundletool/" | relURL }}" class="bt-guide-back inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-lg bt-ink-on-fill text-sm font-semibold no-underline transition">
 				Back to BundleTool
 			</a>
 		</div>

@@ -62,6 +62,10 @@ let _again      = false;  // something changed while a save was running
 // that nothing was left to lose.
 let _changeSeq  = 0;
 let _hasDocuments = () => true;   // set by init: is there anything in the table worth warning about
+// Has this tab's table ever held a document? A table can only be EMPTIED by hand once it has had something in it.
+// Until then an empty save is just a page that has not been given anything yet (a settings or draft change fires
+// on load, before the last session is put back) and must not hide the saved copies from that restore.
+let _everHadDocuments = false;
 // set by init: a validated file can sit in state for up to the row batcher's own gap (rowBatch.js,
 // up to 2s on a slow device) before its row is inserted and markDirty() fires for it. In that
 // window _dirty is still false (nothing has told this module anything changed yet), so without
@@ -189,6 +193,7 @@ export function isSavePending() {
  */
 export function markDirty({ immediate = false } = {}) {
   _dirty = true;
+  if (_hasDocuments()) _everHadDocuments = true;
   _changeSeq++;
   // While saving keeps failing, edits do not trigger saves at all: a back-off timer (set by the
   // failed save) owns the retry, so a failing save is not repeated after every edit.
@@ -461,14 +466,17 @@ async function _saveOnce() {
     // the state reads as empty without anything having been cleared: leave the saved copies alone, and
     // leave the change pending for the save the first inserted row triggers.
     if (_hasPendingRows()) return;
-    // Nothing to save: the table is empty. If it was emptied by hand (something changed since the
-    // last save), older saves must not come back on the next load (frontend/autoRestore.js).
-    markClearedNow();
+    // Nothing to save: the table is empty. If it was emptied by hand (it had documents, and something changed
+    // since the last save), older saves must not come back on the next load (frontend/autoRestore.js). A table that
+    // never held a document was not emptied by anyone: stamping it "cleared" here is what hid the last session from
+    // a new tab whose own first save (a settings change on load) ran before the restore had read the stamp.
+    if (_everHadDocuments) markClearedNow();
     if (_changeSeq === seqAtStart) _dirty = false;
     return;
   }
 
   const timestamp   = Date.now();
+  _everHadDocuments = true;
   const fileCount   = state.files.length;
   const bundleTitle = state.config?.bundleTitle || state.config?.heading?.bundleTitle || '';
   const projectName = state.config?.projectName || state.config?.heading?.projectName || '';

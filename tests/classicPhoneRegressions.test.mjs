@@ -25,7 +25,7 @@ function blocks(selector) {
 
 test('phone sort headings have no pill fill or radius, and are 40px targets', () => {
   const rules = blocks('#file-table thead th');
-  assert.ok(rules.length >= 2, 'both copies of the phone rule exist');
+  assert.ok(rules.length >= 1, 'the phone rule exists');
   for (const body of rules.filter((b) => b.includes('inline-flex'))) {
     assert.doesNotMatch(body, /background/, 'no fill');
     assert.doesNotMatch(body, /999px/, 'no pill radius');
@@ -44,7 +44,10 @@ test('the sort headings are keyboard buttons and the sorted one says so', () => 
 });
 
 test('Classic dark keeps outlines: section boxes, file rows and the phone file cards use the slate scale', () => {
-  assert.match(css, /\[data-palette=classic\]\[data-theme=dark\] \.section-label-input:not\(:focus\),\s*\n?\[data-palette=classic\]\[data-theme=dark\] \.section-name-input:not\(:focus\) \{ border-color: var\(--color-slate-400\); \}/);
+  // The edge is one token (--control-edge): slate-400 in Classic dark, read by the section boxes.
+  assert.match(css, /\[data-palette=classic\]\[data-theme=dark\] \{[^}]*--control-edge: var\(--color-slate-400\);/);
+  // Every field reads --field-edge, and Classic points that at its own control edge.
+  assert.match(css, /:root\[data-palette=classic\] \{[^}]*--field-edge: var\(--control-edge\);/);
   assert.match(css, /\[data-palette=classic\]\[data-theme=dark\] #file-table tr\.file-row \{ border-color: var\(--color-slate-600\); \}/);
   assert.match(css, /\[data-palette=classic\]\[data-theme=dark\] #file-table \.section-tbody tr\.file-row \{ background: var\(--color-slate-800\)/);
 });

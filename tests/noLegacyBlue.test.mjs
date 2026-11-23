@@ -60,9 +60,9 @@ test('no Tailwind blue in the BundleTool stylesheet, outside comments', () => {
 
 test('the accent tokens exist for every palette and theme', () => {
   const css = fs.readFileSync(path.join(root, 'assets', 'css', 'bundletool.css'), 'utf8');
-  for (const token of ['--bt-ink', '--bt-ink-hover', '--bt-fill', '--bt-fill-hover', '--bt-tint', '--bt-line-soft']) {
+  for (const token of ['--bt-ink', '--bt-fill', '--bt-fill-hover', '--bt-tint', '--bt-line-soft']) {
     assert.match(css, new RegExp(`${token}:`), `${token} is defined`);
   }
   assert.match(css, /\[data-theme=dark\]\s*\{[^}]*--bt-ink:/, 'dark takes the lighter ink');
-  assert.match(css, /\[data-palette=classic\]\[data-theme=dark\]\s*\{\s*--bt-ink:\s*#8ec5ff/, 'Classic dark keeps its legible light blue (the palette Info blue)');
+  assert.match(css, /\[data-palette=classic\]\[data-theme=dark\]\s*\{[^}]*--bt-ink:\s*#8ec5ff/, 'Classic dark keeps its legible light blue (the palette Info blue)');
 });

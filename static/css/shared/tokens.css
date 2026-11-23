@@ -4,14 +4,28 @@
  * everywhere at once.
  */
 
+/* The colours, by theme. Dark is the default; light is set by data-theme. The marked blocks are built
+   from the palette token file, not typed: change a value there, never here.
+   --orange-fill  the background of a filled button or badge carrying white text. #ff6900 is 3.42:1 with white, under
+                  the 4.5 floor; #bb4d00 is 4.81:1. In light the accent itself passes, so it is the accent.
+   --muted        carries the status-block captions and the radius label, so it clears the 4.5 floor on --card.
+   --text-dim     the text colour laid on at part strength; in light 0.65 would be 4.41:1 on --bg, so it is 0.72.
+   --field-edge   the edge of a text field, select or text area: the text colour mixed in until it is 3:1 against the
+                  card or page behind it (WCAG 2.1 SC 1.4.11). A field with only a fill a shade off its background fails.
+   --red          a fill; --danger-ink is destructive text and icons (delete, remove, clear, reset), 4.5:1 or better.
+   --box-*        boxes (cards, panels, result lists): the paper-cutout look, a ground a tier off the page and a soft
+                  lift, with no line drawn round the box. Applied to everything inside #main-content by the rule after
+                  the light block, so the header, drawer and footer keep the shared --card / --surface. A box is drawn
+                  with var(--card), var(--surface) and var(--box-lift) as usual; it is only inside the page body that
+                  the grounds resolve to these values. --box-raised is for floating things only: menus, dialogs,
+                  dropdowns, the tutorial card. */
+/* generated:start dark */
 :root {
   color-scheme: dark;
-  --bg: #0e1014;
-  --surface: #13161c;
-  --card: #1c1f27;
+  --bg: #0b0f17;
+  --surface: #121721;
+  --card: #191f2b;
   --orange: #ff6900;
-  /* Background of a filled button or badge carrying white text. #ff6900 is 3.42:1 with white,
-     under the 4.5 floor; #bb4d00 (the shade of BundleTool's Add Documents button and the radius chips) is 4.81:1. */
   --orange-fill: #bb4d00;
   --orange-soft: rgba(255, 105, 0, 0.15);
   --accent-bg: rgba(255, 105, 0, 0.07);
@@ -21,34 +35,66 @@
   --accent-focus: rgba(255, 105, 0, 0.18);
   --text: #f0ebe3;
   --text-dim: rgba(240, 235, 227, 0.66);
-  /* It carries the status-block captions and the radius label, so it must
-     clear the 4.5 floor: #99a1af is 5.36:1 on --card and still reads as the
-     quiet ink of the pair. */
   --muted: #99a1af;
-  --border: rgba(253, 251, 247, 0.07);
-  --border-mid: rgba(253, 251, 247, 0.12);
-  /* The edge of a text field, select or text area: the text colour mixed in until it is 3:1 against the card or page
-     behind it (WCAG 2.1 SC 1.4.11, Non-text Contrast). A field with only a fill a shade off its background fails that. */
-  --field-edge: color-mix(in srgb, var(--text) 50%, transparent); /* 42% was 3:1 on the old #1c1f27 card; the lighter box card (--box-card) needs 50% */
+  --border: rgba(240, 235, 227, 0.08);
+  --border-mid: rgba(240, 235, 227, 0.14);
+  --field-edge: color-mix(in srgb, var(--text) 50%, transparent);
   --green: #00bc7d;
   --red: #c10007;
-  /* Destructive text and icons (delete, remove, clear, reset): 4.5:1 or better on the page and on a box. --red is a fill. */
   --danger-ink: #ff6467;
   --amber: #d08700;
-  --shadow: 0 20px 44px rgba(14, 16, 20, 0.45);
-  --shadow-sm: 0 4px 16px rgba(14, 16, 20, 0.3);
-  /* Boxes (cards, panels, result lists): the paper-cutout look, a ground a tier off the page and a soft lift, with no
-     line drawn round the box. Applied to everything inside #main-content by the rule after the light block, so the
-     header, drawer and footer keep the shared --card / --surface. A box is drawn with var(--card), var(--surface) and
-     var(--box-lift) as usual; it is only inside the page body that the grounds resolve to these values. Only a form
-     field draws an edge (--field-edge, above). */
-  --box-card: #232834;
-  --box-surface: #1c1f27;
-  --box-lift: 0 1px 2px rgba(14, 16, 20, 0.5), 0 6px 18px rgba(14, 16, 20, 0.28);
-  --radius: 16px;
-  --radius-sm: 10px;
+  --shadow: 0 20px 44px rgba(3, 8, 16, 0.5);
+  --shadow-sm: 0 4px 16px rgba(3, 8, 16, 0.34);
+  --box-card: #191f2b;
+  --box-surface: #191f2b;
+  --box-raised: #222936;
+  --box-lift: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 1px 2px rgba(3, 8, 16, 0.55), 0 8px 22px rgba(3, 8, 16, 0.34);
+  --on-fill: #fdfbf7;
+}
+/* generated:end dark */
+
+/* The site's one typeface: Inter Tight (SIL OFL 1.1, licence in /fonts/inter-tight/OFL.txt), self-hosted, in the two weights
+   the brand uses (400 and 600). It is the narrowest of the clean sans faces we measured, so a long word such as
+   "contacted" or "chambers" does not wrap in a tile. The latin file carries everything an English page needs and the
+   latin-ext file only loads for a name with an accent. Until it arrives, the system stack below is shown. Every page's
+   own sheet asks for var(--font-ui); BundleTool's Tailwind capture gets it through --font-sans (bundletool.css). */
+/* Only two weights ship, so each file covers a range: anything up to 500 draws the 400 letters, anything from 600 up
+   (700, 800, bold, <strong>, headings, Tailwind's font-bold) draws the real 600 ones. Without the ranges a browser
+   with no 700 file fakes one by thickening the 600 or 400 letters, which Firefox did to the contact chips. */
+@font-face {
+  font-family: "Inter Tight";
+  font-style: normal;
+  font-weight: 100 500;
+  font-display: swap;
+  src: url("/fonts/inter-tight/inter-tight-latin-ext-400-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Inter Tight";
+  font-style: normal;
+  font-weight: 100 500;
+  font-display: swap;
+  src: url("/fonts/inter-tight/inter-tight-latin-400-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Inter Tight";
+  font-style: normal;
+  font-weight: 600 900;
+  font-display: swap;
+  src: url("/fonts/inter-tight/inter-tight-latin-ext-600-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Inter Tight";
+  font-style: normal;
+  font-weight: 600 900;
+  font-display: swap;
+  src: url("/fonts/inter-tight/inter-tight-latin-600-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }
 
+/* generated:start light */
 [data-theme="light"] {
   color-scheme: light;
   --bg: #eae5dc;
@@ -63,25 +109,64 @@
   --accent-border: rgba(0, 89, 138, 0.26);
   --accent-focus: rgba(0, 89, 138, 0.18);
   --text: #1e2939;
-  --text-dim: rgba(30, 41, 57, 0.72);   /* 0.65 would be 4.41:1 on --bg, under the 4.5 floor */
+  --text-dim: rgba(30, 41, 57, 0.72);
   --muted: #4a5565;
-  --border: rgba(30, 41, 57, 0.13);
-  --border-mid: rgba(30, 41, 57, 0.24);
+  --border: rgba(97, 72, 38, 0.16);
+  --border-mid: rgba(97, 72, 38, 0.28);
   --field-edge: color-mix(in srgb, var(--text) 56%, transparent);
   --green: #006045;
   --red: #9f0712;
   --danger-ink: #9f0712;
   --amber: #a65f00;
-  --shadow: 0 18px 38px rgba(0, 89, 138, 0.11);
-  --shadow-sm: 0 4px 16px rgba(0, 89, 138, 0.07);
+  --shadow: 0 18px 38px rgba(97, 72, 38, 0.16);
+  --shadow-sm: 0 4px 16px rgba(97, 72, 38, 0.10);
   --box-card: #fdfbf7;
   --box-surface: #f6f0e7;
-  --box-lift: 0 1px 2px rgba(30, 41, 57, 0.16), 0 6px 16px rgba(30, 41, 57, 0.1);
+  --box-raised: #fdfbf7;
+  --box-lift: 0 1px 0 rgba(255, 255, 255, 0.85) inset, 0 1px 2px rgba(97, 72, 38, 0.20), 0 8px 20px rgba(97, 72, 38, 0.14);
+  --on-fill: #fdfbf7;
 }
+/* generated:end light */
+
+/* Fixed tints: a status colour at a set strength (the number is the percentage), the same in both themes, and three
+   fixed colours the warnings use. A page says var(--tint-red-12), never the rgba() itself. */
+:root {
+  --tint-red-10: rgba(193, 0, 7, 0.1);
+  --tint-red-12: rgba(193, 0, 7, 0.12);
+  --tint-red-30: rgba(193, 0, 7, 0.3);
+  --tint-red-42: rgba(193, 0, 7, 0.42);
+  --tint-red-70: rgba(193, 0, 7, 0.7);
+  --tint-rose-10: rgba(255, 100, 103, 0.10);
+  --tint-rose-12: rgba(255, 100, 103, 0.12);
+  --tint-rose-70: rgba(255, 100, 103, 0.7);
+  --tint-amber-10: rgba(208, 135, 0, 0.10);
+  --tint-amber-12: rgba(208, 135, 0, 0.12);
+  --tint-amber-14: rgba(208, 135, 0, 0.14);
+  --tint-amber-42: rgba(208, 135, 0, 0.42);
+  --tint-amber-70: rgba(208, 135, 0, 0.7);
+  --tint-green-14: rgba(0, 188, 125, 0.14);
+  --tint-green-70: rgba(0, 188, 125, 0.7);
+  --tint-ink-04: rgba(74, 85, 101, 0.04);
+  --tint-ink-10: rgba(74, 85, 101, 0.10);
+  --tint-night-04: rgba(3, 8, 16, 0.04);
+  --tint-night-08: rgba(3, 8, 16, 0.08);
+  --tint-night-18: rgba(3, 8, 16, 0.18);
+  --tint-night-30: rgba(3, 8, 16, 0.3);
+  --tint-night-45: rgba(3, 8, 16, 0.45);
+  --tint-paper-14: rgba(253, 251, 247, 0.14);
+  --amber-deep: #733e0a;
+  --amber-pale: #fee685;
+  --orange-bright: #ff8904;
+}
+
+/* The page lit from above: a faint cool sheen on dark and a soft warm one on light, fading out over the first 360px.
+   BundleTool's Classic palette keeps its own flat ground. */
+html:not([data-palette="classic"]) body { background-image: linear-gradient(180deg, rgba(150, 175, 215, 0.05), rgba(150, 175, 215, 0) 360px); }
+html:not([data-palette="classic"])[data-theme="light"] body { background-image: linear-gradient(180deg, rgba(255, 251, 244, 0.55), rgba(255, 251, 244, 0) 360px); }
 
 /* The page body on every page (BundleTool's Classic palette keeps its own colours). --cf-* are BundleTool Modern's
    aliases, resolved on <html>, so they are re-pointed here too. The text-field edge (--field-edge) is untouched. */
-html:not([data-palette="classic"]) #main-content {
+html:root #main-content {
   --card: var(--box-card);
   --surface: var(--box-surface);
   --cf-card: var(--box-card);
@@ -89,31 +174,74 @@ html:not([data-palette="classic"]) #main-content {
 }
 
 /* Two tiers for the tools' boxes, the same on Chambers Finder, the Envelope Guide and BundleTool (Modern; Classic
-   follows it in its own colours, bundletool.css). The hero is the upper tier, --card; the main panels, cards and
-   tiles under it are --surface. Both lift off the page with --box-lift and draw no line round them (the
+   follows it in its own colours, bundletool.css). The hero, the main panels, cards and
+   tiles are all --surface, in light as in dark. Both lift off the page with --box-lift and draw no line round them (the
    paper-cutout look): only a form field has an edge. A site's own CSS sets only layout on these. */
-.hero, .lh-hero { background: var(--card); box-shadow: var(--box-lift); }
+/* The title card is the same on every tool: one ground (the same card colour as the other boxes), one lift, one padding, one gap to the first box and one title-to-subtitle gap. BundleTool's Classic keeps
+   its own (bundletool.css). A site's own CSS sets nothing here. */
+.hero, .lh-hero, :root .bt-hero {
+  background: var(--box-surface);
+  box-shadow: var(--box-lift);
+  border-radius: var(--radius);
+  padding: 28px 44px 22px;
+  margin-bottom: 12px;
+}
+.hero h1, .lh-title, :root .bt-wordmark { font-size: clamp(30px, 5.5vw, var(--fs-tool-title)); font-weight: 600; letter-spacing: -0.025em; line-height: 1.08; margin: 0 0 14px; }
+.hero h1, .lh-title { color: var(--text); }
+.hero-sub, .lh-sub, :root .bt-hero-sub { margin: 0; }
+.hero-sub, .lh-sub { color: var(--text-dim); font-size: var(--fs-label); }
+@media (max-width: 640px) { .hero, .lh-hero, :root .bt-hero { padding: 28px 20px 22px; } }
 .toolbar-card, .status-block, .lh-form, .lh-preview { background: var(--surface); box-shadow: var(--box-lift); }
 
-/* One type scale for every page. A size is picked by what the text is, so the same kind of
-   text is the same size on every page. */
+/* One type scale for every page. A size is picked by what the text is, so the same kind of text is the same size
+   on every page. Built from the size token file, like the colours.
+   --fs-tool-title  the tool name on its own page (Chambers Finder, BundleTool)
+   --fs-page-title  Contact, Privacy, Success, 404, Guide, Envelope Guide; -fluid is the same title on a phone
+   --fs-large       the wordmark, a court's name, an empty-state message
+   --fs-heading     section and step headings, orb names
+   --fs-body        body text, inputs, selects, textareas, buttons, menu rows
+   --fs-label       form labels, secondary text, intro lines, compact controls
+   --fs-caption     hints, helper text, toasts, footer: the same size as a label, told apart by weight and colour
+   --fs-micro       only uppercase table and group headings, badges, and the menu's tool tiles
+   --radius         cards and panels; --radius-sm actions and every text field; --radius-pill badges, choice chips and
+                    the theme toggle (ends as round as the height allows)
+   --fw-*, --lh-running  the two weights the typeface ships in, and the line height of running text */
+/* generated:start sizes */
 :root {
-  --fs-tool-title: 46px;   /* the tool name on its own page (Chambers Finder, BundleTool) */
-  --fs-page-title: 35.2px; /* Contact, Privacy, Success, 404, Guide, Envelope Guide */
-  --fs-page-title-fluid: clamp(28px, 7vw, var(--fs-page-title)); /* a page title on a phone: the same on every page */
-  --fs-large: 21.6px;      /* the wordmark, a court's name, an empty-state message */
-  --fs-heading: 20px;      /* section and step headings, orb names */
-  --fs-body: 16px;         /* body text, inputs, selects, textareas, buttons, menu rows */
-  --fs-label: 14.4px;      /* form labels, secondary text, intro lines, compact controls */
-  --fs-caption: var(--fs-label); /* hints, helper text, toasts, footer: the same size as a label, told apart by weight and colour */
-  --fs-micro: 13px;        /* only uppercase table and group headings, badges, and the menu's tool tiles */
+  --font-ui: "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --fw-regular: 400;
+  --fw-semibold: 600;
+  --lh-running: 1.6;
+  --fs-tool-title: 46px;
+  --fs-page-title: 35.2px;
+  --fs-page-title-fluid: clamp(28px, 7vw, var(--fs-page-title));
+  --fs-large: 21.6px;
+  --fs-heading: 20px;
+  --fs-body: 16px;
+  --fs-label: 14.4px;
+  --fs-caption: var(--fs-label);
+  --fs-micro: 13px;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-pill: 999px;
 }
+/* generated:end sizes */
 
 /* Every text field, select and text area on every page (BundleTool's Classic palette keeps its own look) carries the 3:1 edge above, whatever its own sheet says
    (several drew a borderless "cutout"). !important only on the colour and style, and never while the field has focus,
    so each page's own focus ring still shows. */
-html:not([data-palette="classic"]) :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="hidden"], [type="submit"], [type="button"], [type="reset"], [type="image"]), select, textarea):not(:focus, :focus-visible) {
+html:root :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="hidden"], [type="submit"], [type="button"], [type="reset"], [type="image"]), select, textarea):not(:focus, :focus-visible) {
   border-style: solid !important;
   border-color: var(--field-edge) !important;
   border-width: 1px;
+}
+
+/* The same corner on every text field (focused or not): the action radius, so a field and the button beside it match. */
+html:root :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="hidden"], [type="submit"], [type="button"], [type="reset"], [type="image"]), select, textarea) {
+  border-radius: var(--radius-sm);
+}
+
+/* Floating things (menus, dialogs, dropdowns) are one tier above the cards they float over. */
+html:root :is(.drawer-panel, .settings-card, .search-results, .bt-modal-panel, [role="dialog"] > div) {
+  background-color: var(--box-raised);
 }
