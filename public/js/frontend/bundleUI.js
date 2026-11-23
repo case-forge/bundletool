@@ -22,11 +22,11 @@ export function buildTrack() {
     const isLast = i === BUNDLE_STEPS.length - 1;
     return `<div class="flex gap-3 items-stretch">
       <div class="flex flex-col items-center w-5 flex-shrink-0">
-        <div id="station-dot-${i}" class="w-4 h-4 rounded-full border-2 border-gray-300 dark:border-slate-500 bg-white dark:bg-slate-800 flex-shrink-0"></div>
-        ${!isLast ? `<div id="station-line-${i}" class="w-px flex-1 bg-gray-200 dark:bg-slate-600 mt-1"></div>` : ''}
+        <div id="station-dot-${i}" class="w-4 h-4 rounded-full border-2 bt-edge-mid bt-fill-raised flex-shrink-0"></div>
+        ${!isLast ? `<div id="station-line-${i}" class="w-px flex-1 bt-fill-line mt-1"></div>` : ''}
       </div>
       <div class="${!isLast ? 'pb-3' : ''}">
-        <span id="station-label-${i}" class="text-xs text-gray-400 dark:text-slate-500">${step}</span>
+        <span id="station-label-${i}" class="text-xs bt-ink-faint">${step}</span>
       </div>
     </div>`;
   }).join('');
@@ -41,20 +41,20 @@ export function updateTrack(activeIndex) {
     const label = document.getElementById(`station-label-${i}`);
     if (!dot) return;
     if (i < activeIndex) {
-      dot.className = 'w-4 h-4 rounded-full bg-green-500 flex-shrink-0 flex items-center justify-center';
-      dot.innerHTML = `${icon('check', 'w-2.5 h-2.5 text-white')}`;
-      if (line)  line.className  = 'w-px flex-1 bg-green-400 mt-1';
-      if (label) label.className = 'text-xs text-green-600 dark:text-green-400 font-medium';
+      dot.className = 'w-4 h-4 rounded-full bt-fill-done flex-shrink-0 flex items-center justify-center';
+      dot.innerHTML = `${icon('check', 'w-2.5 h-2.5 bt-ink-on-fill')}`;
+      if (line)  line.className  = 'w-px flex-1 bt-fill-done-line mt-1';
+      if (label) label.className = 'text-xs bt-ink-done font-medium';
     } else if (i === activeIndex) {
-      dot.className = 'w-4 h-4 rounded-full bg-green-500 flex-shrink-0 animate-pulse';
+      dot.className = 'w-4 h-4 rounded-full bt-fill-done flex-shrink-0 animate-pulse';
       dot.innerHTML = '';
-      if (line)  line.className  = 'w-px flex-1 bg-gray-200 dark:bg-slate-600 mt-1';
-      if (label) label.className = 'text-xs text-gray-800 dark:text-slate-100 font-semibold';
+      if (line)  line.className  = 'w-px flex-1 bt-fill-line mt-1';
+      if (label) label.className = 'text-xs bt-ink-heavy font-semibold';
     } else {
-      dot.className = 'w-4 h-4 rounded-full border-2 border-gray-300 dark:border-slate-500 bg-white dark:bg-slate-800 flex-shrink-0';
+      dot.className = 'w-4 h-4 rounded-full border-2 bt-edge-mid bt-fill-raised flex-shrink-0';
       dot.innerHTML = '';
-      if (line)  line.className  = 'w-px flex-1 bg-gray-200 dark:bg-slate-600 mt-1';
-      if (label) label.className = 'text-xs text-gray-400 dark:text-slate-500';
+      if (line)  line.className  = 'w-px flex-1 bt-fill-line mt-1';
+      if (label) label.className = 'text-xs bt-ink-faint';
     }
   });
 }
@@ -289,11 +289,11 @@ export function showBundleReadyState(pdfBytes, filename, opts = {}) {
     if (spinnerRow) {
       spinnerRow.outerHTML = `
         <div class="flex items-center gap-3 mb-4">
-          <div class="w-6 h-6 rounded-full bg-green-500 flex-shrink-0 flex items-center justify-center">
-            ${icon('check', 'w-3.5 h-3.5 text-white')}
+          <div class="w-6 h-6 rounded-full bt-fill-done flex-shrink-0 flex items-center justify-center">
+            ${icon('check', 'w-3.5 h-3.5 bt-ink-on-fill')}
           </div>
-          <p id="processing-overlay-msg" class="text-sm font-semibold text-gray-800 dark:text-slate-100 flex-1">${readyMessage}</p>
-          <button id="overlay-close-x" class="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition" aria-label="Close">
+          <p id="processing-overlay-msg" class="text-sm font-semibold bt-ink-heavy flex-1">${readyMessage}</p>
+          <button id="overlay-close-x" class="bt-ink-faint bt-hover-ink-soft transition" aria-label="Close">
             ${icon('close', 'w-4 h-4')}
           </button>
         </div>`;

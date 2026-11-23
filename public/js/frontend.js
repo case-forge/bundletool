@@ -19,8 +19,9 @@ import { sortRowsBy, sortSection } from './frontend/sort.js';
 import { getAutosaveState, applySnapshot } from './frontend/autosave.js';
 import { setupFormDraft, restoreFormDraft } from './frontend/formDraft.js';
 import { clearCoverOverrides } from './frontend/coverOverrides.js';
+import { clearDraft as clearCoverDraft } from './frontend/coverDraft.js';
 import { runAutoRestore } from './frontend/autoRestore.js';
-import { setup as setupFileRows } from './frontend/fileRows.js';
+import { setup as setupFileRows, clearReviewTable } from './frontend/fileRows.js';
 import { setup as setupSections } from './frontend/sections.js';
 import { setup as setupCoversheet } from './frontend/coversheet.js';
 import { setup as setupCoverEditor } from './frontend/coverEditor.js';
@@ -94,7 +95,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (!list || !modal) return;
 
     if (!snapshots.length) {
-      list.innerHTML = '<p class="text-xs text-gray-500 dark:text-slate-400 text-center py-2">No autosaves found.</p>';
+      list.innerHTML = '<p class="text-xs bt-ink-quiet text-center py-2">No autosaves found.</p>';
     } else {
       list.innerHTML = snapshots.map(s => {
         const when  = new Date(s.timestamp);
@@ -108,17 +109,17 @@ window.addEventListener('DOMContentLoaded', () => {
         const proj    = trunc(s.projectName, 20);
         const nameStr = [title, proj].filter(Boolean).join(' / ');
         return `<div class="autosave-entry flex items-center gap-1.5"><button type="button"
-          class="autosave-restore-item flex-1 min-w-0 text-left px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-600 bt-hover-line bt-hover-tint transition text-xs"
+          class="autosave-restore-item flex-1 min-w-0 text-left px-3 py-2 rounded-lg border bt-edge-faint bt-hover-line bt-hover-tint transition text-xs"
           data-ts="${s.timestamp}">
-          <span class="font-medium text-gray-800 dark:text-slate-200">${label}</span>${nameStr ? `<span class="text-gray-600 dark:text-slate-400 ml-2">${esc(nameStr)}</span>` : ''}
-          <span class="text-gray-500 dark:text-slate-400 ml-2">${s.fileCount} doc${s.fileCount !== 1 ? 's' : ''} · ${size}</span>
+          <span class="font-medium bt-ink-title">${label}</span>${nameStr ? `<span class="bt-ink-soft ml-2">${esc(nameStr)}</span>` : ''}
+          <span class="bt-ink-quiet ml-2">${s.fileCount} doc${s.fileCount !== 1 ? 's' : ''} · ${size}</span>
         </button><button type="button" class="autosave-delete bt-btn-link--danger transition shrink-0 p-1" data-ts="${s.timestamp}" aria-label="Delete this saved copy" title="Delete this saved copy">${icon('close', 'w-3.5 h-3.5')}</button></div>`;
       }).join('');
       list.querySelectorAll('.autosave-delete').forEach(btn => {
         btn.addEventListener('click', async () => {
           await deleteSnapshot(Number(btn.dataset.ts));
           btn.closest('.autosave-entry')?.remove();
-          if (!list.querySelector('.autosave-entry')) list.innerHTML = '<p class="text-xs text-gray-500 dark:text-slate-400 text-center py-2">No autosaves found.</p>';
+          if (!list.querySelector('.autosave-entry')) list.innerHTML = '<p class="text-xs bt-ink-quiet text-center py-2">No autosaves found.</p>';
         });
       });
       list.querySelectorAll('.autosave-restore-item').forEach(btn => {
@@ -152,7 +153,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (!list || !modal) return;
 
     if (!bundles.length) {
-      list.innerHTML = '<p class="text-xs text-gray-500 dark:text-slate-400 text-center py-2">No finished bundles saved yet.</p>';
+      list.innerHTML = '<p class="text-xs bt-ink-quiet text-center py-2">No finished bundles saved yet.</p>';
     } else {
       list.innerHTML = bundles.map(b => {
         const when  = new Date(b.timestamp);
@@ -162,12 +163,12 @@ window.addEventListener('DOMContentLoaded', () => {
           ? `${(b.sizeBytes / 1024).toFixed(0)} KB`
           : `${(b.sizeBytes / 1024 ** 2).toFixed(1)} MB`;
         const trunc = (str, n) => str && str.length > n ? str.slice(0, n) + '…' : str;
-        return `<div class="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-600 text-xs">
+        return `<div class="flex items-center gap-1.5 px-3 py-2 rounded-lg border bt-edge-faint text-xs">
           <button type="button" class="finished-bundle-download flex-1 min-w-0 text-left" data-ts="${b.timestamp}">
-            <span class="font-medium text-gray-800 dark:text-slate-200 block truncate">${esc(trunc(b.filename, 34))}</span>
-            <span class="text-gray-500 dark:text-slate-400">${label} · ${size}</span>
+            <span class="font-medium bt-ink-title block truncate">${esc(trunc(b.filename, 34))}</span>
+            <span class="bt-ink-quiet">${label} · ${size}</span>
           </button>
-          <button type="button" class="finished-bundle-split text-gray-400 dark:text-slate-500 bt-hover-ink transition shrink-0 p-1" data-ts="${b.timestamp}" aria-label="Split for email" title="Split for email">
+          <button type="button" class="finished-bundle-split bt-ink-faint bt-hover-ink transition shrink-0 p-1" data-ts="${b.timestamp}" aria-label="Split for email" title="Split for email">
             ${icon('swap_horiz', 'w-3.5 h-3.5')}
           </button>
           <button type="button" class="finished-bundle-delete bt-btn-link--danger transition shrink-0 p-1" data-ts="${b.timestamp}" aria-label="Delete">
@@ -214,7 +215,7 @@ window.addEventListener('DOMContentLoaded', () => {
       await deleteAllSavedCopies();
       for (const id of ['autosave-snapshot-list', 'finished-bundles-list']) {
         const list = document.getElementById(id);
-        if (list) list.innerHTML = '<p class="text-xs text-gray-500 dark:text-slate-400 text-center py-2">Nothing saved.</p>';
+        if (list) list.innerHTML = '<p class="text-xs bt-ink-quiet text-center py-2">Nothing saved.</p>';
       }
       return '';
     } catch (err) {
@@ -222,17 +223,21 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
   const WIPED = 'Everything this browser had saved has been deleted. What is on this page stays until you close it, and nothing is saved again until you change something.';
+  // The restored-session notice is about the documents it just put back, so its Delete all clears those from the page
+  // as well (the person is asked twice first).
+  const WIPED_WITH_PAGE = 'Everything this browser had saved has been deleted, and what was put back on this page (the documents, Basic Information and the cover page text) is cleared too. Nothing is saved again until you add something.';
 
   // From either list, and from the notice that says the last session is back. Two clicks: the first turns the
   // button into the question.
-  for (const [btnId, onDone] of [
+  for (const [btnId, onDone, ask] of [
     ['autosave-delete-all-btn', (said) => { const n = document.getElementById('autosave-delete-all-note'); if (n) n.textContent = said; }],
     ['finished-delete-all-btn', (said) => { const n = document.getElementById('finished-delete-all-note'); if (n) n.textContent = said; }],
     ['restore-notice-delete-all', (said) => {
       const m = document.getElementById('restore-notice-msg');
+      if (said === WIPED) { clearReviewTable(); clearBasicInformation(); clearCoverPageText(); said = WIPED_WITH_PAGE; }
       if (m) m.textContent = said;
       document.getElementById('restore-notice-delete-all')?.classList.add('hidden');
-    }],
+    }, 'Click again to delete everything, including what is on this page'],
   ]) {
     const btn = document.getElementById(btnId);
     if (!btn) continue;
@@ -241,7 +246,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const disarm = () => { clearTimeout(armed); armed = null; btn.textContent = idle; };
     btn.addEventListener('click', async () => {
       if (!armed) {
-        btn.textContent = 'Click again to delete everything saved';
+        btn.textContent = ask || 'Click again to delete everything saved';
         armed = setTimeout(disarm, 6000);
         return;
       }
@@ -562,13 +567,39 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 })();
 
+// Box 1 (Basic Information): empties the four fields as if cleared by hand, so autosave and the clear icons react.
+// A new matter starts with a cover that follows Basic Information again: a leftover title or "Prepared by" from the
+// last matter must not reach the next. Used by box 1's own Clear All and by the restored-session notice's Delete all.
+const BASIC_INFO_FIELD_IDS = ['config-claimNumber', 'config-bundleTitle', 'config-projectName', 'config-author'];
+function clearBasicInformation() {
+  BASIC_INFO_FIELD_IDS.forEach((id) => {
+    const input = document.getElementById(id);
+    if (input && input.value) {
+      input.value = '';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  });
+  clearCoverOverrides();
+}
+
+// The cover page's own text (court, "In the matter of", applicant, respondent, extra line) and an unsaved edit in the
+// cover editor. Only the restored-session notice's Delete all uses it; box 1's Clear All leaves the cover's own text.
+const COVER_OWN_FIELD_IDS = ['config-courtName', 'config-matterOf', 'config-applicantName', 'config-respondentName', 'config-coverExtraText'];
+function clearCoverPageText() {
+  for (const id of COVER_OWN_FIELD_IDS) {
+    const input = document.getElementById(id);
+    if (input) input.value = '';
+  }
+  clearCoverDraft();
+}
+
 // ── Basic Information: header Clear All ────────────────────────────────────
 // Hidden until any of the four fields has something typed in it.
 // One click clears all four through the same per-field
 // data-clear-target buttons frontend.js already wires up above, so autosave
 // and the individual clear icons all react exactly as if cleared by hand.
 (function basicInfoClearAll() {
-  const fieldIds = ['config-claimNumber', 'config-bundleTitle', 'config-projectName', 'config-author'];
+  const fieldIds = BASIC_INFO_FIELD_IDS;
   const btn = document.getElementById('basic-info-clear-all-btn');
   if (!btn) return;
   const sync = () => {
@@ -586,16 +617,7 @@ window.addEventListener('DOMContentLoaded', () => {
       modal.classList.remove('hidden');
     });
     if (!confirmed) return;
-    fieldIds.forEach((id) => {
-      const input = document.getElementById(id);
-      if (input && input.value) {
-        input.value = '';
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-      }
-    });
-    // A new matter starts with a cover that follows Basic Information again: a
-    // leftover title or "Prepared by" from the last matter must not reach the next.
-    clearCoverOverrides();
+    clearBasicInformation();
   });
   sync();
   // Autosave restore sets .value directly without an 'input' event (see

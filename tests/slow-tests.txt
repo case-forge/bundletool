@@ -1,0 +1,9 @@
+bundletoolCli.test.mjs
+bundletoolCliInputs.test.mjs
+chambersFinderCli.test.mjs
+cliHelp.test.mjs
+cliOcr.test.mjs
+envelopeCli.test.mjs
+footer.test.mjs
+ocrReorient.test.mjs
+splitOwn.test.mjs

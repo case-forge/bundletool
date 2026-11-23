@@ -95,7 +95,7 @@ Version 1.5.0 collects everything changed since the first public snapshot.
 - **Document window.** Page, turn and zoom sit on one row. Preview pictures zoom and pinch, and zooming no longer widens the window. There is an icon toolbar, Remove page, Turn page, and Turn all pages (formerly "Turn whole document").
 - **Cover.** The cover's selects offer presets only. The party joiner choices are `-and-` (the default), `-vs-`, `-&-` and `-V-`; a setting saved as `-v-` maps to `-V-`. The gap round the joiner is even.
 - **Settings.** Settings never grey out, and Reset also puts the cover's layout choices back.
-- **Recovery.** The restored-session notice has Delete all beside Dismiss; it asks for a second click before it deletes anything.
+- **Recovery.** The restored-session notice has Delete all beside Dismiss; it asks for a second click before it deletes anything, and then deletes everything the browser saved and clears the documents the notice put back on the page (Delete all in Rewind and Bundles leaves the page as it is).
 - **Phones.** Step titles stay on one line, so Share and Reset no longer push Settings onto a second row. There is more room under the "documents and pages" line, and in light mode each document row is a box that stands out from the page.
 - **Tooltips.** Turn, Share, Reset and Download say what they do.
 - **Updates.** A new version applies itself when the page has only just opened or the tab is in the background; otherwise a Reload button is offered, and it works. The reload notice names the file that failed to load.

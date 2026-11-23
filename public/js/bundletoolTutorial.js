@@ -184,9 +184,12 @@ function tutorialTone() {
   const styles = getComputedStyle(document.documentElement);
   const accent = styles.getPropertyValue('--orange-fill').trim()
     || styles.getPropertyValue('--color-accent-500').trim() || '#014889';
+  // Modern: the tutorial card is the same raised box tier as every other popup (--box-raised: #fdfbf7 light, #222936 dark),
+  // read from the page so a palette change reaches it. Classic keeps its own colours below.
+  const boxCard = document.documentElement.getAttribute('data-palette') === 'classic' ? '' : styles.getPropertyValue('--box-raised').trim();
   return dark ? {
     accent,
-    surface: '#1c1f27',
+    surface: boxCard || '#1c1f27',
     border: 'rgba(255,255,255,0.12)',
     ink: '#f0ebe3',
     inkDim: 'rgba(240,235,227,0.66)',
@@ -196,7 +199,7 @@ function tutorialTone() {
     shadow: '0 24px 64px rgba(0,0,0,0.6)',
   } : {
     accent,
-    surface: '#fff',
+    surface: boxCard || '#fff',
     border: '#e2e8f0',
     ink: '#0f172a',
     inkDim: '#475569',
@@ -238,8 +241,8 @@ function buildUI() {
     <div style="padding:20px 22px 18px;">
       <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
         <div style="flex:1;min-width:0;">
-          <div id="tut-counter" style="font-size:var(--fs-caption);color:${tone.inkDim};margin-bottom:3px;font-weight:500;"></div>
-          <h3 id="tut-title" style="margin:0;font-size:var(--fs-heading);font-weight:700;color:${tone.ink};line-height:1.3;"></h3>
+          <div id="tut-counter" style="font-size:var(--fs-caption);color:${tone.inkDim};margin-bottom:3px;font-weight:400;"></div>
+          <h3 id="tut-title" style="margin:0;font-size:var(--fs-heading);font-weight:600;color:${tone.ink};line-height:1.3;"></h3>
         </div>
         <button id="tut-skip" style="flex-shrink:0;padding:7px 14px;background:transparent;border:none;border-radius:8px;font-size:var(--fs-label);font-weight:600;color:${tone.inkDim};cursor:pointer;white-space:nowrap;line-height:1;">
           Skip tutorial
@@ -249,10 +252,10 @@ function buildUI() {
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
         <div id="tut-dots" style="display:flex;gap:5px;flex-shrink:0;"></div>
         <div style="display:flex;gap:8px;">
-          <button id="tut-prev" style="padding:8px 16px;background:transparent;border:none;border-radius:8px;font-size:var(--fs-body);font-weight:500;color:${tone.inkDim};cursor:pointer;display:none;align-items:center;gap:6px;">
+          <button id="tut-prev" style="padding:8px 16px;background:transparent;border:none;border-radius:8px;font-size:var(--fs-body);font-weight:400;color:${tone.inkDim};cursor:pointer;display:none;align-items:center;gap:6px;">
             ${arrowIcon('arrow_back')}Back
           </button>
-          <button id="tut-next" style="padding:8px 22px;background:${tone.accent};border:none;border-radius:8px;font-size:var(--fs-body);font-weight:700;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+          <button id="tut-next" style="padding:8px 22px;background:${tone.accent};border:none;border-radius:8px;font-size:var(--fs-body);font-weight:600;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
             Next${arrowIcon('arrow_forward')}
           </button>
         </div>

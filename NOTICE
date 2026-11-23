@@ -318,6 +318,16 @@ ISC
     The interface icons throughout the site, via the lucide-static
     package, as the inline SVG shapes in data/icons.json.
 
+Inter Tight (the site typeface)
+-------------------------------
+
+Inter Tight 5.3.0 (the Fontsource build of the Inter Tight family): SIL Open Font License 1.1
+    Copyright 2022 The Inter Project Authors (https://github.com/rsms/inter-tight).
+    static/fonts/inter-tight/inter-tight-latin-400-normal.woff2, inter-tight-latin-600-normal.woff2,
+    inter-tight-latin-ext-400-normal.woff2 and inter-tight-latin-ext-600-normal.woff2, shipped unmodified
+    and served from this origin (no font host), with the licence beside them in static/fonts/inter-tight/OFL.txt.
+    Declared in static/css/shared/tokens.css as the one typeface of every page (weights 400 and 600). No
+    Reserved Font Name is declared. A font cannot be sold on its own and must keep this notice; the weights are not renamed.
 Fonts
 -----
 

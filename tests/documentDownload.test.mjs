@@ -103,7 +103,7 @@ test('the Download button sits beside Clear All as Share sits beside Reset: same
   assert.match(header[1], /\bflex items-center gap-2 shrink-0\b/, 'in a row with the same gap and alignment as Advanced Settings');
   assert.match(css, /\.bt-icon-circle--pair\s*\{\s*margin-right: -\.25rem;/, 'the same nudge towards its neighbour');
   assert.match(css, /\.bt-icon-circle--accent:hover\s*\{/);
-  assert.match(css, /\[data-palette=modern\] \.bt-icon-circle--accent:hover\s*\{/);
+  assert.match(css, /:root \.bt-icon-circle--accent:hover\s*\{/);
 });
 
 // ── The picker ──────────────────────────────────────────────────────────────────

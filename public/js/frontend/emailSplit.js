@@ -240,16 +240,16 @@ function renderResults(parts) {
   $('email-split-download-zip')?.classList.toggle('hidden', single);
   if (single) {
     list.innerHTML = _mode === 'section'
-      ? `<p class="text-sm text-gray-700 dark:text-slate-300">This bundle has a single section and nothing ahead of it, so there is nothing to split by section.</p>`
-      : `<p class="text-sm text-gray-700 dark:text-slate-300">This bundle already fits in one email at that size (${mb(parts[0].bytes.length)}), so there is nothing to split. You can lower the part size, or just attach the bundle as it is.</p>`;
+      ? `<p class="text-sm bt-ink-body">This bundle has a single section and nothing ahead of it, so there is nothing to split by section.</p>`
+      : `<p class="text-sm bt-ink-body">This bundle already fits in one email at that size (${mb(parts[0].bytes.length)}), so there is nothing to split. You can lower the part size, or just attach the bundle as it is.</p>`;
   } else {
     list.innerHTML = parts.map((p, i) => `
-      <div class="flex items-center gap-2 px-3 py-2 rounded-lg border ${p.oversize ? 'border-amber-400 dark:border-amber-600' : 'border-gray-200 dark:border-slate-600'} text-xs">
+      <div class="flex items-center gap-2 px-3 py-2 rounded-lg border ${p.oversize ? 'bt-edge-warn' : 'bt-edge-faint'} text-xs">
         <div class="flex-1 min-w-0">
-          <span class="font-medium text-gray-800 dark:text-slate-200 block">${esc(partTitle(p))} · ${mb(p.bytes.length)}</span>
-          <span class="block text-gray-600 dark:text-slate-400">${esc(p.pagesLabel ? p.pagesLabel.replace(/ of \d+$/, '') : `pages ${p.fromPage}-${p.toPage}`)}${p.own ? esc(`; ${p.documents} ${p.documents === 1 ? 'document' : 'documents'}, its own index, numbered from 1`) : ''}</span>
-          <span class="split-part-name block text-gray-600 dark:text-slate-400">${esc(names[i])}</span>
-          ${p.oversize ? '<span class="text-amber-700 dark:text-amber-400">This part is over the target size, so it may bounce. Consider compressing its documents or lowering the part size.</span>' : ''}
+          <span class="font-medium bt-ink-title block">${esc(partTitle(p))} · ${mb(p.bytes.length)}</span>
+          <span class="block bt-ink-soft">${esc(p.pagesLabel ? p.pagesLabel.replace(/ of \d+$/, '') : `pages ${p.fromPage}-${p.toPage}`)}${p.own ? esc(`; ${p.documents} ${p.documents === 1 ? 'document' : 'documents'}, its own index, numbered from 1`) : ''}</span>
+          <span class="split-part-name block bt-ink-soft">${esc(names[i])}</span>
+          ${p.oversize ? '<span class="bt-ink-warn-dim">This part is over the target size, so it may bounce. Consider compressing its documents or lowering the part size.</span>' : ''}
         </div>
         <button type="button" data-part="${i}" class="email-split-download bt-btn--success shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg transition" aria-label="Download ${esc(names[i])}">
           Download

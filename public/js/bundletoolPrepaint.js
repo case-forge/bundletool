@@ -51,5 +51,5 @@
 	var meta = document.querySelector('meta[name="theme-color"]');
 	if (meta) meta.content = palette === 'classic'
 		? (mode === 'dark' ? '#020617' : '#f5f5f4')
-		: (mode === 'dark' ? '#0e1014' : '#f0ebe1');
+		: (mode === 'dark' ? '#0b0f17' : '#f0ebe1');
 })();

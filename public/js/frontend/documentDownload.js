@@ -191,7 +191,7 @@ export function openDownloadPicker() {
   for (const choice of downloadChoices(groups)) {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'w-full text-left px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-600 bt-hover-line bt-hover-tint transition text-sm font-medium bt-ink';
+    button.className = 'w-full text-left px-3 py-2 rounded-lg border bt-edge-faint bt-hover-line bt-hover-tint transition text-sm font-medium bt-ink';
     button.textContent = choice.label;
     button.addEventListener('click', () => {
       popover.classList.add('hidden');
